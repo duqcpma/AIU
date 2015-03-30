@@ -1,0 +1,60 @@
+package aiumain;
+
+import java.util.ArrayList;
+
+/**
+ *
+ * @author Adam
+ */
+public class Student {
+    public String lastName;
+    public String firstName;
+    public String phoneNumber;
+    public String emailAddress;
+    public enum goal{COLLEGE,JOB,CITIZENSHIP,OTHER}; //list of common goals
+    public ArrayList<goal> goalList;  //to account for multiple goals
+    
+    public Student(String theLastName, String theFirstName, String thePhoneNumber, String theEmail, goal theGoal){
+        lastName = theLastName;
+        firstName = theFirstName;
+        phoneNumber = thePhoneNumber;
+        emailAddress = theEmail;
+        goalList  = new ArrayList<>();
+        goalList.add(theGoal);
+    }
+    
+    public String getLastName(){
+        return this.lastName;
+    }
+    
+    public String getFirstName(){
+        return this.firstName;
+    }
+    
+    public String getFullName(){
+        return (this.lastName + ", " + this.firstName);
+    }
+    
+    public String getPhoneNumber(){
+        return this.phoneNumber;
+    }
+    
+    public String getEmail(){
+        return this.emailAddress;
+    }
+    
+    public ArrayList<goal> getGoals(){
+        return this.goalList;
+    }
+    
+    public void addGoal(goal newGoal){
+        this.goalList.add(newGoal);
+    }
+    
+    public void removeGoal(goal oldGoal){
+        this.goalList.remove(oldGoal);
+    }
+    
+    
+     
+}
