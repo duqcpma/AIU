@@ -1,0 +1,155 @@
+package aiumain;
+
+/**
+ *
+ * @author Adam
+ */
+public class AIUTree<K extends Comparable,D> {
+    
+    protected Node<K,D> root = null;
+
+    public int height() {
+        return height(root);
+    }
+
+    private int height(Node<K,D> root) {
+        return root == null ? 0 : 1 + Math.max(height(root.left), height(root.right));
+    }
+
+    public int size() {
+        return size(root);
+    }
+
+    private int size(Node<K,D> root) {
+        return root == null ? 0 : 1 + size(root.left) + size(root.right);
+    }
+
+    public D find(K key) {
+        return find(key, root);
+    }
+
+    private D find(K key, Node<K,D> root) {
+        if(root == null)
+            return null;
+        int c = key.compareTo(root.key); 
+        if(c == 0)
+            return root.data;
+        else if(c < 0) 
+            return find(key, root.left);
+         else // c > 0
+            return find(key, root.right);
+    }
+
+    public void add(K key, D data) {
+        root = add(key, data, root);
+    }
+
+    private Node<K,D> add(K key, D data, Node<K,D> root) {
+        // returns the tree with the added record.
+        if(root == null)
+            return new Node<K,D>(key,data);
+        int c = key.compareTo(root.key); 
+        
+       //if(c == 0) {
+         //   System.err.println("Error: duplicate key: " + key);
+           // System.exit(1);
+            //return null;
+        //}
+        
+        if(c <= 0) {
+            root.left =  add(key, data, root.left);
+            return root;
+        }
+        else { // c > 0
+            root.right = add(key, data, root.right);
+            return root;
+        }
+    }
+
+    public void modify(K key, D data) {
+        modify(key, data, root);
+    }
+
+    private void modify(K key, D data, Node<K,D> root) {
+        if(root == null) {
+            System.err.println("Error: key not found: " + key);
+            System.exit(1);
+        }
+         int c = key.compareTo(root.key);
+        if(c == 0)
+            root.data = data;
+        else if(c < 0) 
+            modify(key, data, root.left);
+        else // c > 0
+            modify(key, data, root.right);
+    }
+
+    @Override
+    public String toString() {
+      return toString(root);
+    }
+
+    private String toString(Node<K,D> root) {
+        if(root == null)
+            return "";
+        return toString(root.left) + "(" + root.key + "," + root.data + ")" + toString(root.right);
+    }
+
+    public Node<K,D> leftmost(Node<K,D> root) {
+ // Assume root is not null.
+        if(root.left == null)
+            return root;
+        else
+            return leftmost(root.left);
+    }
+
+    private Pair<Node<K,D>,Node<K,D>> findAndRemoveLeftmost(Node<K,D> root) {
+ // Assume root is not null.
+ // Returns the leftmost node and the tree with that node deleted.
+        if(root.left == null)
+            return new Pair<Node<K,D>,Node<K,D>>(root, root.right);
+        else {
+            Pair<Node<K,D>,Node<K,D>> pair = findAndRemoveLeftmost(root.left);
+            Node<K,D> leftmost = pair.first;
+            Node<K,D> newTree = pair.second;
+            root.left = newTree;
+            return new Pair<Node<K,D>,Node<K,D>>(leftmost, root);
+        }
+    }
+
+    public void remove(K key) {
+        root = remove(key, root);
+    }
+
+    private Node<K,D> remove(K key, Node<K,D> root) {
+        if(root == null) {
+            System.err.println("Error: key not found: " + key);
+            System.exit(1);
+            return null;
+        }
+        int c = key.compareTo(root.key); 
+        if(c == 0) {
+            if(root.left == null)
+                return root.right;
+            else if(root.right == null)
+                return root.left;
+            else { // two children, replace with leftmost node of right subtree.
+                Pair<Node<K,D>,Node<K,D>> pair = findAndRemoveLeftmost(root.right);
+                Node<K,D> leftmost = pair.first;
+                Node<K,D> newRight = pair.second;
+                leftmost.left = root.left;
+                leftmost.right = newRight;
+                return leftmost;
+            }
+        }
+        else if(c < 0) {
+            root.left = remove(key, root.left);
+            return root;
+        }
+        else { // c > 0
+            root.right = remove(key, root.right);
+            return root;
+        }
+    }
+    
+}
