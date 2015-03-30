@@ -1,0 +1,232 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package tabdemo;
+
+import javafx.application.Application;
+import javafx.collections.FXCollections;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.Group;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
+import static javafx.scene.control.TabPane.TabClosingPolicy.UNAVAILABLE;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.ColumnConstraints;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
+import javafx.scene.text.Text;
+import javafx.stage.Stage;
+
+/**
+ *
+ * @author mguyer92
+ */
+public class TabDemo extends Application {
+
+    @Override
+    public void start(Stage primaryStage) {
+        primaryStage.setTitle("Tab Demo");
+        primaryStage.setResizable(false);
+        Group root = new Group();
+        Scene scene = new Scene(root, 450, 500, Color.WHITE);
+
+        TabPane tabPane = new TabPane();
+        BorderPane mainPane = new BorderPane();
+
+        tabPane.setTabClosingPolicy(UNAVAILABLE);
+
+        GridPane editGrid = new GridPane();
+        editGrid.setAlignment(Pos.TOP_LEFT);
+        editGrid.setHgap(10);
+        editGrid.setVgap(10);
+        editGrid.setPadding(new Insets(25, 25, 25, 25));
+        editGrid.getColumnConstraints().add(new ColumnConstraints(150));
+        editGrid.getColumnConstraints().add(new ColumnConstraints(150));
+
+        Label selectStudent = new Label("Select student:");
+        editGrid.add(selectStudent, 0, 0);
+
+        final ComboBox findStudent = new ComboBox();
+        findStudent.setItems(FXCollections.observableArrayList("Adam Baumgardner",
+                "Rich Boyles", "Michael Guyer"));
+        findStudent.setVisibleRowCount(3);
+        editGrid.add(findStudent, 1, 0);
+
+        final TextField firstNameField = new TextField();
+        firstNameField.setPromptText("First Name");
+        editGrid.add(firstNameField, 0, 2, 1, 1);
+
+        final TextField lastNameField = new TextField();
+        lastNameField.setPromptText("Last Name");
+        editGrid.add(lastNameField, 0, 5, 1, 1);
+
+        findStudent.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent t) {
+                final String choice = (String) findStudent.getValue();
+                firstNameField.clear();
+                firstNameField.insertText(0, choice.substring(0, choice.indexOf(" ")));
+                lastNameField.clear();
+                lastNameField.insertText(0, choice.substring(choice.indexOf(" ") + 1));
+                //System.exit(0);
+            }
+        });
+
+        Label notes = new Label("Notes:");
+        editGrid.add(notes, 0, 8);
+
+        TextArea noteArea = new TextArea();
+        noteArea.setPrefRowCount(5);
+        editGrid.add(noteArea, 0, 9, 2, 5);
+
+        Button saveChanges = new Button("Save Changes");
+        HBox hbSaveChanges = new HBox(10);
+        hbSaveChanges.setAlignment(Pos.BOTTOM_RIGHT);
+        hbSaveChanges.getChildren().add(saveChanges);
+        editGrid.add(hbSaveChanges, 1, 17);
+
+        GridPane goalsGrid = new GridPane();
+        goalsGrid.setAlignment(Pos.TOP_LEFT);
+        goalsGrid.setHgap(10);
+        goalsGrid.setVgap(10);
+        goalsGrid.setPadding(new Insets(25, 25, 25, 25));
+
+        GridPane newStudentGrid = new GridPane();
+        newStudentGrid.setAlignment(Pos.TOP_LEFT);
+        newStudentGrid.setHgap(10);
+        newStudentGrid.setVgap(10);
+        newStudentGrid.setPadding(new Insets(25, 25, 25, 25));
+        newStudentGrid.getColumnConstraints().add(new ColumnConstraints(150));
+        newStudentGrid.getColumnConstraints().add(new ColumnConstraints(150));
+
+        TextField firstNameField2 = new TextField();
+        firstNameField2.setPromptText("First Name");
+        newStudentGrid.add(firstNameField2, 0, 2, 1, 1);
+
+        TextField lastNameField2 = new TextField();
+        lastNameField2.setPromptText("Last Name");
+        newStudentGrid.add(lastNameField2, 0, 5, 1, 1);
+
+        Label notes2 = new Label("Notes:");
+        newStudentGrid.add(notes2, 0, 8);
+
+        TextArea noteArea2 = new TextArea();
+        noteArea2.setPrefRowCount(5);
+        newStudentGrid.add(noteArea2, 0, 9, 2, 5);
+
+        Button addStudent = new Button("Add Student");
+        HBox hbAddStudent = new HBox(10);
+        hbAddStudent.setAlignment(Pos.BOTTOM_RIGHT);
+        hbAddStudent.getChildren().add(addStudent);
+        newStudentGrid.add(hbAddStudent, 1, 17);
+
+        GridPane flagsGrid = new GridPane();
+        flagsGrid.setAlignment(Pos.TOP_LEFT);
+        flagsGrid.setHgap(10);
+        flagsGrid.setVgap(10);
+        flagsGrid.setPadding(new Insets(25, 25, 25, 25));
+        flagsGrid.getColumnConstraints().add(new ColumnConstraints(200));
+
+        Label unreportedStudents = new Label("Students who have not reported in:");
+        flagsGrid.add(unreportedStudents, 0, 8, 1, 1);
+
+        ChoiceBox reportTimes = new ChoiceBox();
+        reportTimes.setItems(FXCollections.observableArrayList("12 Hours", "30 Hours",
+                "60 Hours"));
+        flagsGrid.add(reportTimes, 1, 8);
+
+        TextArea studentList = new TextArea();
+        studentList.setPrefRowCount(6);
+        flagsGrid.add(studentList, 0, 9, 2, 6);
+
+        Button printBtn = new Button("Print");
+        HBox hbPrint = new HBox(10);
+        hbPrint.setAlignment(Pos.BOTTOM_RIGHT);
+        hbPrint.getChildren().add(printBtn);
+        flagsGrid.add(hbPrint, 1, 17);
+
+        GridPane reportsGrid = new GridPane();
+        reportsGrid.setAlignment(Pos.TOP_LEFT);
+        reportsGrid.setHgap(10);
+        reportsGrid.setVgap(10);
+        reportsGrid.setPadding(new Insets(25, 25, 25, 25));
+
+        Label selectStudent2 = new Label("Select student:");
+        reportsGrid.add(selectStudent2,0,2);
+        
+        final ComboBox findStudent2 = new ComboBox();
+        findStudent2.setItems(FXCollections.observableArrayList("Adam Baumgardner",
+                "Rich Boyles", "Michael Guyer"));
+        findStudent2.setVisibleRowCount(3);
+        reportsGrid.add(findStudent2, 0, 3);
+        
+        Button printReport = new Button("Print Individual Report");
+        HBox hbPrintReport = new HBox(10);
+        hbPrintReport.setAlignment(Pos.BOTTOM_RIGHT);
+        hbPrintReport.getChildren().add(printReport);
+        reportsGrid.add(hbPrintReport, 0, 7);
+
+        //Create Tabs
+        Tab editTab = new Tab();
+        editTab.setText("Edit");
+        editTab.setContent(editGrid);
+        tabPane.getTabs().add(editTab);
+
+        Tab goalTab = new Tab();
+        goalTab.setText("Goals");
+        goalTab.setContent(goalsGrid);
+        tabPane.getTabs().add(goalTab);
+
+        Tab newStudentTab = new Tab();
+        newStudentTab.setText("New Student");
+        newStudentTab.setContent(newStudentGrid);
+        tabPane.getTabs().add(newStudentTab);
+
+        Tab flagsTab = new Tab();
+        flagsTab.setText("Flags");
+        flagsTab.setContent(flagsGrid);
+        tabPane.getTabs().add(flagsTab);
+
+        Tab reportsTab = new Tab();
+        reportsTab.setText("Reports");
+        reportsTab.setContent(reportsGrid);
+        tabPane.getTabs().add(reportsTab);
+
+        Text scenetitle2 = new Text("Student");
+        scenetitle2.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
+        mainPane.setCenter(tabPane);
+        mainPane.setTop(scenetitle2);
+        mainPane.setAlignment(scenetitle2, Pos.CENTER);
+        mainPane.setMargin(scenetitle2, new Insets(10, 10, 10, 10));
+
+        mainPane.prefHeightProperty().bind(scene.heightProperty());
+        mainPane.prefWidthProperty().bind(scene.widthProperty());
+
+        root.getChildren().add(mainPane);
+        primaryStage.setScene(scene);
+        primaryStage.show();
+    }
+
+    /**
+     * @param args the command line arguments
+     */
+    public static void main(String[] args) {
+        launch(args);
+    }
+
+}
