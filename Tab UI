@@ -5,6 +5,8 @@
  */
 package tabdemo;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
@@ -17,12 +19,12 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import static javafx.scene.control.TabPane.TabClosingPolicy.UNAVAILABLE;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
@@ -40,33 +42,39 @@ import javafx.stage.Stage;
 public class TabDemo extends Application {
 
     @Override
-    public void start(Stage primaryStage) {
+    public void start(final Stage primaryStage) {
         primaryStage.setTitle("Tab Demo");
         primaryStage.setResizable(false);
-        Group root = new Group();
-        Scene scene = new Scene(root, 450, 500, Color.WHITE);
+        final Group root = new Group();
+        final Scene scene = new Scene(root, 450, 500, Color.WHITE);
 
         TabPane tabPane = new TabPane();
         BorderPane mainPane = new BorderPane();
 
         tabPane.setTabClosingPolicy(UNAVAILABLE);
 
+        // "Edit" tab contents
         GridPane editGrid = new GridPane();
         editGrid.setAlignment(Pos.TOP_LEFT);
         editGrid.setHgap(10);
         editGrid.setVgap(10);
         editGrid.setPadding(new Insets(25, 25, 25, 25));
         editGrid.getColumnConstraints().add(new ColumnConstraints(150));
+        editGrid.getColumnConstraints().add(new ColumnConstraints(20));
         editGrid.getColumnConstraints().add(new ColumnConstraints(150));
 
         Label selectStudent = new Label("Select student:");
         editGrid.add(selectStudent, 0, 0);
 
-        final ComboBox findStudent = new ComboBox();
-        findStudent.setItems(FXCollections.observableArrayList("Adam Baumgardner",
-                "Rich Boyles", "Michael Guyer"));
-        findStudent.setVisibleRowCount(3);
-        editGrid.add(findStudent, 1, 0);
+        final ArrayList<String> names = new ArrayList<String>();
+        names.add("Baumgardner, Adam");
+        names.add("Boyles, Rich");
+        names.add("Guyer, Mike");
+
+        final ComboBox findStudentEdit = new ComboBox();
+        findStudentEdit.setItems(FXCollections.observableArrayList(names));
+        findStudentEdit.setVisibleRowCount(3);
+        editGrid.add(findStudentEdit, 2, 0);
 
         final TextField firstNameField = new TextField();
         firstNameField.setPromptText("First Name");
@@ -76,65 +84,94 @@ public class TabDemo extends Application {
         lastNameField.setPromptText("Last Name");
         editGrid.add(lastNameField, 0, 5, 1, 1);
 
-        findStudent.setOnAction(new EventHandler<ActionEvent>() {
-            public void handle(ActionEvent t) {
-                final String choice = (String) findStudent.getValue();
-                firstNameField.clear();
-                firstNameField.insertText(0, choice.substring(0, choice.indexOf(" ")));
-                lastNameField.clear();
-                lastNameField.insertText(0, choice.substring(choice.indexOf(" ") + 1));
-                //System.exit(0);
-            }
-        });
+        final Label currentGoal = new Label("Current Goal: ");
+        currentGoal.setAlignment(Pos.CENTER_RIGHT);
+        editGrid.add(currentGoal, 2, 2);
+
+        Label newGoal = new Label("Set a different goal: ");
+        editGrid.add(newGoal, 2, 5);
+
+        ComboBox goals = new ComboBox();
+        editGrid.add(goals, 2, 6);
 
         Label notes = new Label("Notes:");
         editGrid.add(notes, 0, 8);
 
         TextArea noteArea = new TextArea();
         noteArea.setPrefRowCount(5);
-        editGrid.add(noteArea, 0, 9, 2, 5);
+        editGrid.add(noteArea, 0, 9, 3, 5);
 
         Button saveChanges = new Button("Save Changes");
         HBox hbSaveChanges = new HBox(10);
         hbSaveChanges.setAlignment(Pos.BOTTOM_RIGHT);
         hbSaveChanges.getChildren().add(saveChanges);
-        editGrid.add(hbSaveChanges, 1, 17);
+        editGrid.add(hbSaveChanges, 2, 17);
 
+        // "Goals" tab contents
         GridPane goalsGrid = new GridPane();
         goalsGrid.setAlignment(Pos.TOP_LEFT);
         goalsGrid.setHgap(10);
         goalsGrid.setVgap(10);
         goalsGrid.setPadding(new Insets(25, 25, 25, 25));
+        goalsGrid.getColumnConstraints().add(new ColumnConstraints(120));
+        goalsGrid.getColumnConstraints().add(new ColumnConstraints(150));
 
+        Label studentLookUp = new Label("Select student:");
+        goalsGrid.add(studentLookUp, 0, 2);
+
+        final ComboBox findStudentGoals = new ComboBox();
+        findStudentGoals.setItems(FXCollections.observableArrayList(names));
+        findStudentGoals.setVisibleRowCount(3);
+        goalsGrid.add(findStudentGoals, 1, 2);
+
+        TextField addGoalText = new TextField();
+        addGoalText.setPromptText("Add a Goal");
+        goalsGrid.add(addGoalText, 2, 3);
+
+        Button addGoal = new Button("Add Goal to List");
+        HBox hbAddGoal = new HBox(10);
+        hbAddGoal.setAlignment(Pos.BOTTOM_RIGHT);
+        hbAddGoal.getChildren().add(addGoal);
+        goalsGrid.add(hbAddGoal, 2, 4);
+
+        // "New Student" tab contents
         GridPane newStudentGrid = new GridPane();
         newStudentGrid.setAlignment(Pos.TOP_LEFT);
         newStudentGrid.setHgap(10);
         newStudentGrid.setVgap(10);
         newStudentGrid.setPadding(new Insets(25, 25, 25, 25));
         newStudentGrid.getColumnConstraints().add(new ColumnConstraints(150));
+        newStudentGrid.getColumnConstraints().add(new ColumnConstraints(20));
         newStudentGrid.getColumnConstraints().add(new ColumnConstraints(150));
 
-        TextField firstNameField2 = new TextField();
+        final TextField firstNameField2 = new TextField();
         firstNameField2.setPromptText("First Name");
         newStudentGrid.add(firstNameField2, 0, 2, 1, 1);
 
-        TextField lastNameField2 = new TextField();
+        final TextField lastNameField2 = new TextField();
         lastNameField2.setPromptText("Last Name");
-        newStudentGrid.add(lastNameField2, 0, 5, 1, 1);
+        newStudentGrid.add(lastNameField2, 0, 4, 1, 1);
+
+        Label goalSelection = new Label("Select a goal:");
+        newStudentGrid.add(goalSelection, 2, 2);
+
+        ComboBox goals2 = new ComboBox();
+        newStudentGrid.add(goals2, 2, 3);
 
         Label notes2 = new Label("Notes:");
         newStudentGrid.add(notes2, 0, 8);
 
         TextArea noteArea2 = new TextArea();
         noteArea2.setPrefRowCount(5);
-        newStudentGrid.add(noteArea2, 0, 9, 2, 5);
+        newStudentGrid.add(noteArea2, 0, 9, 3, 5);
 
         Button addStudent = new Button("Add Student");
         HBox hbAddStudent = new HBox(10);
         hbAddStudent.setAlignment(Pos.BOTTOM_RIGHT);
         hbAddStudent.getChildren().add(addStudent);
-        newStudentGrid.add(hbAddStudent, 1, 17);
+        newStudentGrid.add(hbAddStudent, 2, 17);
 
+        // "Flags" tab contents
         GridPane flagsGrid = new GridPane();
         flagsGrid.setAlignment(Pos.TOP_LEFT);
         flagsGrid.setHgap(10);
@@ -160,26 +197,112 @@ public class TabDemo extends Application {
         hbPrint.getChildren().add(printBtn);
         flagsGrid.add(hbPrint, 1, 17);
 
+        // "Reports" tab contents
         GridPane reportsGrid = new GridPane();
         reportsGrid.setAlignment(Pos.TOP_LEFT);
         reportsGrid.setHgap(10);
         reportsGrid.setVgap(10);
         reportsGrid.setPadding(new Insets(25, 25, 25, 25));
+        reportsGrid.getColumnConstraints().add(new ColumnConstraints(150));
+        reportsGrid.getColumnConstraints().add(new ColumnConstraints(50));
 
         Label selectStudent2 = new Label("Select student:");
-        reportsGrid.add(selectStudent2,0,2);
-        
-        final ComboBox findStudent2 = new ComboBox();
-        findStudent2.setItems(FXCollections.observableArrayList("Adam Baumgardner",
-                "Rich Boyles", "Michael Guyer"));
-        findStudent2.setVisibleRowCount(3);
-        reportsGrid.add(findStudent2, 0, 3);
-        
+        reportsGrid.add(selectStudent2, 0, 2);
+
+        final ComboBox findStudentReports = new ComboBox();
+        findStudentReports.setItems(FXCollections.observableArrayList(names));
+        findStudentReports.setVisibleRowCount(3);
+        reportsGrid.add(findStudentReports, 0, 3);
+
         Button printReport = new Button("Print Individual Report");
         HBox hbPrintReport = new HBox(10);
         hbPrintReport.setAlignment(Pos.BOTTOM_RIGHT);
         hbPrintReport.getChildren().add(printReport);
         reportsGrid.add(hbPrintReport, 0, 7);
+
+        final TextField studentName = new TextField();
+        studentName.setPromptText("Student Name");
+        studentName.setEditable(false);
+        reportsGrid.add(studentName, 2, 2);
+
+        final TextField studentGoal = new TextField();
+        studentGoal.setPromptText("Current Student Goal");
+        studentGoal.setEditable(false);
+        reportsGrid.add(studentGoal, 2, 3);
+
+        final Label goalsCompleted = new Label("Goals completed: 0");
+        reportsGrid.add(goalsCompleted, 2, 6);
+
+        final Label progressLabel = new Label("Progress towards current goal: 25%");
+        reportsGrid.add(progressLabel, 2, 8);
+
+        final ProgressBar goalProgress = new ProgressBar(0.25);
+        reportsGrid.add(goalProgress, 2, 9);
+
+        Button printReportAll = new Button("Print Report on All Students");
+        HBox hbPrintReportAll = new HBox(10);
+        hbPrintReportAll.setAlignment(Pos.BOTTOM_RIGHT);
+        hbPrintReportAll.getChildren().add(printReportAll);
+        reportsGrid.add(hbPrintReportAll, 2, 22);
+
+        // "Edit" tab Actions
+        findStudentEdit.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent t) {
+                firstNameField.clear();
+                lastNameField.clear();
+                if (findStudentEdit.getValue() != null) {
+                    final String choice = (String) findStudentEdit.getValue();
+                    //firstNameField.clear();
+                    firstNameField.insertText(0, choice.substring(choice.indexOf(" ") + 1));
+                    //lastNameField.clear();
+                    lastNameField.insertText(0, choice.substring(0, choice.indexOf(",")));
+                }
+            }
+        });
+
+        saveChanges.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent t) {
+                names.remove("" + ((String) findStudentEdit.getValue()));
+                names.add("" + lastNameField.getText() + ", " + firstNameField.getText());
+                findStudentEdit.getSelectionModel().clearSelection();
+                findStudentEdit.setValue(null);
+
+                Object[] newNames = names.toArray();
+                Arrays.sort(newNames);
+
+                findStudentEdit.setItems(FXCollections.observableArrayList(newNames));
+
+            }
+        });
+
+        // "Goals" tab Actions
+        // "New Student" tab Actions
+        addStudent.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent t) {
+                names.add("" + lastNameField2.getText() + ", " + firstNameField2.getText());
+                Object[] newNames = names.toArray();
+                Arrays.sort(newNames);
+                findStudentEdit.setItems(FXCollections.observableArrayList(newNames));
+                findStudentReports.setItems(FXCollections.observableArrayList(newNames));
+                findStudentGoals.setItems(FXCollections.observableArrayList(newNames));
+            }
+        });
+
+        // "Flags" tab Actions
+        // "Reports" tab Actions
+        findStudentReports.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent t) {
+                studentName.clear();
+                studentGoal.clear();
+                if (findStudentReports.getValue() != null) {
+                    final String choice2 = (String) findStudentReports.getValue();
+                    String firstName = choice2.substring(choice2.indexOf(" ") + 1);
+                    String lastName = choice2.substring(0, choice2.indexOf(","));
+                    studentName.insertText(0, firstName + " " + lastName);
+                    studentGoal.insertText(0, "Get a job");
+                }
+            }
+        });
 
         //Create Tabs
         Tab editTab = new Tab();
