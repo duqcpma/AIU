@@ -1,0 +1,50 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package aiumain;
+
+import java.util.Stack;
+
+/**
+ *
+ * @author Adam
+ */
+public class AIUTreeIterator<K extends Comparable,D> {
+    Stack<Pair<Node<K,D>,Boolean>> stack = new Stack<Pair<Node<K,D>,Boolean>>();
+  
+  private boolean flag = false;
+  private Node<K,D> node = null;
+  public AIUTreeIterator(AIUTree tree){
+    node = tree.root;
+    Pair<Node<K,D>,Boolean> pair = new Pair<Node<K,D>,Boolean>(node,true);
+    stack.push(pair);
+  }
+  
+  public boolean hasNext(){
+    return !stack.empty();
+  }
+  
+  public Node<K,D> next(){
+    Pair<Node<K,D>,Boolean> pair = stack.pop();
+    if(pair.second == true){
+      pair.second = false;
+      stack.push(pair);
+      if(pair.first.left != null){
+        Pair<Node<K,D>,Boolean> pair2 = new Pair<Node<K,D>,Boolean>(pair.first.left,true);
+        stack.push(pair2);
+      }
+      return this.next();
+    }
+    else if(pair.second == false && pair.first.right != null){
+        Pair<Node<K,D>,Boolean> pair3 = new Pair<Node<K,D>,Boolean>(pair.first.right,true);
+        stack.push(pair3);
+        return pair.first;
+      }
+    else 
+      return pair.first;
+    }
+  
+    
+}
