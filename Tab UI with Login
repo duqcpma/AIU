@@ -114,6 +114,8 @@ final class TabDemo extends Application {
 
         tabPane.setTabClosingPolicy(UNAVAILABLE);
 
+        boolean isAdmin = false;
+
         // "Edit" tab contents
         GridPane editGrid = new GridPane();
         editGrid.setAlignment(Pos.TOP_LEFT);
@@ -196,6 +198,13 @@ final class TabDemo extends Application {
         hbSaveChanges.setAlignment(Pos.BOTTOM_RIGHT);
         hbSaveChanges.getChildren().add(saveChanges);
         editGrid.add(hbSaveChanges, 2, 17);
+
+        final Button deleteStudent = new Button("Delete Student");
+        final HBox hbDeleteStudent = new HBox(10);
+        hbDeleteStudent.setAlignment(Pos.BOTTOM_LEFT);
+        hbDeleteStudent.getChildren().add(deleteStudent);
+        editGrid.add(hbDeleteStudent, 0, 17);
+        hbDeleteStudent.setVisible(false);
 
         final Text incompleteInput = new Text();
         editGrid.add(incompleteInput, 2, 19);
@@ -350,7 +359,17 @@ final class TabDemo extends Application {
         hbPrintReportAll.getChildren().add(printReportAll);
         reportsGrid.add(hbPrintReportAll, 2, 22);
 
+        // "Administration" tab contents
+        GridPane adminGrid = new GridPane();
+        adminGrid.setAlignment(Pos.TOP_LEFT);
+        adminGrid.setHgap(10);
+        adminGrid.setVgap(10);
+        adminGrid.setPadding(new Insets(25, 25, 25, 25));
+
         // "Edit" tab Actions
+        final PopUpWindow popup = new PopUpWindow();
+        final Stage popupStage = new Stage();
+
         findStudentEdit.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
                 firstNameField.clear();
@@ -365,6 +384,7 @@ final class TabDemo extends Application {
                     emailField.setEditable(true);
                     phoneNumberField.setEditable(true);
                     noteArea.setEditable(true);
+                    hbDeleteStudent.setVisible(true);
                     final String choice = (String) findStudentEdit.getValue();
                     int studentIndex = names.indexOf(choice);
                     firstNameField.insertText(0, students.get(studentIndex).getFirstName());
@@ -391,6 +411,7 @@ final class TabDemo extends Application {
                     incompleteInput.setFill(Color.FIREBRICK);
                     incompleteInput.setText("Please fill out all fields!");
                 } else {
+                    if (popup.agreeToChanges) {
                     int index = names.indexOf("" + ((String) findStudentEdit.getValue()));
                     names.set(index, "" + lastNameField.getText() + ", " + firstNameField.getText());
                     Student updatedStudent = new Student(lastNameField.getText(),
@@ -410,7 +431,28 @@ final class TabDemo extends Application {
                     findStudentEdit.setItems(FXCollections.observableArrayList(newNames));
                     findStudentGoals.setItems(FXCollections.observableArrayList(newNames));
                     findStudentReports.setItems(FXCollections.observableArrayList(newNames));
+                    
+                    popup.setAgreeToChanges(false);
+                    }
+                    else {
+                    popup.start(popupStage);
+                    }
                 }
+            }
+        });
+
+        deleteStudent.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent t) {
+                String currentStudent = (String) findStudentEdit.getValue();
+                int currentIndex = names.indexOf(currentStudent);
+                names.remove(currentStudent);
+                students.remove(currentIndex);
+                Object[] updatedNames = names.toArray();
+                Arrays.sort(updatedNames);
+                findStudentEdit.setItems(FXCollections.observableArrayList(updatedNames));
+                findStudentReports.setItems(FXCollections.observableArrayList(updatedNames));
+                findStudentGoals.setItems(FXCollections.observableArrayList(updatedNames));
+                hbDeleteStudent.setVisible(false);
             }
         });
 
@@ -494,6 +536,13 @@ final class TabDemo extends Application {
         reportsTab.setContent(reportsGrid);
         tabPane.getTabs().add(reportsTab);
 
+        Tab adminTab = new Tab();
+        adminTab.setText("Administration");
+        adminTab.setContent(adminGrid);
+        if (isAdmin) {
+            tabPane.getTabs().add(adminTab);
+        }
+
         Text scenetitle2 = new Text("Student");
         scenetitle2.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
         mainPane.setCenter(tabPane);
@@ -534,6 +583,76 @@ final class UserAndPass {
 
     public void changePassword(String thePassword) {
         this.password = thePassword;
+    }
+
+}
+
+final class PopUpWindow extends Application {
+
+    public boolean agreeToChanges = false;
+    
+    public void setAgreeToChanges(boolean b) {
+        this.agreeToChanges = b;
+    }
+
+    @Override
+    public void start(final Stage primaryStage) {
+        GridPane grid = new GridPane();
+        grid.setAlignment(Pos.TOP_CENTER);
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(10, 10, 10, 10));
+        grid.getColumnConstraints().add(new ColumnConstraints(50));
+        grid.getColumnConstraints().add(new ColumnConstraints(50));
+        grid.getColumnConstraints().add(new ColumnConstraints(50));
+        grid.getColumnConstraints().add(new ColumnConstraints(50));
+        grid.getColumnConstraints().add(new ColumnConstraints(50));
+        grid.getColumnConstraints().add(new ColumnConstraints(50));
+
+        Text areYouSure = new Text();
+        areYouSure.setFill(Color.BLACK);
+        areYouSure.setText("Are you sure you want to make these changes?");
+        grid.add(areYouSure, 1, 1, 5, 1);
+
+        Button yes = new Button("Yes");
+        HBox hbYes = new HBox(10);
+        hbYes.setAlignment(Pos.BOTTOM_RIGHT);
+        hbYes.getChildren().add(yes);
+        grid.add(yes, 2, 3);
+
+        Button no = new Button("No");
+        HBox hbNo = new HBox(10);
+        hbNo.setAlignment(Pos.BOTTOM_LEFT);
+        hbNo.getChildren().add(no);
+        grid.add(no, 3, 3);
+
+        yes.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent t) {
+                agreeToChanges = true;
+                primaryStage.close();
+            }
+        });
+
+        no.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent t) {
+                agreeToChanges = true;
+                primaryStage.close();
+            }
+        });
+
+        Scene scene = new Scene(grid, 300, 100);
+        primaryStage.setResizable(false);
+
+        primaryStage.setTitle("");
+        primaryStage.setScene(scene);
+        primaryStage.show();
+    }
+
+    /**
+     * @param args the command line arguments
+     */
+    public static void main(String[] args) {
+        launch(args);
     }
 
 }
@@ -580,7 +699,7 @@ public class AIULogin extends Application {
 
         final Text loginIssue = new Text();
         grid.add(loginIssue, 0, 6, 2, 1);
-        
+
         btn.setOnAction(new EventHandler<ActionEvent>() {
 
             @Override
