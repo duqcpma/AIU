@@ -193,7 +193,7 @@ final class TabDemo extends Application {
         noteArea.setEditable(false);
         editGrid.add(noteArea, 0, 9, 3, 5);
 
-        Button saveChanges = new Button("Save Changes");
+        final Button saveChanges = new Button("Save Changes");
         HBox hbSaveChanges = new HBox(10);
         hbSaveChanges.setAlignment(Pos.BOTTOM_RIGHT);
         hbSaveChanges.getChildren().add(saveChanges);
@@ -370,6 +370,65 @@ final class TabDemo extends Application {
         final PopUpWindow popup = new PopUpWindow();
         final Stage popupStage = new Stage();
 
+        GridPane popupGrid = new GridPane();
+        popupGrid.setAlignment(Pos.TOP_CENTER);
+        popupGrid.setHgap(10);
+        popupGrid.setVgap(10);
+        popupGrid.setPadding(new Insets(10, 10, 10, 10));
+        popupGrid.getColumnConstraints().add(new ColumnConstraints(50));
+        popupGrid.getColumnConstraints().add(new ColumnConstraints(50));
+        popupGrid.getColumnConstraints().add(new ColumnConstraints(50));
+        popupGrid.getColumnConstraints().add(new ColumnConstraints(50));
+        popupGrid.getColumnConstraints().add(new ColumnConstraints(50));
+        popupGrid.getColumnConstraints().add(new ColumnConstraints(50));
+
+        final Text areYouSure1 = new Text();
+        areYouSure1.setFill(Color.BLACK);
+        areYouSure1.setText("Are you sure you want to make these changes?");
+        popupGrid.add(areYouSure1, 1, 1, 5, 1);
+        areYouSure1.setVisible(false);
+
+        final Text areYouSure2 = new Text();
+        areYouSure2.setFill(Color.BLACK);
+        areYouSure2.setText("Are you sure you want to delete this student?");
+        popupGrid.add(areYouSure2, 1, 1, 5, 1);
+        areYouSure2.setVisible(false);
+
+        Button yes = new Button("Yes");
+        HBox hbYes = new HBox(10);
+        hbYes.setAlignment(Pos.BOTTOM_RIGHT);
+        hbYes.getChildren().add(yes);
+        popupGrid.add(yes, 2, 3);
+
+        Button no = new Button("No");
+        HBox hbNo = new HBox(10);
+        hbNo.setAlignment(Pos.BOTTOM_LEFT);
+        hbNo.getChildren().add(no);
+        popupGrid.add(no, 3, 3);
+
+        yes.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent t) {
+                popup.setAgreeToChanges(true);
+                popupStage.close();
+                if (popup.isUpdating)
+                    saveChanges.fire();
+                else
+                    deleteStudent.fire();
+            }
+        });
+
+        no.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent t) {
+                popup.setAgreeToChanges(false);
+                popupStage.close();
+            }
+        });
+
+        final Scene popupScene = new Scene(popupGrid, 300, 100);
+        primaryStage.setResizable(false);
+
+        primaryStage.setTitle("");
+
         findStudentEdit.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
                 firstNameField.clear();
@@ -412,30 +471,35 @@ final class TabDemo extends Application {
                     incompleteInput.setText("Please fill out all fields!");
                 } else {
                     if (popup.agreeToChanges) {
-                    int index = names.indexOf("" + ((String) findStudentEdit.getValue()));
-                    names.set(index, "" + lastNameField.getText() + ", " + firstNameField.getText());
-                    Student updatedStudent = new Student(lastNameField.getText(),
-                            firstNameField.getText(),
-                            phoneNumberField.getText(),
-                            emailField.getText(), Student.goal.JOB);
-                    students.set(index, updatedStudent);
+                        int index = names.indexOf("" + ((String) findStudentEdit.getValue()));
+                        names.set(index, "" + lastNameField.getText() + ", " + firstNameField.getText());
+                        Student updatedStudent = new Student(lastNameField.getText(),
+                                firstNameField.getText(),
+                                phoneNumberField.getText(),
+                                emailField.getText(), Student.goal.JOB);
+                        students.set(index, updatedStudent);
 
-                    findStudentEdit.getSelectionModel().clearSelection();
-                    findStudentEdit.setValue(null);
+                        findStudentEdit.getSelectionModel().clearSelection();
+                        findStudentEdit.setValue(null);
 
-                    incompleteInput.setText("");
+                        incompleteInput.setText("");
 
-                    Object[] newNames = names.toArray();
-                    Arrays.sort(newNames);
+                        Object[] newNames = names.toArray();
+                        Arrays.sort(newNames);
 
-                    findStudentEdit.setItems(FXCollections.observableArrayList(newNames));
-                    findStudentGoals.setItems(FXCollections.observableArrayList(newNames));
-                    findStudentReports.setItems(FXCollections.observableArrayList(newNames));
-                    
-                    popup.setAgreeToChanges(false);
-                    }
-                    else {
-                    popup.start(popupStage);
+                        findStudentEdit.setItems(FXCollections.observableArrayList(newNames));
+                        findStudentGoals.setItems(FXCollections.observableArrayList(newNames));
+                        findStudentReports.setItems(FXCollections.observableArrayList(newNames));
+
+                        popup.setAgreeToChanges(false);
+                        hbDeleteStudent.setVisible(false);
+                    } else {
+                        areYouSure2.setVisible(false);
+                        areYouSure1.setVisible(true);
+                        popup.setDeleting(false);
+                        popup.setUpdating(true);
+                        popupStage.setScene(popupScene);
+                        popupStage.show();
                     }
                 }
             }
@@ -443,6 +507,7 @@ final class TabDemo extends Application {
 
         deleteStudent.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
+                if (popup.agreeToChanges) {
                 String currentStudent = (String) findStudentEdit.getValue();
                 int currentIndex = names.indexOf(currentStudent);
                 names.remove(currentStudent);
@@ -453,6 +518,16 @@ final class TabDemo extends Application {
                 findStudentReports.setItems(FXCollections.observableArrayList(updatedNames));
                 findStudentGoals.setItems(FXCollections.observableArrayList(updatedNames));
                 hbDeleteStudent.setVisible(false);
+                popup.setAgreeToChanges(false);
+                }
+                else {
+                    areYouSure1.setVisible(false);
+                    areYouSure2.setVisible(true);
+                    popup.setDeleting(true);
+                    popup.setUpdating(false);
+                    popupStage.setScene(popupScene);
+                    popupStage.show();
+                }
             }
         });
 
@@ -587,72 +662,23 @@ final class UserAndPass {
 
 }
 
-final class PopUpWindow extends Application {
+final class PopUpWindow {
 
     public boolean agreeToChanges = false;
+    public boolean isDeleting = false;
+    public boolean isUpdating = false;
     
+
     public void setAgreeToChanges(boolean b) {
         this.agreeToChanges = b;
     }
-
-    @Override
-    public void start(final Stage primaryStage) {
-        GridPane grid = new GridPane();
-        grid.setAlignment(Pos.TOP_CENTER);
-        grid.setHgap(10);
-        grid.setVgap(10);
-        grid.setPadding(new Insets(10, 10, 10, 10));
-        grid.getColumnConstraints().add(new ColumnConstraints(50));
-        grid.getColumnConstraints().add(new ColumnConstraints(50));
-        grid.getColumnConstraints().add(new ColumnConstraints(50));
-        grid.getColumnConstraints().add(new ColumnConstraints(50));
-        grid.getColumnConstraints().add(new ColumnConstraints(50));
-        grid.getColumnConstraints().add(new ColumnConstraints(50));
-
-        Text areYouSure = new Text();
-        areYouSure.setFill(Color.BLACK);
-        areYouSure.setText("Are you sure you want to make these changes?");
-        grid.add(areYouSure, 1, 1, 5, 1);
-
-        Button yes = new Button("Yes");
-        HBox hbYes = new HBox(10);
-        hbYes.setAlignment(Pos.BOTTOM_RIGHT);
-        hbYes.getChildren().add(yes);
-        grid.add(yes, 2, 3);
-
-        Button no = new Button("No");
-        HBox hbNo = new HBox(10);
-        hbNo.setAlignment(Pos.BOTTOM_LEFT);
-        hbNo.getChildren().add(no);
-        grid.add(no, 3, 3);
-
-        yes.setOnAction(new EventHandler<ActionEvent>() {
-            public void handle(ActionEvent t) {
-                agreeToChanges = true;
-                primaryStage.close();
-            }
-        });
-
-        no.setOnAction(new EventHandler<ActionEvent>() {
-            public void handle(ActionEvent t) {
-                agreeToChanges = true;
-                primaryStage.close();
-            }
-        });
-
-        Scene scene = new Scene(grid, 300, 100);
-        primaryStage.setResizable(false);
-
-        primaryStage.setTitle("");
-        primaryStage.setScene(scene);
-        primaryStage.show();
+    
+    public void setDeleting(boolean b) {
+        this.isDeleting = b;
     }
-
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String[] args) {
-        launch(args);
+    
+    public void setUpdating(boolean b) {
+        this.isUpdating = b;
     }
 
 }
