@@ -14,15 +14,16 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.print.Printer;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.ProgressBar;
+import javafx.scene.control.Separator;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import static javafx.scene.control.TabPane.TabClosingPolicy.UNAVAILABLE;
@@ -32,7 +33,6 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
@@ -43,6 +43,39 @@ import javafx.stage.Stage;
  *
  * @author mguyer92
  */
+final class Goal {
+
+    public String goal;
+    public ArrayList<Subgoal> subgoals = new ArrayList<Subgoal>();
+
+    public Goal(String theGoal) {
+        goal = theGoal;
+    }
+
+    public void addSubgoal(Subgoal subgoal) {
+        subgoals.add(subgoal);
+    }
+
+    public void removeSubgoal(Subgoal subgoal) {
+        subgoals.remove(subgoal);
+    }
+}
+
+final class Subgoal {
+    
+    public String subgoal;
+    public boolean isComplete;
+    
+    public Subgoal(String theSubgoal) {
+        subgoal = theSubgoal;
+        isComplete = false;
+    }
+    
+    public void setComplete(boolean b) {
+        isComplete = b;
+    }
+}
+
 final class Student {
 
     public String lastName;
@@ -50,21 +83,20 @@ final class Student {
     public String phoneNumber;
     public String emailAddress;
     public int count = 0;
+    public int hoursSince = 0;
+    public String notes;
 
-    public enum goal {
+    public Goal goal;
 
-        COLLEGE, JOB, CITIZENSHIP, OTHER
-    }; //list of common goals
-    public ArrayList<goal> goalList;  //to account for multiple goals
-
-    public Student(String theLastName, String theFirstName, String thePhoneNumber, String theEmail, goal theGoal) {
+    public Student(String theLastName, String theFirstName, String thePhoneNumber, String theEmail,
+            Goal theGoal, String theNotes) {
         lastName = theLastName;
         firstName = theFirstName;
         phoneNumber = thePhoneNumber;
         emailAddress = theEmail;
         count++;
-        goalList = new ArrayList<>();
-        goalList.add(theGoal);
+        goal = theGoal;
+        notes = theNotes;
     }
 
     public String getLastName() {
@@ -87,16 +119,8 @@ final class Student {
         return this.emailAddress;
     }
 
-    public ArrayList<goal> getGoals() {
-        return this.goalList;
-    }
-
-    public void addGoal(goal newGoal) {
-        this.goalList.add(newGoal);
-    }
-
-    public void removeGoal(goal oldGoal) {
-        this.goalList.remove(oldGoal);
+    public String getNotes() {
+        return this.notes;
     }
 
 }
@@ -123,7 +147,7 @@ final class TabDemo extends Application {
 
         tabPane.setTabClosingPolicy(UNAVAILABLE);
 
-        // "Edit" tab contents
+        // "Edit Profiles" tab contents
         GridPane editGrid = new GridPane();
         editGrid.setAlignment(Pos.TOP_LEFT);
         editGrid.setHgap(10);
@@ -138,12 +162,31 @@ final class TabDemo extends Application {
 
         final ArrayList<Student> students = new ArrayList<Student>();
 
+        final Goal createEmail = new Goal("Create an email address");
+        Subgoal emailSubgoal1 = new Subgoal("Go to gmail");
+        Subgoal emailSubgoal2 = new Subgoal("Choose a unique user ID");
+        createEmail.addSubgoal(emailSubgoal1);
+        createEmail.addSubgoal(emailSubgoal2);
+        
+        final Goal driversLicense = new Goal("Acquire a driver's license");
+        Subgoal licenseSubgoal1 = new Subgoal("Obtain a Learner's permit");
+        Subgoal licenseSubgoal2 = new Subgoal("Practice driving");
+        Subgoal licenseSubgoal3 = new Subgoal("Learn to parallel park");
+        Subgoal licenseSubgoal4 = new Subgoal("Schedule a driving test");
+        Subgoal licenseSubgoal5 = new Subgoal("Pass the driving test");
+        driversLicense.addSubgoal(licenseSubgoal1);
+        driversLicense.addSubgoal(licenseSubgoal2);
+        driversLicense.addSubgoal(licenseSubgoal3);
+        driversLicense.addSubgoal(licenseSubgoal4);
+        driversLicense.addSubgoal(licenseSubgoal5);
+        
+        
         Student adamBaumgardner = new Student("Baumgardner", "Adam", "(412) 580-8826",
-                "baumgardnera@duq.edu", Student.goal.JOB);
+                "baumgardnera@duq.edu", createEmail, "");
         Student richBoyles = new Student("Boyles", "Rich", "(724) 550-3375",
-                "boylesr@duq.edu", Student.goal.JOB);
+                "boylesr@duq.edu", createEmail, "");
         Student mikeGuyer = new Student("Guyer", "Mike", "(570) 807-0899",
-                "guyerm@duq.edu", Student.goal.JOB);
+                "guyerm@duq.edu", driversLicense, "");
         students.add(adamBaumgardner);
         students.add(richBoyles);
         students.add(mikeGuyer);
@@ -157,6 +200,30 @@ final class TabDemo extends Application {
         Object[] namesArray = names.toArray();
         Arrays.sort(namesArray);
 
+        /*
+         ArrayList<String> civicsGoalList = new ArrayList<String>();
+         civicsGoalList.add("Pass the US citizenship test");
+         civicsGoalList.add("Register to vote");
+         civicsGoalList.add("Vote for the first time");
+         civicsGoalList.add("Increase involvement in the community");
+         civicsGoalList.add("Gain volunteering experience to increase job skills");
+         civicsGoalList.add("Learn to use maps");
+         civicsGoalList.add("Learn how to communicate basic personal information");
+         civicsGoalList.add("Understand basic working rights");
+        
+         ArrayList<String> jobsGoalList = new ArrayList<String>();
+         jobsGoalList.add("Create an email address");
+         jobsGoalList.add("Acquire a driver's license");
+        
+         ArrayList<String> postSecondaryGoalList = new ArrayList<String>();
+         postSecondaryGoalList.add("Transfer credits to school");
+         postSecondaryGoalList.add("Get high school transcript");
+         postSecondaryGoalList.add("Meet with academic advisor");
+         postSecondaryGoalList.add("Take TOEFL");
+         postSecondaryGoalList.add("Take GRE");
+         postSecondaryGoalList.add("Fill out school application");
+         postSecondaryGoalList.add("Apply for financial aid");
+         */
         final ComboBox findStudentEdit = new ComboBox();
         findStudentEdit.setItems(FXCollections.observableArrayList(namesArray));
         findStudentEdit.setVisibleRowCount(3);
@@ -189,7 +256,15 @@ final class TabDemo extends Application {
         Label newGoal = new Label("Set a different goal: ");
         editGrid.add(newGoal, 2, 3);
 
-        ComboBox goals = new ComboBox();
+        final ComboBox goals = new ComboBox();
+        goals.setItems(FXCollections.observableArrayList("Pass the US citizenship test",
+                "Register to vote", "Vote for the first time", "Increase involvement in the community",
+                "Gain volunteering experience to increase job skills", "Learn to use maps",
+                "Learn to communicate basic personal information", "Understand basic working rights",
+                new Separator(), "Create an email address", "Acquire a driver's license", new Separator(),
+                "Transfer credits to school", "Get high school transcript", "Meet with academic advisor",
+                "Take TOEFL", "Take GRE", "Fill out school application", "Apply for financial aid"));
+        goals.setDisable(true);
         editGrid.add(goals, 2, 4);
 
         Label notes = new Label("Notes:");
@@ -216,8 +291,8 @@ final class TabDemo extends Application {
         final Text incompleteInput = new Text();
         editGrid.add(incompleteInput, 2, 19);
 
-        // "Goals" tab contents
-        GridPane goalsGrid = new GridPane();
+        // "Student Goals" tab contents
+        final GridPane goalsGrid = new GridPane();
         goalsGrid.setAlignment(Pos.TOP_LEFT);
         goalsGrid.setHgap(10);
         goalsGrid.setVgap(10);
@@ -233,16 +308,17 @@ final class TabDemo extends Application {
         findStudentGoals.setVisibleRowCount(3);
         goalsGrid.add(findStudentGoals, 1, 2);
 
-        TextField addGoalText = new TextField();
-        addGoalText.setPromptText("Add a Goal");
-        goalsGrid.add(addGoalText, 2, 3);
+        Label currentGoal2 = new Label("Current goal:");
+        goalsGrid.add(currentGoal2, 0, 3);
 
-        Button addGoal = new Button("Add Goal to List");
-        HBox hbAddGoal = new HBox(10);
-        hbAddGoal.setAlignment(Pos.BOTTOM_RIGHT);
-        hbAddGoal.getChildren().add(addGoal);
-        goalsGrid.add(hbAddGoal, 2, 4);
+        Label subgoals = new Label("Sub-goals:");
+        goalsGrid.add(subgoals, 0, 4);
 
+        Button saveGoalChanges = new Button("Save Changes");
+        final HBox hbSaveGoalChanges = new HBox(10);
+        hbSaveGoalChanges.setAlignment(Pos.BOTTOM_RIGHT);
+        hbSaveGoalChanges.getChildren().add(saveGoalChanges);
+        
         // "New Student" tab contents
         GridPane newStudentGrid = new GridPane();
         newStudentGrid.setAlignment(Pos.TOP_LEFT);
@@ -272,13 +348,20 @@ final class TabDemo extends Application {
         Label goalSelection = new Label("Select a goal:");
         newStudentGrid.add(goalSelection, 2, 2);
 
-        ComboBox goals2 = new ComboBox();
+        final ComboBox goals2 = new ComboBox();
+        goals2.setItems(FXCollections.observableArrayList("Pass the US citizenship test",
+                "Register to vote", "Vote for the first time", "Increase involvement in the community",
+                "Gain volunteering experience to increase job skills", "Learn to use maps",
+                "Learn to communicate basic personal information", "Understand basic working rights",
+                new Separator(), "Create an email address", "Acquire a driver's license", new Separator(),
+                "Transfer credits to school", "Get high school transcript", "Meet with academic advisor",
+                "Take TOEFL", "Take GRE", "Fill out school application", "Apply for financial aid"));
         newStudentGrid.add(goals2, 2, 3);
 
         Label notes2 = new Label("Notes:");
         newStudentGrid.add(notes2, 0, 8);
 
-        TextArea noteArea2 = new TextArea();
+        final TextArea noteArea2 = new TextArea();
         noteArea2.setPrefRowCount(5);
         newStudentGrid.add(noteArea2, 0, 9, 3, 5);
 
@@ -335,11 +418,18 @@ final class TabDemo extends Application {
         findStudentReports.setVisibleRowCount(3);
         reportsGrid.add(findStudentReports, 0, 3);
 
+        Label completedGoals = new Label("Completed goals:");
+        reportsGrid.add(completedGoals, 0, 6);
+
+        final TextArea completedGoalsList = new TextArea();
+        completedGoalsList.setEditable(false);
+        reportsGrid.add(completedGoalsList, 0, 7, 1, 7);
+
         Button printReport = new Button("Print Individual Report");
         HBox hbPrintReport = new HBox(10);
         hbPrintReport.setAlignment(Pos.BOTTOM_RIGHT);
         hbPrintReport.getChildren().add(printReport);
-        reportsGrid.add(hbPrintReport, 0, 7);
+        reportsGrid.add(hbPrintReport, 0, 15);
 
         final TextField studentName = new TextField();
         studentName.setPromptText("Student Name");
@@ -355,10 +445,10 @@ final class TabDemo extends Application {
         reportsGrid.add(goalsCompleted, 2, 6);
 
         final Label progressLabel = new Label("Progress towards current goal: 25%");
-        reportsGrid.add(progressLabel, 2, 8);
+        reportsGrid.add(progressLabel, 2, 7);
 
         final ProgressBar goalProgress = new ProgressBar(0.25);
-        reportsGrid.add(goalProgress, 2, 9);
+        reportsGrid.add(goalProgress, 2, 8);
 
         Button printReportAll = new Button("Print Report on All Students");
         HBox hbPrintReportAll = new HBox(10);
@@ -463,15 +553,32 @@ final class TabDemo extends Application {
         newUserAdded.setFill(Color.FIREBRICK);
         newUserAdded.setText("Please fill out all fields!");
         newUserAdded.setVisible(false);
-        adminGrid.add(newUserAdded,0,12);
-        
+        adminGrid.add(newUserAdded, 0, 12);
+
         Button addNewUser = new Button("Add user");
         HBox hbNewUser = new HBox(10);
         hbNewUser.setAlignment(Pos.BOTTOM_LEFT);
         hbNewUser.getChildren().add(addNewUser);
         adminGrid.add(hbNewUser, 1, 12);
 
-        // "Edit" tab Actions
+        // "Manage Goals" tab contents
+        GridPane manageGoalsGrid = new GridPane();
+        manageGoalsGrid.setAlignment(Pos.TOP_LEFT);
+        manageGoalsGrid.setHgap(10);
+        manageGoalsGrid.setVgap(10);
+        manageGoalsGrid.setPadding(new Insets(25, 25, 25, 25));
+
+        Label modifyGoal = new Label("Modify an existing goal:");
+        
+        Label selectGoal = new Label("Select a goal:");
+        
+        Label createGoal = new Label("Create a new goal:");
+        manageGoalsGrid.add(createGoal, 0, 1);
+
+        final TextField createdGoal = new TextField();
+        manageGoalsGrid.add(createdGoal, 1, 1);
+
+        // Popup Window
         final PopUpWindow popup = new PopUpWindow();
         final Stage popupStage = new Stage();
 
@@ -545,6 +652,7 @@ final class TabDemo extends Application {
 
         primaryStage.setTitle("");
 
+        // "Edit Profiles" tab Actions
         findStudentEdit.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
                 firstNameField.clear();
@@ -552,6 +660,8 @@ final class TabDemo extends Application {
                 emailField.clear();
                 phoneNumberField.clear();
                 noteArea.clear();
+                goals.getSelectionModel().clearSelection();
+                goals.setValue(null);
                 incompleteInput.setText("");
                 if (findStudentEdit.getValue() != null) {
                     firstNameField.setEditable(true);
@@ -559,6 +669,7 @@ final class TabDemo extends Application {
                     emailField.setEditable(true);
                     phoneNumberField.setEditable(true);
                     noteArea.setEditable(true);
+                    goals.setDisable(false);
                     hbDeleteStudent.setVisible(true);
                     final String choice = (String) findStudentEdit.getValue();
                     int studentIndex = names.indexOf(choice);
@@ -566,12 +677,14 @@ final class TabDemo extends Application {
                     lastNameField.insertText(0, students.get(studentIndex).getLastName());
                     emailField.insertText(0, students.get(studentIndex).getEmail());
                     phoneNumberField.insertText(0, students.get(studentIndex).getPhoneNumber());
+                    noteArea.insertText(0, students.get(studentIndex).getNotes());
                 } else {
                     firstNameField.setEditable(false);
                     lastNameField.setEditable(false);
                     emailField.setEditable(false);
                     phoneNumberField.setEditable(false);
                     noteArea.setEditable(false);
+                    goals.setDisable(true);
                 }
             }
         });
@@ -592,7 +705,7 @@ final class TabDemo extends Application {
                         Student updatedStudent = new Student(lastNameField.getText(),
                                 firstNameField.getText(),
                                 phoneNumberField.getText(),
-                                emailField.getText(), Student.goal.JOB);
+                                emailField.getText(), createEmail, noteArea.getText());
                         students.set(index, updatedStudent);
 
                         findStudentEdit.getSelectionModel().clearSelection();
@@ -652,12 +765,47 @@ final class TabDemo extends Application {
             }
         });
 
-        // "Goals" tab Actions
+        // "Student Goals" tab Actions
+        final ArrayList<CheckBox> checkBoxes = new ArrayList<CheckBox>();
+        
+        findStudentGoals.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent t) {
+                int size = checkBoxes.size();
+                int numChildren = goalsGrid.getChildren().size();
+                for (int i=0; i<size; i++) {
+                    goalsGrid.getChildren().remove(numChildren-i-1);
+                }
+                checkBoxes.clear();
+                if (findStudentGoals.getValue() != null) {
+                    String currentStudent = (String) findStudentGoals.getValue();
+                    int studentIndex = names.indexOf(currentStudent);
+                    Goal currentGoal = students.get(studentIndex).goal;
+                    int n = currentGoal.subgoals.size();
+                    for (int i = 0; i<n; i++) {
+                        CheckBox currentSubgoal = new CheckBox(currentGoal.subgoals.get(i).subgoal);
+                        currentSubgoal.setSelected(currentGoal.subgoals.get(i).isComplete);
+                        goalsGrid.add(currentSubgoal,1,5+i,2,1);
+                        checkBoxes.add(currentSubgoal);
+                    }
+                    goalsGrid.add(hbSaveGoalChanges,1,6+n);
+                }
+            }
+        });
+        
+        saveGoalChanges.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent t) {
+                String currentStudent = (String) findStudentGoals.getValue();
+                int studentIndex = names.indexOf(currentStudent);
+                Goal currentGoal = students.get(studentIndex).goal;
+            }
+        });
+        
         // "New Student" tab Actions
         addStudent.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
                 if (firstNameField2.getLength() == 0 || lastNameField2.getLength() == 0
-                        || emailField2.getLength() == 0 || phoneNumberField2.getLength() == 0) {
+                        || emailField2.getLength() == 0 || phoneNumberField2.getLength() == 0
+                        || goals2.getValue() == null) {
                     studentAdded.setFill(Color.FIREBRICK);
                     studentAdded.setText("Please fill out all fields!");
                 } else {
@@ -670,17 +818,28 @@ final class TabDemo extends Application {
                     Student newStudent = new Student(lastNameField2.getText(),
                             firstNameField2.getText(),
                             phoneNumberField2.getText(),
-                            emailField2.getText(), Student.goal.JOB);
+                            emailField2.getText(), createEmail, noteArea2.getText());
                     students.add(newStudent);
                     firstNameField2.clear();
                     lastNameField2.clear();
                     emailField2.clear();
                     phoneNumberField2.clear();
+                    goals2.getSelectionModel().clearSelection();
+                    goals2.setValue(null);
+                    noteArea2.clear();
                     studentAdded.setText("");
                 }
             }
         }
         );
+
+        goals2.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent t) {
+                if (goals2.getValue() == null) {
+                    studentAdded.setText("");
+                }
+            }
+        });
 
         /* CAN FIX THIS WITH GOALS DROPDOWN
          firstNameField2.setOnAction(new EventHandler<ActionEvent>() {
@@ -690,9 +849,14 @@ final class TabDemo extends Application {
          });
          */
         // "Flags" tab Actions
+        printBtn.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent t) {
+
+            }
+        });
+
         // "Reports" tab Actions
         findStudentReports.setOnAction(new EventHandler<ActionEvent>() {
-
             public void handle(ActionEvent t) {
                 studentName.clear();
                 studentGoal.clear();
@@ -703,6 +867,18 @@ final class TabDemo extends Application {
                     studentName.insertText(0, firstName + " " + lastName);
                     studentGoal.insertText(0, "Get a job");
                 }
+            }
+        });
+
+        printReport.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent t) {
+
+            }
+        });
+
+        printReportAll.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent t) {
+
             }
         });
 
@@ -842,12 +1018,12 @@ final class TabDemo extends Application {
 
         //Create Tabs
         Tab editTab = new Tab();
-        editTab.setText("Edit");
+        editTab.setText("Edit Profiles");
         editTab.setContent(editGrid);
         tabPane.getTabs().add(editTab);
 
         Tab goalTab = new Tab();
-        goalTab.setText("Goals");
+        goalTab.setText("Student Goals");
         goalTab.setContent(goalsGrid);
         tabPane.getTabs().add(goalTab);
 
@@ -873,6 +1049,13 @@ final class TabDemo extends Application {
             tabPane.getTabs().add(adminTab);
         }
 
+        Tab manageTab = new Tab();
+        manageTab.setText("Manage Goals");
+        manageTab.setContent(manageGoalsGrid);
+        if (isAdmin) {
+            tabPane.getTabs().add(manageTab);
+        }
+        
         Text scenetitle2 = new Text("Student");
         scenetitle2.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
         mainPane.setCenter(tabPane);
