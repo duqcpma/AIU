@@ -1,20 +1,25 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
 package aiumain;
 
 /**
  *
  * @author Adam
  */
-public class Node <K extends Comparable,D> {
+public class Node <K extends Comparable> {
 
     public K key;
-    public D data;
-    public Node<K,D> left, right;
+    public Student data;
+    public Node<K> left, right;
 
-    public Node(K k, D d, Node<K,D> l,Node <K,D> r) {
+    public Node(K k, Student d, Node<K> l,Node <K> r) {
         key = k; data = d; left = l; right = r;
     }
 
-    public Node(K k, D d) {
+    public Node(K k, Student d) {
         this(k,d,null,null);
     }
     
