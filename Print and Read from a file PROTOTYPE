@@ -1,0 +1,48 @@
+import java.util.*;
+import java.lang.*;
+import java.io.*;
+import java.net.*;
+
+
+public class TreePrint {
+
+
+
+public void Print(String tree) {
+
+try{
+PrintWriter output = null;
+output = new PrintWriter("C:\\Users\\" + System.getProperty("user.name") +"\\Google Drive\\test.csv");
+                                                                           //file can change as needed
+output.println(tree);
+output.close();
+
+}
+catch(IOException ex){
+System.out.println("error");
+}//end catch 
+}//end Print
+
+
+
+
+public String Read()throws IOException{
+//this method needs a try catch when calling
+
+
+String line;
+
+FileReader fr = new FileReader("C:\\Users\\" + System.getProperty("user.name") +"\\Google Drive\\test.csv");
+                                                                           //file can change as needed
+BufferedReader br = new BufferedReader(fr);
+line = br.readLine();
+br.close();
+return line;
+
+
+
+}//end Read
+
+
+
+}//end class
