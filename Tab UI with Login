@@ -413,27 +413,52 @@ final class TabDemo extends Application {
         flagsGrid.setHgap(10);
         flagsGrid.setVgap(10);
         flagsGrid.setPadding(new Insets(25, 25, 25, 25));
-        flagsGrid.getColumnConstraints().add(new ColumnConstraints(200));
+        flagsGrid.getColumnConstraints().add(new ColumnConstraints(100));
+        flagsGrid.getColumnConstraints().add(new ColumnConstraints(100));
+        flagsGrid.getColumnConstraints().add(new ColumnConstraints(150));
 
+        Label selectStudentFlags = new Label("Select a student:");
+        flagsGrid.add(selectStudentFlags, 0, 1);
+        
+        final ComboBox findStudentFlags = new ComboBox();
+        findStudentFlags.setItems(FXCollections.observableArrayList(namesArray));
+        findStudentFlags.setVisibleRowCount(3);
+        flagsGrid.add(findStudentFlags, 1, 1, 2, 1);
+        
+        Label timeSinceLabel = new Label("Time (in hours) since last appointment:");
+        flagsGrid.add(timeSinceLabel, 0, 3, 2, 1);
+        
+        final TextField timeSince = new TextField();
+        timeSince.setEditable(false);
+        timeSince.setPromptText("Enter time in hours");
+        flagsGrid.add(timeSince, 2, 3);
+        
+        final Button saveTime = new Button("Update");
+        HBox hbSaveTime = new HBox(10);
+        hbSaveTime.setAlignment(Pos.BOTTOM_LEFT);
+        hbSaveTime.getChildren().add(saveTime);
+        saveTime.setDisable(true);
+        flagsGrid.add(hbSaveTime, 2, 5);
+        
         Label unreportedStudents = new Label("Students who have not reported in:");
-        flagsGrid.add(unreportedStudents, 0, 8, 1, 1);
+        flagsGrid.add(unreportedStudents, 0, 8, 2, 1);
 
         final ComboBox reportTimes = new ComboBox();
-        reportTimes.setItems(FXCollections.observableArrayList("12 Hours", "30 Hours",
-                "60 Hours"));
-        flagsGrid.add(reportTimes, 1, 8);
+        reportTimes.setItems(FXCollections.observableArrayList("0-12 Hours", "13-30 Hours",
+                "31-60 Hours", "60+ Hours"));
+        flagsGrid.add(reportTimes, 2, 8);
 
-        TextArea studentList = new TextArea();
+        final TextArea studentList = new TextArea();
         studentList.setPrefRowCount(6);
         studentList.setEditable(false);
-        flagsGrid.add(studentList, 0, 9, 2, 6);
+        flagsGrid.add(studentList, 0, 9, 3, 6);
 
         final Button printBtn = new Button("Print");
         HBox hbPrint = new HBox(10);
         hbPrint.setAlignment(Pos.BOTTOM_RIGHT);
         hbPrint.getChildren().add(printBtn);
         printBtn.setDisable(true);
-        flagsGrid.add(hbPrint, 1, 17);
+        flagsGrid.add(hbPrint, 2, 17);
 
         // "Reports" tab contents
         GridPane reportsGrid = new GridPane();
@@ -756,10 +781,7 @@ final class TabDemo extends Application {
 
         saveChanges.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
-                /*if (findStudentEdit.getValue() == null) {
-                    incompleteInput.setFill(Color.FIREBRICK);
-                    incompleteInput.setText("Please select a student!");
-                } else*/ if (firstNameField.getLength() == 0 || lastNameField.getLength() == 0
+                if (firstNameField.getLength() == 0 || lastNameField.getLength() == 0
                         || emailField.getLength() == 0 || phoneNumberField.getLength() == 0) {
                     incompleteInput.setFill(Color.FIREBRICK);
                     incompleteInput.setText("Please fill out all fields!");
@@ -778,6 +800,8 @@ final class TabDemo extends Application {
                         findStudentEdit.setValue(null);
                         findStudentGoals.getSelectionModel().clearSelection();
                         findStudentGoals.setValue(null);
+                        findStudentFlags.getSelectionModel().clearSelection();
+                        findStudentFlags.setValue(null);
                         findStudentReports.getSelectionModel().clearSelection();
                         findStudentReports.setValue(null);
                         reportTimes.getSelectionModel().clearSelection();
@@ -790,6 +814,7 @@ final class TabDemo extends Application {
 
                         findStudentEdit.setItems(FXCollections.observableArrayList(newNames));
                         findStudentGoals.setItems(FXCollections.observableArrayList(newNames));
+                        findStudentFlags.setItems(FXCollections.observableArrayList(newNames));
                         findStudentReports.setItems(FXCollections.observableArrayList(newNames));
 
                         popup.setAgreeToChanges(false);
@@ -820,6 +845,7 @@ final class TabDemo extends Application {
                     findStudentEdit.setItems(FXCollections.observableArrayList(updatedNames));
                     findStudentReports.setItems(FXCollections.observableArrayList(updatedNames));
                     findStudentGoals.setItems(FXCollections.observableArrayList(updatedNames));
+                    findStudentFlags.setItems(FXCollections.observableArrayList(updatedNames));
                     popup.setAgreeToChanges(false);
                 } else {
                     areYouSure1.setVisible(false);
@@ -898,6 +924,7 @@ final class TabDemo extends Application {
                     findStudentEdit.setItems(FXCollections.observableArrayList(newNames));
                     findStudentReports.setItems(FXCollections.observableArrayList(newNames));
                     findStudentGoals.setItems(FXCollections.observableArrayList(newNames));
+                    findStudentFlags.setItems(FXCollections.observableArrayList(newNames));
                     Student newStudent = new Student(lastNameField2.getText(),
                             firstNameField2.getText(),
                             phoneNumberField2.getText(),
@@ -932,11 +959,68 @@ final class TabDemo extends Application {
          });
          */
         // "Flags" tab Actions
+        findStudentFlags.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent t) {
+                timeSince.setEditable(false);
+                timeSince.clear();
+                saveTime.setDisable(true);
+                if (findStudentFlags.getValue() != null) {
+                    timeSince.setEditable(true);
+                    saveTime.setDisable(false);
+                }
+            }
+        });
+        
+        saveTime.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent t) {
+                if (timeSince.getLength() == 0) {
+                    
+                }
+                else {
+                    String student = (String) findStudentFlags.getValue();
+                    int studentIndex = names.indexOf(student);
+                    Student currentStudent = students.get(studentIndex);
+                    currentStudent.hoursSince = Integer.parseInt(timeSince.getText());
+                    findStudentFlags.getSelectionModel().clearSelection();
+                    findStudentFlags.setValue(null);
+                    reportTimes.getSelectionModel().clearSelection();
+                    reportTimes.setValue(null);
+                }
+            }
+        });
+        
         reportTimes.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
                 printBtn.setDisable(true);
+                studentList.clear();
                 if (reportTimes.getValue() != null) {
                     printBtn.setDisable(false);
+                    String listOfStudents = "";
+                    if (reportTimes.getValue().equals("0-12 Hours")) {
+                        for (Student student : students) {
+                            if (student.hoursSince <= 12)
+                                listOfStudents += student.firstName + " " + student.lastName + "\n";
+                        }
+                    }
+                    else if (reportTimes.getValue().equals("13-30 Hours")) {
+                        for (Student student : students) {
+                            if (student.hoursSince > 12 && student.hoursSince <= 30)
+                                listOfStudents += student.firstName + " " + student.lastName + "\n";
+                        }
+                    }
+                    else if (reportTimes.getValue().equals("31-60 Hours")) {
+                        for (Student student : students) {
+                            if (student.hoursSince > 30 && student.hoursSince <= 60)
+                                listOfStudents += student.firstName + " " + student.lastName + "\n";
+                        }
+                    }
+                    else {
+                        for (Student student : students) {
+                            if (student.hoursSince > 60) 
+                                listOfStudents += student.firstName + " " + student.lastName + "\n";
+                        }
+                    }
+                    studentList.setText(listOfStudents);
                 }
             }
         });
