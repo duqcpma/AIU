@@ -279,10 +279,10 @@ final class TabDemo extends Application {
 
         final TextField displayGoal = new TextField();
         displayGoal.setEditable(false);
-        editGrid.add(displayGoal, 3, 2, 2, 1);
+        editGrid.add(displayGoal, 2, 3, 2, 1);
 
         Label newGoal = new Label("Set a different goal: ");
-        editGrid.add(newGoal, 2, 3, 2, 1);
+        editGrid.add(newGoal, 2, 4, 2, 1);
 
         final ComboBox goals = new ComboBox();
         goals.setItems(FXCollections.observableArrayList("Pass the US citizenship test",
@@ -293,7 +293,7 @@ final class TabDemo extends Application {
                 "Transfer credits to school", "Get high school transcript", "Meet with academic advisor",
                 "Take TOEFL", "Take GRE", "Fill out school application", "Apply for financial aid"));
         goals.setDisable(true);
-        editGrid.add(goals, 2, 4, 2, 1);
+        editGrid.add(goals, 2, 5, 2, 1);
 
         Label notes = new Label("Notes:");
         editGrid.add(notes, 0, 8);
@@ -340,7 +340,7 @@ final class TabDemo extends Application {
         Label currentGoal2 = new Label("Current goal:");
         goalsGrid.add(currentGoal2, 0, 3);
 
-        TextField currentStudentGoal = new TextField();
+        final TextField currentStudentGoal = new TextField();
         currentStudentGoal.setEditable(false);
         goalsGrid.add(currentStudentGoal, 1, 3);
 
@@ -719,6 +719,7 @@ final class TabDemo extends Application {
                 lastNameField.clear();
                 emailField.clear();
                 phoneNumberField.clear();
+                displayGoal.clear();
                 noteArea.clear();
                 goals.getSelectionModel().clearSelection();
                 goals.setValue(null);
@@ -740,6 +741,7 @@ final class TabDemo extends Application {
                     lastNameField.insertText(0, students.get(studentIndex).getLastName());
                     emailField.insertText(0, students.get(studentIndex).getEmail());
                     phoneNumberField.insertText(0, students.get(studentIndex).getPhoneNumber());
+                    displayGoal.setText(students.get(studentIndex).goal.goal);
                     noteArea.insertText(0, students.get(studentIndex).getNotes());
                 } else {
                     firstNameField.setEditable(false);
@@ -769,6 +771,7 @@ final class TabDemo extends Application {
                                 firstNameField.getText(),
                                 phoneNumberField.getText(),
                                 emailField.getText(), new Goal(createEmail), noteArea.getText());
+                        //Update to take in general goal
                         students.set(index, updatedStudent);
 
                         findStudentEdit.getSelectionModel().clearSelection();
@@ -837,6 +840,7 @@ final class TabDemo extends Application {
 
         findStudentGoals.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
+                currentStudentGoal.clear();
                 int size = checkBoxes.size();
                 if (size > 0) {
                     goalsGrid.getChildren().remove(hbSaveGoalChanges);
@@ -850,6 +854,7 @@ final class TabDemo extends Application {
                     String currentStudent = (String) findStudentGoals.getValue();
                     int studentIndex = names.indexOf(currentStudent);
                     Goal currentGoal = students.get(studentIndex).goal;
+                    currentStudentGoal.setText(currentGoal.goal);
                     int n = currentGoal.subgoals.size();
                     for (int i = 0; i < n; i++) {
                         CheckBox currentSubgoal = new CheckBox(currentGoal.subgoals.get(i).subgoal);
@@ -951,6 +956,8 @@ final class TabDemo extends Application {
                 progressLabel.setVisible(false);
                 goalProgress.setVisible(false);
                 printReport.setDisable(true);
+                completedSubgoalsList.clear();
+                remainingSubgoalsList.clear();
                 if (findStudentReports.getValue() != null) {
                     final String choice2 = (String) findStudentReports.getValue();
                     String firstName = choice2.substring(choice2.indexOf(" ") + 1);
@@ -958,6 +965,7 @@ final class TabDemo extends Application {
                     studentName.insertText(0, firstName + " " + lastName);
                     int studentIndex = names.indexOf(choice2);
                     Student currentStudent = students.get(studentIndex);
+                    studentGoal.setText(currentStudent.goal.goal);
                     goalsCompleted.setText("Goals completed: " + currentStudent.goalsCompleted);
                     int numSubgoals = currentStudent.goal.subgoals.size();
                     int numCompleted = currentStudent.goal.numCompletedSubgoals();
@@ -967,6 +975,16 @@ final class TabDemo extends Application {
                     progressLabel.setVisible(true);
                     goalProgress.setVisible(true);
                     printReport.setDisable(false);
+                    String completedSubgoals = "";
+                    String remainingSubgoals = "";
+                    for (Subgoal subgoal : currentStudent.goal.subgoals) {
+                        if (subgoal.isComplete)
+                            completedSubgoals += subgoal.subgoal + "\n";
+                        else 
+                            remainingSubgoals += subgoal.subgoal + "\n";
+                    }
+                    completedSubgoalsList.setText(completedSubgoals);
+                    remainingSubgoalsList.setText(remainingSubgoals);
                     //studentGoal.insertText(0, "Get a job");
                 }
             }
