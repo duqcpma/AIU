@@ -1,18 +1,24 @@
 package aiumain;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+
+
 /**
  *
  * @author Adam
  */
-public class AIUTree<K extends Comparable,D> {
+public class AIUTree<K extends Comparable> {
     
-    protected Node<K,D> root = null;
+    protected Node<K> root = null;
 
     public int height() {
         return height(root);
     }
 
-    private int height(Node<K,D> root) {
+    private int height(Node<K> root) {
         return root == null ? 0 : 1 + Math.max(height(root.left), height(root.right));
     }
 
@@ -20,15 +26,15 @@ public class AIUTree<K extends Comparable,D> {
         return size(root);
     }
 
-    private int size(Node<K,D> root) {
+    private int size(Node<K> root) {
         return root == null ? 0 : 1 + size(root.left) + size(root.right);
     }
 
-    public D find(K key) {
+    public Student find(K key) {
         return find(key, root);
     }
 
-    private D find(K key, Node<K,D> root) {
+    private Student find(K key, Node<K> root) {
         if(root == null)
             return null;
         int c = key.compareTo(root.key); 
@@ -40,14 +46,14 @@ public class AIUTree<K extends Comparable,D> {
             return find(key, root.right);
     }
 
-    public void add(K key, D data) {
+    public void add(K key, Student data) {
         root = add(key, data, root);
     }
 
-    private Node<K,D> add(K key, D data, Node<K,D> root) {
+    private Node<K> add(K key, Student data, Node<K> root) {
         // returns the tree with the added record.
         if(root == null)
-            return new Node<K,D>(key,data);
+            return new Node<K>(key,data);
         int c = key.compareTo(root.key); 
         
        //if(c == 0) {
@@ -66,11 +72,11 @@ public class AIUTree<K extends Comparable,D> {
         }
     }
 
-    public void modify(K key, D data) {
+    public void modify(K key, Student data) {
         modify(key, data, root);
     }
 
-    private void modify(K key, D data, Node<K,D> root) {
+    private void modify(K key, Student data, Node<K> root) {
         if(root == null) {
             System.err.println("Error: key not found: " + key);
             System.exit(1);
@@ -89,13 +95,13 @@ public class AIUTree<K extends Comparable,D> {
       return toString(root);
     }
 
-    private String toString(Node<K,D> root) {
+    private String toString(Node<K> root) {
         if(root == null)
             return "";
         return toString(root.left) + "(" + root.key + "," + root.data + ")" + toString(root.right);
     }
 
-    public Node<K,D> leftmost(Node<K,D> root) {
+    public Node<K> leftmost(Node<K> root) {
  // Assume root is not null.
         if(root.left == null)
             return root;
@@ -103,17 +109,17 @@ public class AIUTree<K extends Comparable,D> {
             return leftmost(root.left);
     }
 
-    private Pair<Node<K,D>,Node<K,D>> findAndRemoveLeftmost(Node<K,D> root) {
+    private Pair<Node<K>,Node<K>> findAndRemoveLeftmost(Node<K> root) {
  // Assume root is not null.
  // Returns the leftmost node and the tree with that node deleted.
         if(root.left == null)
-            return new Pair<Node<K,D>,Node<K,D>>(root, root.right);
+            return new Pair<Node<K>,Node<K>>(root, root.right);
         else {
-            Pair<Node<K,D>,Node<K,D>> pair = findAndRemoveLeftmost(root.left);
-            Node<K,D> leftmost = pair.first;
-            Node<K,D> newTree = pair.second;
+            Pair<Node<K>,Node<K>> pair = findAndRemoveLeftmost(root.left);
+            Node<K> leftmost = pair.first;
+            Node<K> newTree = pair.second;
             root.left = newTree;
-            return new Pair<Node<K,D>,Node<K,D>>(leftmost, root);
+            return new Pair<Node<K>,Node<K>>(leftmost, root);
         }
     }
 
@@ -121,7 +127,7 @@ public class AIUTree<K extends Comparable,D> {
         root = remove(key, root);
     }
 
-    private Node<K,D> remove(K key, Node<K,D> root) {
+    private Node<K> remove(K key, Node<K> root) {
         if(root == null) {
             System.err.println("Error: key not found: " + key);
             System.exit(1);
@@ -134,9 +140,9 @@ public class AIUTree<K extends Comparable,D> {
             else if(root.right == null)
                 return root.left;
             else { // two children, replace with leftmost node of right subtree.
-                Pair<Node<K,D>,Node<K,D>> pair = findAndRemoveLeftmost(root.right);
-                Node<K,D> leftmost = pair.first;
-                Node<K,D> newRight = pair.second;
+                Pair<Node<K>,Node<K>> pair = findAndRemoveLeftmost(root.right);
+                Node<K> leftmost = pair.first;
+                Node<K> newRight = pair.second;
                 leftmost.left = root.left;
                 leftmost.right = newRight;
                 return leftmost;
@@ -149,6 +155,36 @@ public class AIUTree<K extends Comparable,D> {
         else { // c > 0
             root.right = remove(key, root.right);
             return root;
+        }
+    }
+    
+    public void printTree(){
+        AIUTreeIterator iterator = new AIUTreeIterator(this);
+        try {
+ 
+            String content = "";
+   
+            while(iterator.hasNext()){
+                Node<K> currNode = iterator.next();
+                content = content + currNode.data.lastName + "," + currNode.data.lastName + "," + currNode.data.firstName + "," + currNode.data.phoneNumber + "," + currNode.data.emailAddress + "," + currNode.data.goal.goal + System.getProperty("line.separator");
+            }
+    
+            File file = new File("C:\\Users\\Adam\\Google Drive\\database.txt");
+ 
+            // if file doesnt exists, then create it
+            if (!file.exists()) {
+            file.createNewFile();
+            }
+ 
+            FileWriter fw = new FileWriter(file.getAbsoluteFile());
+            BufferedWriter bw = new BufferedWriter(fw);
+            bw.write(content);
+            bw.close();
+ 
+            System.out.println("Done");
+ 
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
     
