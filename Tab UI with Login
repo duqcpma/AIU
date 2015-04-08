@@ -43,7 +43,6 @@ import javafx.stage.Stage;
  *
  * @author mguyer92
  */
-
 final class Goal {
 
     public String goal;
@@ -52,7 +51,7 @@ final class Goal {
     public Goal(String theGoal) {
         goal = theGoal;
     }
-    
+
     public Goal(Goal theGoal) {
         goal = theGoal.goal;
         ArrayList<Subgoal> subgoalsCopy = new ArrayList<Subgoal>();
@@ -63,12 +62,13 @@ final class Goal {
         }
         subgoals = subgoalsCopy;
     }
-    
+
     public int numCompletedSubgoals() {
         int count = 0;
         for (Subgoal subgoal : this.subgoals) {
-            if (subgoal.isComplete)
+            if (subgoal.isComplete) {
                 count++;
+            }
         }
         return count;
     }
@@ -83,15 +83,15 @@ final class Goal {
 }
 
 final class Subgoal {
-    
+
     public String subgoal;
     public boolean isComplete;
-    
+
     public Subgoal(String theSubgoal) {
         subgoal = theSubgoal;
         isComplete = false;
     }
-    
+
     public void setComplete(boolean b) {
         isComplete = b;
     }
@@ -109,6 +109,7 @@ final class Student {
     public int goalsCompleted = 0;
 
     public Goal goal;
+    public ArrayList<Goal> completedGoals;
 
     public Student(String theLastName, String theFirstName, String thePhoneNumber, String theEmail,
             Goal theGoal, String theNotes) {
@@ -191,7 +192,7 @@ final class TabDemo extends Application {
         Subgoal emailSubgoal2 = new Subgoal("Choose a unique user ID");
         createEmail.addSubgoal(emailSubgoal1);
         createEmail.addSubgoal(emailSubgoal2);
-        
+
         final Goal driversLicense = new Goal("Acquire a driver's license");
         Subgoal licenseSubgoal1 = new Subgoal("Obtain a Learner's permit");
         Subgoal licenseSubgoal2 = new Subgoal("Practice driving");
@@ -203,8 +204,7 @@ final class TabDemo extends Application {
         driversLicense.addSubgoal(licenseSubgoal3);
         driversLicense.addSubgoal(licenseSubgoal4);
         driversLicense.addSubgoal(licenseSubgoal5);
-        
-        
+
         Student adamBaumgardner = new Student("Baumgardner", "Adam", "(412) 580-8826",
                 "baumgardnera@duq.edu", new Goal(createEmail), "");
         Student richBoyles = new Student("Boyles", "Rich", "(724) 550-3375",
@@ -280,7 +280,7 @@ final class TabDemo extends Application {
         final TextField displayGoal = new TextField();
         displayGoal.setEditable(false);
         editGrid.add(displayGoal, 3, 2, 2, 1);
-        
+
         Label newGoal = new Label("Set a different goal: ");
         editGrid.add(newGoal, 2, 3, 2, 1);
 
@@ -307,14 +307,15 @@ final class TabDemo extends Application {
         HBox hbSaveChanges = new HBox(10);
         hbSaveChanges.setAlignment(Pos.BOTTOM_RIGHT);
         hbSaveChanges.getChildren().add(saveChanges);
-        editGrid.add(hbSaveChanges, 2, 17);
+        saveChanges.setDisable(true);
+        editGrid.add(hbSaveChanges, 2, 17, 2, 1);
 
         final Button deleteStudent = new Button("Delete Student");
         final HBox hbDeleteStudent = new HBox(10);
         hbDeleteStudent.setAlignment(Pos.BOTTOM_LEFT);
         hbDeleteStudent.getChildren().add(deleteStudent);
+        deleteStudent.setDisable(true);
         editGrid.add(hbDeleteStudent, 0, 17);
-        hbDeleteStudent.setVisible(false);
 
         final Text incompleteInput = new Text();
         editGrid.add(incompleteInput, 2, 19);
@@ -341,8 +342,8 @@ final class TabDemo extends Application {
 
         TextField currentStudentGoal = new TextField();
         currentStudentGoal.setEditable(false);
-        goalsGrid.add(currentStudentGoal,1,3);
-        
+        goalsGrid.add(currentStudentGoal, 1, 3);
+
         Label subgoals = new Label("Sub-goals:");
         goalsGrid.add(subgoals, 0, 4);
 
@@ -350,7 +351,7 @@ final class TabDemo extends Application {
         final HBox hbSaveGoalChanges = new HBox(10);
         hbSaveGoalChanges.setAlignment(Pos.BOTTOM_RIGHT);
         hbSaveGoalChanges.getChildren().add(saveGoalChanges);
-        
+
         // "New Student" tab contents
         GridPane newStudentGrid = new GridPane();
         newStudentGrid.setAlignment(Pos.TOP_LEFT);
@@ -427,10 +428,11 @@ final class TabDemo extends Application {
         studentList.setEditable(false);
         flagsGrid.add(studentList, 0, 9, 2, 6);
 
-        Button printBtn = new Button("Print");
+        final Button printBtn = new Button("Print");
         HBox hbPrint = new HBox(10);
         hbPrint.setAlignment(Pos.BOTTOM_RIGHT);
         hbPrint.getChildren().add(printBtn);
+        printBtn.setDisable(true);
         flagsGrid.add(hbPrint, 1, 17);
 
         // "Reports" tab contents
@@ -439,8 +441,10 @@ final class TabDemo extends Application {
         reportsGrid.setHgap(10);
         reportsGrid.setVgap(10);
         reportsGrid.setPadding(new Insets(25, 20, 25, 20));
-        reportsGrid.getColumnConstraints().add(new ColumnConstraints(150));
-        reportsGrid.getColumnConstraints().add(new ColumnConstraints(80));
+        reportsGrid.getColumnConstraints().add(new ColumnConstraints(100));
+        reportsGrid.getColumnConstraints().add(new ColumnConstraints(50));
+        reportsGrid.getColumnConstraints().add(new ColumnConstraints(45));
+        reportsGrid.getColumnConstraints().add(new ColumnConstraints(40));
 
         Label selectStudent2 = new Label("Select student:");
         reportsGrid.add(selectStudent2, 0, 1);
@@ -448,55 +452,69 @@ final class TabDemo extends Application {
         final ComboBox findStudentReports = new ComboBox();
         findStudentReports.setItems(FXCollections.observableArrayList(namesArray));
         findStudentReports.setVisibleRowCount(3);
-        reportsGrid.add(findStudentReports, 0, 2);
+        reportsGrid.add(findStudentReports, 1, 1, 3, 1);
 
         Label completedGoals = new Label("Completed goals:");
-        reportsGrid.add(completedGoals, 0, 7);
+        reportsGrid.add(completedGoals, 3, 9, 3, 1);
 
         final TextArea completedGoalsList = new TextArea();
         completedGoalsList.setEditable(false);
-        reportsGrid.add(completedGoalsList, 0, 8, 1, 7);
+        reportsGrid.add(completedGoalsList, 3, 10, 3, 7);
 
-        Button printReport = new Button("Print Individual Report");
+        Label completedSubgoals = new Label("Completed subgoals:");
+        reportsGrid.add(completedSubgoals, 0, 9, 2, 1);
+
+        final TextArea completedSubgoalsList = new TextArea();
+        completedSubgoalsList.setEditable(false);
+        reportsGrid.add(completedSubgoalsList, 0, 10, 2, 3);
+
+        Label remainingSubgoals = new Label("Remaining subgoals:");
+        reportsGrid.add(remainingSubgoals, 0, 13, 2, 1);
+
+        final TextArea remainingSubgoalsList = new TextArea();
+        remainingSubgoalsList.setEditable(false);
+        reportsGrid.add(remainingSubgoalsList, 0, 14, 2, 3);
+
+        final Button printReport = new Button("Print Individual Report");
         HBox hbPrintReport = new HBox(10);
         hbPrintReport.setAlignment(Pos.BOTTOM_RIGHT);
         hbPrintReport.getChildren().add(printReport);
-        reportsGrid.add(hbPrintReport, 0, 16);
+        printReport.setDisable(true);
+        reportsGrid.add(hbPrintReport, 0, 18, 2, 1);
 
         Label studentLabel = new Label("Student name:");
-        reportsGrid.add(studentLabel,1,3);
-        
+        reportsGrid.add(studentLabel, 0, 3);
+
         final TextField studentName = new TextField();
         studentName.setPromptText("Student Name");
         studentName.setEditable(false);
-        reportsGrid.add(studentName, 2, 3);
+        reportsGrid.add(studentName, 1, 3, 3, 1);
 
         Label goalLabel = new Label("Current goal:");
-        reportsGrid.add(goalLabel,1,4);
-        
+        reportsGrid.add(goalLabel, 0, 4);
+
         final TextField studentGoal = new TextField();
         studentGoal.setPromptText("Current Student Goal");
         studentGoal.setEditable(false);
-        reportsGrid.add(studentGoal, 2, 4);
+        reportsGrid.add(studentGoal, 1, 4, 3, 1);
 
         final Label goalsCompleted = new Label();
         goalsCompleted.setVisible(false);
-        reportsGrid.add(goalsCompleted, 2, 7);
+        reportsGrid.add(goalsCompleted, 1, 6, 3, 1);
 
         final Label progressLabel = new Label();
         progressLabel.setVisible(false);
-        reportsGrid.add(progressLabel, 2, 8);
+        reportsGrid.add(progressLabel, 1, 7, 4, 1);
 
         final ProgressBar goalProgress = new ProgressBar();
         goalProgress.setVisible(false);
-        reportsGrid.add(goalProgress, 2, 9);
-        
+        reportsGrid.add(goalProgress, 1, 8, 3, 1);
 
-        Button printReportAll = new Button("Print Report on All Students");
+        Button printReportAll = new Button("Create Summary Report");
         HBox hbPrintReportAll = new HBox(10);
         hbPrintReportAll.setAlignment(Pos.BOTTOM_RIGHT);
         hbPrintReportAll.getChildren().add(printReportAll);
-        reportsGrid.add(hbPrintReportAll, 2, 22);
+        reportsGrid.add(hbPrintReportAll, 3, 18, 3, 1);
 
         // "Administration" tab contents
         GridPane adminGrid = new GridPane();
@@ -611,9 +629,9 @@ final class TabDemo extends Application {
         manageGoalsGrid.setPadding(new Insets(25, 25, 25, 25));
 
         Label modifyGoal = new Label("Modify an existing goal:");
-        
+
         Label selectGoal = new Label("Select a goal:");
-        
+
         Label createGoal = new Label("Create a new goal:");
         manageGoalsGrid.add(createGoal, 0, 1);
 
@@ -705,6 +723,8 @@ final class TabDemo extends Application {
                 goals.getSelectionModel().clearSelection();
                 goals.setValue(null);
                 incompleteInput.setText("");
+                saveChanges.setDisable(true);
+                deleteStudent.setDisable(true);
                 if (findStudentEdit.getValue() != null) {
                     firstNameField.setEditable(true);
                     lastNameField.setEditable(true);
@@ -712,7 +732,8 @@ final class TabDemo extends Application {
                     phoneNumberField.setEditable(true);
                     noteArea.setEditable(true);
                     goals.setDisable(false);
-                    hbDeleteStudent.setVisible(true);
+                    saveChanges.setDisable(false);
+                    deleteStudent.setDisable(false);
                     final String choice = (String) findStudentEdit.getValue();
                     int studentIndex = names.indexOf(choice);
                     firstNameField.insertText(0, students.get(studentIndex).getFirstName());
@@ -733,10 +754,10 @@ final class TabDemo extends Application {
 
         saveChanges.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
-                if (findStudentEdit.getValue() == null) {
+                /*if (findStudentEdit.getValue() == null) {
                     incompleteInput.setFill(Color.FIREBRICK);
                     incompleteInput.setText("Please select a student!");
-                } else if (firstNameField.getLength() == 0 || lastNameField.getLength() == 0
+                } else*/ if (firstNameField.getLength() == 0 || lastNameField.getLength() == 0
                         || emailField.getLength() == 0 || phoneNumberField.getLength() == 0) {
                     incompleteInput.setFill(Color.FIREBRICK);
                     incompleteInput.setText("Please fill out all fields!");
@@ -758,7 +779,7 @@ final class TabDemo extends Application {
                         findStudentReports.setValue(null);
                         reportTimes.getSelectionModel().clearSelection();
                         reportTimes.setValue(null);
-                        
+
                         incompleteInput.setText("");
 
                         Object[] newNames = names.toArray();
@@ -767,9 +788,8 @@ final class TabDemo extends Application {
                         findStudentEdit.setItems(FXCollections.observableArrayList(newNames));
                         findStudentGoals.setItems(FXCollections.observableArrayList(newNames));
                         findStudentReports.setItems(FXCollections.observableArrayList(newNames));
-                        
+
                         popup.setAgreeToChanges(false);
-                        hbDeleteStudent.setVisible(false);
                     } else {
                         areYouSure2.setVisible(false);
                         areYouSure3.setVisible(false);
@@ -797,7 +817,6 @@ final class TabDemo extends Application {
                     findStudentEdit.setItems(FXCollections.observableArrayList(updatedNames));
                     findStudentReports.setItems(FXCollections.observableArrayList(updatedNames));
                     findStudentGoals.setItems(FXCollections.observableArrayList(updatedNames));
-                    hbDeleteStudent.setVisible(false);
                     popup.setAgreeToChanges(false);
                 } else {
                     areYouSure1.setVisible(false);
@@ -815,15 +834,16 @@ final class TabDemo extends Application {
 
         // "Student Goals" tab Actions
         final ArrayList<CheckBox> checkBoxes = new ArrayList<CheckBox>();
-        
+
         findStudentGoals.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
                 int size = checkBoxes.size();
-                if (size > 0)
+                if (size > 0) {
                     goalsGrid.getChildren().remove(hbSaveGoalChanges);
+                }
                 int numChildren = goalsGrid.getChildren().size();
-                for (int i=0; i<size; i++) {
-                    goalsGrid.getChildren().remove(numChildren-i-1);
+                for (int i = 0; i < size; i++) {
+                    goalsGrid.getChildren().remove(numChildren - i - 1);
                 }
                 checkBoxes.clear();
                 if (findStudentGoals.getValue() != null) {
@@ -831,24 +851,24 @@ final class TabDemo extends Application {
                     int studentIndex = names.indexOf(currentStudent);
                     Goal currentGoal = students.get(studentIndex).goal;
                     int n = currentGoal.subgoals.size();
-                    for (int i = 0; i<n; i++) {
+                    for (int i = 0; i < n; i++) {
                         CheckBox currentSubgoal = new CheckBox(currentGoal.subgoals.get(i).subgoal);
                         currentSubgoal.setSelected(currentGoal.subgoals.get(i).isComplete);
-                        goalsGrid.add(currentSubgoal,1,5+i,2,1);
+                        goalsGrid.add(currentSubgoal, 1, 5 + i, 2, 1);
                         checkBoxes.add(currentSubgoal);
                     }
-                    goalsGrid.add(hbSaveGoalChanges,1,6+n);
+                    goalsGrid.add(hbSaveGoalChanges, 1, 6 + n);
                 }
             }
         });
-        
+
         saveGoalChanges.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
                 String currentStudent = (String) findStudentGoals.getValue();
                 int studentIndex = names.indexOf(currentStudent);
                 Goal currentGoal = students.get(studentIndex).goal;
                 int size = checkBoxes.size();
-                for (int i=0; i<size; i++) {
+                for (int i = 0; i < size; i++) {
                     currentGoal.subgoals.get(i).setComplete(checkBoxes.get(i).isSelected());
                 }
                 findStudentGoals.getSelectionModel().clearSelection();
@@ -857,7 +877,7 @@ final class TabDemo extends Application {
                 findStudentReports.setValue(null);
             }
         });
-        
+
         // "New Student" tab Actions
         addStudent.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
@@ -909,10 +929,13 @@ final class TabDemo extends Application {
         // "Flags" tab Actions
         reportTimes.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
-                
+                printBtn.setDisable(true);
+                if (reportTimes.getValue() != null) {
+                    printBtn.setDisable(false);
+                }
             }
         });
-        
+
         printBtn.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
 
@@ -927,6 +950,7 @@ final class TabDemo extends Application {
                 goalsCompleted.setVisible(false);
                 progressLabel.setVisible(false);
                 goalProgress.setVisible(false);
+                printReport.setDisable(true);
                 if (findStudentReports.getValue() != null) {
                     final String choice2 = (String) findStudentReports.getValue();
                     String firstName = choice2.substring(choice2.indexOf(" ") + 1);
@@ -937,11 +961,12 @@ final class TabDemo extends Application {
                     goalsCompleted.setText("Goals completed: " + currentStudent.goalsCompleted);
                     int numSubgoals = currentStudent.goal.subgoals.size();
                     int numCompleted = currentStudent.goal.numCompletedSubgoals();
-                    progressLabel.setText("Progress towards current goal: " + numCompleted*100.0/numSubgoals +"%");
-                    goalProgress.setProgress(numCompleted*1.0/numSubgoals);
+                    progressLabel.setText("Progress towards current goal: " + numCompleted * 100.0 / numSubgoals + "%");
+                    goalProgress.setProgress(numCompleted * 1.0 / numSubgoals);
                     goalsCompleted.setVisible(true);
                     progressLabel.setVisible(true);
                     goalProgress.setVisible(true);
+                    printReport.setDisable(false);
                     //studentGoal.insertText(0, "Get a job");
                 }
             }
@@ -1141,7 +1166,7 @@ final class TabDemo extends Application {
         if (isAdmin) {
             tabPane.getTabs().add(manageTab);
         }
-        
+
         Text scenetitle2 = new Text("Student");
         scenetitle2.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
         mainPane.setCenter(tabPane);
