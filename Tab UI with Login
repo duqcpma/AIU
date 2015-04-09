@@ -394,20 +394,41 @@ final class TabDemo extends Application {
         findStudentGoals.setVisibleRowCount(3);
         goalsGrid.add(findStudentGoals, 1, 2);
 
-        Label currentGoal2 = new Label("Current goal:");
+        Label currentGoal2 = new Label("Current goal(s):");
         goalsGrid.add(currentGoal2, 0, 3);
 
         final TextField currentStudentGoal = new TextField();
         currentStudentGoal.setEditable(false);
         goalsGrid.add(currentStudentGoal, 1, 3);
 
-        Label subgoals = new Label("Subgoals:");
-        goalsGrid.add(subgoals, 0, 4);
+        final Button selectGoal1 = new Button("Select");
+        HBox hbSelectGoal1 = new HBox(10);
+        hbSelectGoal1.getChildren().add(selectGoal1);
+        selectGoal1.setDisable(true);
+        goalsGrid.add(hbSelectGoal1, 2, 3);
 
-        Button saveGoalChanges = new Button("Save Changes");
-        final HBox hbSaveGoalChanges = new HBox(10);
-        hbSaveGoalChanges.setAlignment(Pos.BOTTOM_RIGHT);
-        hbSaveGoalChanges.getChildren().add(saveGoalChanges);
+        final TextField secondStudentGoal = new TextField();
+        secondStudentGoal.setEditable(false);
+        goalsGrid.add(secondStudentGoal, 1, 4);
+
+        final Button selectGoal2 = new Button("Select");
+        HBox hbSelectGoal2 = new HBox(10);
+        hbSelectGoal2.getChildren().add(selectGoal2);
+        selectGoal2.setDisable(true);
+        goalsGrid.add(hbSelectGoal2, 2, 4);
+
+        Label subgoals = new Label("Subgoals:");
+        goalsGrid.add(subgoals, 0, 5);
+
+        Button saveGoalChanges1 = new Button("Save Changes");
+        final HBox hbSaveGoalChanges1 = new HBox(10);
+        hbSaveGoalChanges1.setAlignment(Pos.BOTTOM_RIGHT);
+        hbSaveGoalChanges1.getChildren().add(saveGoalChanges1);
+
+        Button saveGoalChanges2 = new Button("Save Changes");
+        final HBox hbSaveGoalChanges2 = new HBox(10);
+        hbSaveGoalChanges2.setAlignment(Pos.BOTTOM_RIGHT);
+        hbSaveGoalChanges2.getChildren().add(saveGoalChanges2);
 
         // "New Student" tab contents
         GridPane newStudentGrid = new GridPane();
@@ -595,11 +616,23 @@ final class TabDemo extends Application {
         primaryStudentGoal.setPromptText("Primary Student Goal");
         primaryStudentGoal.setEditable(false);
         reportsGrid.add(primaryStudentGoal, 1, 4, 3, 1);
-        
+
+        final Button selectGoalReport1 = new Button("Select");
+        HBox hbSelectGoalReport1 = new HBox(10);
+        hbSelectGoalReport1.getChildren().add(selectGoalReport1);
+        selectGoalReport1.setDisable(true);
+        reportsGrid.add(hbSelectGoalReport1, 4, 4);
+
         final TextField secondaryStudentGoal = new TextField();
         secondaryStudentGoal.setPromptText("Secondary Student Goal");
         secondaryStudentGoal.setEditable(false);
         reportsGrid.add(secondaryStudentGoal, 1, 5, 3, 1);
+
+        final Button selectGoalReport2 = new Button("Select");
+        HBox hbSelectGoalReport2 = new HBox(10);
+        hbSelectGoalReport2.getChildren().add(selectGoalReport2);
+        selectGoalReport2.setDisable(true);
+        reportsGrid.add(hbSelectGoalReport2, 4, 5);
 
         final Label goalsCompleted = new Label();
         goalsCompleted.setVisible(false);
@@ -918,12 +951,12 @@ final class TabDemo extends Application {
                     if (popup.agreeToChanges) {
                         int index = names.indexOf("" + ((String) findStudentEdit.getValue()));
                         names.set(index, "" + lastNameField.getText() + ", " + firstNameField.getText());
-                        Student updatedStudent = new Student(lastNameField.getText(),
-                                firstNameField.getText(),
-                                phoneNumberField.getText(),
-                                emailField.getText(), new Goal(createEmail), noteArea.getText());
-                        //Update to take in general goal
-                        students.set(index, updatedStudent);
+                        students.get(index).lastName = lastNameField.getText();
+                        students.get(index).firstName = firstNameField.getText();
+                        students.get(index).phoneNumber = phoneNumberField.getText();
+                        students.get(index).emailAddress = emailField.getText();
+                        students.get(index).secondGoal = new Goal(driversLicense);
+                        //Generalize for arbitrary goal
 
                         findStudentEdit.getSelectionModel().clearSelection();
                         findStudentEdit.setValue(null);
@@ -996,9 +1029,12 @@ final class TabDemo extends Application {
         findStudentGoals.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
                 currentStudentGoal.clear();
+                secondStudentGoal.clear();
                 int size = checkBoxes.size();
                 if (size > 0) {
-                    goalsGrid.getChildren().remove(hbSaveGoalChanges);
+                    goalsGrid.getChildren().remove(hbSaveGoalChanges1);
+                    goalsGrid.getChildren().remove(hbSaveGoalChanges2);
+
                 }
                 int numChildren = goalsGrid.getChildren().size();
                 for (int i = 0; i < size; i++) {
@@ -1010,23 +1046,100 @@ final class TabDemo extends Application {
                     int studentIndex = names.indexOf(currentStudent);
                     Goal currentGoal = students.get(studentIndex).goal;
                     currentStudentGoal.setText(currentGoal.goal);
-                    int n = currentGoal.subgoals.size();
-                    for (int i = 0; i < n; i++) {
-                        CheckBox currentSubgoal = new CheckBox(currentGoal.subgoals.get(i).subgoal);
-                        currentSubgoal.setSelected(currentGoal.subgoals.get(i).isComplete);
-                        goalsGrid.add(currentSubgoal, 1, 5 + i, 2, 1);
-                        checkBoxes.add(currentSubgoal);
+                    selectGoal1.setDisable(false);
+                    Goal secondaryGoal = students.get(studentIndex).secondGoal;
+                    if (secondaryGoal != null) {
+                        secondStudentGoal.setText(secondaryGoal.goal);
+                        selectGoal2.setDisable(false);
                     }
-                    goalsGrid.add(hbSaveGoalChanges, 1, 6 + n);
+                    /*
+                     int n = currentGoal.subgoals.size();
+                     for (int i = 0; i < n; i++) {
+                     CheckBox currentSubgoal = new CheckBox(currentGoal.subgoals.get(i).subgoal);
+                     currentSubgoal.setSelected(currentGoal.subgoals.get(i).isComplete);
+                     goalsGrid.add(currentSubgoal, 1, 6 + i, 2, 1);
+                     checkBoxes.add(currentSubgoal);
+                     }
+                     goalsGrid.add(hbSaveGoalChanges, 1, 7 + n);*/
                 }
             }
         });
 
-        saveGoalChanges.setOnAction(new EventHandler<ActionEvent>() {
+        selectGoal1.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent t) {
+                int size = checkBoxes.size();
+                if (size > 0) {
+                    goalsGrid.getChildren().remove(hbSaveGoalChanges1);
+                    goalsGrid.getChildren().remove(hbSaveGoalChanges2);
+
+                }
+                int numChildren = goalsGrid.getChildren().size();
+                for (int i = 0; i < size; i++) {
+                    goalsGrid.getChildren().remove(numChildren - i - 1);
+                }
+                checkBoxes.clear();
+                String currentStudent = (String) findStudentGoals.getValue();
+                int studentIndex = names.indexOf(currentStudent);
+                Goal currentGoal = students.get(studentIndex).goal;
+                int n = currentGoal.subgoals.size();
+                for (int i = 0; i < n; i++) {
+                    CheckBox currentSubgoal = new CheckBox(currentGoal.subgoals.get(i).subgoal);
+                    currentSubgoal.setSelected(currentGoal.subgoals.get(i).isComplete);
+                    goalsGrid.add(currentSubgoal, 1, 6 + i, 2, 1);
+                    checkBoxes.add(currentSubgoal);
+                }
+                goalsGrid.add(hbSaveGoalChanges1, 1, 7 + n);
+            }
+        });
+
+        selectGoal2.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent t) {
+                int size = checkBoxes.size();
+                if (size > 0) {
+                    goalsGrid.getChildren().remove(hbSaveGoalChanges1);
+                    goalsGrid.getChildren().remove(hbSaveGoalChanges2);
+
+                }
+                int numChildren = goalsGrid.getChildren().size();
+                for (int i = 0; i < size; i++) {
+                    goalsGrid.getChildren().remove(numChildren - i - 1);
+                }
+                checkBoxes.clear();
+                String currentStudent = (String) findStudentGoals.getValue();
+                int studentIndex = names.indexOf(currentStudent);
+                Goal currentGoal = students.get(studentIndex).secondGoal;
+                int n = currentGoal.subgoals.size();
+                for (int i = 0; i < n; i++) {
+                    CheckBox currentSubgoal = new CheckBox(currentGoal.subgoals.get(i).subgoal);
+                    currentSubgoal.setSelected(currentGoal.subgoals.get(i).isComplete);
+                    goalsGrid.add(currentSubgoal, 1, 6 + i, 2, 1);
+                    checkBoxes.add(currentSubgoal);
+                }
+                goalsGrid.add(hbSaveGoalChanges2, 1, 7 + n);
+            }
+        });
+
+        saveGoalChanges1.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
                 String currentStudent = (String) findStudentGoals.getValue();
                 int studentIndex = names.indexOf(currentStudent);
                 Goal currentGoal = students.get(studentIndex).goal;
+                int size = checkBoxes.size();
+                for (int i = 0; i < size; i++) {
+                    currentGoal.subgoals.get(i).setComplete(checkBoxes.get(i).isSelected());
+                }
+                findStudentGoals.getSelectionModel().clearSelection();
+                findStudentGoals.setValue(null);
+                findStudentReports.getSelectionModel().clearSelection();
+                findStudentReports.setValue(null);
+            }
+        });
+
+        saveGoalChanges2.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent t) {
+                String currentStudent = (String) findStudentGoals.getValue();
+                int studentIndex = names.indexOf(currentStudent);
+                Goal currentGoal = students.get(studentIndex).secondGoal;
                 int size = checkBoxes.size();
                 for (int i = 0; i < size; i++) {
                     currentGoal.subgoals.get(i).setComplete(checkBoxes.get(i).isSelected());
@@ -1179,30 +1292,66 @@ final class TabDemo extends Application {
                     int studentIndex = names.indexOf(choice2);
                     Student currentStudent = students.get(studentIndex);
                     primaryStudentGoal.setText(currentStudent.goal.goal);
-                    if (currentStudent.secondGoal != null)
+                    selectGoalReport1.setDisable(false);
+                    if (currentStudent.secondGoal != null) {
                         secondaryStudentGoal.setText(currentStudent.secondGoal.goal);
-                    goalsCompleted.setText("Goals completed: " + currentStudent.goalsCompleted);
-                    int numSubgoals = currentStudent.goal.subgoals.size();
-                    int numCompleted = currentStudent.goal.numCompletedSubgoals();
-                    progressLabel.setText("Progress towards current goal: " + numCompleted * 100.0 / numSubgoals + "%");
-                    goalProgress.setProgress(numCompleted * 1.0 / numSubgoals);
-                    goalsCompleted.setVisible(true);
-                    progressLabel.setVisible(true);
-                    goalProgress.setVisible(true);
-                    printReport.setDisable(false);
-                    String completedSubgoals = "";
-                    String remainingSubgoals = "";
-                    for (Subgoal subgoal : currentStudent.goal.subgoals) {
-                        if (subgoal.isComplete) {
-                            completedSubgoals += subgoal.subgoal + "\n";
-                        } else {
-                            remainingSubgoals += subgoal.subgoal + "\n";
-                        }
+                        selectGoalReport2.setDisable(false);
                     }
-                    completedSubgoalsList.setText(completedSubgoals);
-                    remainingSubgoalsList.setText(remainingSubgoals);
-                    //studentGoal.insertText(0, "Get a job");
+                    goalsCompleted.setText("Goals completed: " + currentStudent.goalsCompleted);
+                    goalsCompleted.setVisible(true);
                 }
+            }
+        });
+
+        selectGoalReport1.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent t) {
+                String currentName = (String) findStudentReports.getValue();
+                int studentIndex = names.indexOf(currentName);
+                Student currentStudent = students.get(studentIndex);
+                int numSubgoals = currentStudent.goal.subgoals.size();
+                int numCompleted = currentStudent.goal.numCompletedSubgoals();
+                progressLabel.setText("Progress towards current goal: " + numCompleted * 100.0 / numSubgoals + "%");
+                goalProgress.setProgress(numCompleted * 1.0 / numSubgoals);
+                progressLabel.setVisible(true);
+                goalProgress.setVisible(true);
+                printReport.setDisable(false);
+                String completedSubgoals = "";
+                String remainingSubgoals = "";
+                for (Subgoal subgoal : currentStudent.goal.subgoals) {
+                    if (subgoal.isComplete) {
+                        completedSubgoals += subgoal.subgoal + "\n";
+                    } else {
+                        remainingSubgoals += subgoal.subgoal + "\n";
+                    }
+                }
+                completedSubgoalsList.setText(completedSubgoals);
+                remainingSubgoalsList.setText(remainingSubgoals);
+            }
+        });
+
+        selectGoalReport2.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent t) {
+                String currentName = (String) findStudentReports.getValue();
+                int studentIndex = names.indexOf(currentName);
+                Student currentStudent = students.get(studentIndex);
+                int numSubgoals = currentStudent.secondGoal.subgoals.size();
+                int numCompleted = currentStudent.secondGoal.numCompletedSubgoals();
+                progressLabel.setText("Progress towards current goal: " + numCompleted * 100.0 / numSubgoals + "%");
+                goalProgress.setProgress(numCompleted * 1.0 / numSubgoals);
+                progressLabel.setVisible(true);
+                goalProgress.setVisible(true);
+                printReport.setDisable(false);
+                String completedSubgoals = "";
+                String remainingSubgoals = "";
+                for (Subgoal subgoal : currentStudent.secondGoal.subgoals) {
+                    if (subgoal.isComplete) {
+                        completedSubgoals += subgoal.subgoal + "\n";
+                    } else {
+                        remainingSubgoals += subgoal.subgoal + "\n";
+                    }
+                }
+                completedSubgoalsList.setText(completedSubgoals);
+                remainingSubgoalsList.setText(remainingSubgoals);
             }
         });
 
