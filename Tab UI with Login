@@ -168,7 +168,7 @@ final class TabDemo extends Application {
         primaryStage.setTitle("Tab Demo");
         primaryStage.setResizable(false);
         final Group root = new Group();
-        final Scene scene = new Scene(root, 450, 525, Color.WHITE);
+        final Scene scene = new Scene(root, 450, 575, Color.WHITE);
 
         TabPane tabPane = new TabPane();
         BorderPane mainPane = new BorderPane();
@@ -247,6 +247,16 @@ final class TabDemo extends Application {
         searchMessage.setText("Please enter a name");
         searchMessage.setVisible(false);
         editGrid.add(searchMessage, 2, 1);
+        
+        final TextField searchPhone = new TextField();
+        searchPhone.setPromptText("Enter a phone number");
+        editGrid.add(searchPhone,2,1,2,1);
+        
+        final Button searchPhoneButton = new Button("Search");
+        HBox hbSearchPhoneButton = new HBox(10);
+        hbSearchPhoneButton.setAlignment(Pos.BOTTOM_RIGHT);
+        hbSearchPhoneButton.getChildren().add(searchPhoneButton);
+        editGrid.add(hbSearchPhoneButton,4,1);
 
         /*
          ArrayList<String> civicsGoalList = new ArrayList<String>();
@@ -386,6 +396,27 @@ final class TabDemo extends Application {
         goalsGrid.getColumnConstraints().add(new ColumnConstraints(120));
         goalsGrid.getColumnConstraints().add(new ColumnConstraints(150));
 
+        Label searchForStudent = new Label("Search for a student:");
+        goalsGrid.add(searchForStudent,0,0);
+        
+        final TextField searchName2 = new TextField();
+        searchName2.setPromptText("Enter a student name");
+        goalsGrid.add(searchName2,1,0);
+        
+        final Button searchButton2 = new Button("Search");
+        HBox hbSearchButton2 = new HBox(10);
+        hbSearchButton2.getChildren().add(searchButton2);
+        goalsGrid.add(hbSearchButton2,2,0);
+        
+        final TextField searchPhone2 = new TextField();
+        searchPhone2.setPromptText("Enter a phone number");
+        goalsGrid.add(searchPhone2,1,1);
+        
+        final Button searchPhoneButton2 = new Button("Search");
+        HBox hbSearchPhoneButton2 = new HBox(10);
+        hbSearchPhoneButton2.getChildren().add(searchPhoneButton2);
+        goalsGrid.add(hbSearchPhoneButton2,2,1);
+        
         Label studentLookUp = new Label("Select student:");
         goalsGrid.add(studentLookUp, 0, 2);
 
@@ -560,39 +591,60 @@ final class TabDemo extends Application {
         reportsGrid.setHgap(10);
         reportsGrid.setVgap(10);
         reportsGrid.setPadding(new Insets(25, 20, 25, 20));
-        reportsGrid.getColumnConstraints().add(new ColumnConstraints(100));
-        reportsGrid.getColumnConstraints().add(new ColumnConstraints(50));
+        reportsGrid.getColumnConstraints().add(new ColumnConstraints(150));
+        //reportsGrid.getColumnConstraints().add(new ColumnConstraints(50));
         reportsGrid.getColumnConstraints().add(new ColumnConstraints(45));
         reportsGrid.getColumnConstraints().add(new ColumnConstraints(40));
 
+        Label studentSearchReport = new Label("Search for a student:");
+        reportsGrid.add(studentSearchReport,0,0);
+        
+        final TextField searchName3 = new TextField();
+        searchName3.setPromptText("Enter a student name");
+        reportsGrid.add(searchName3,1,0,3,1);
+        
+        final Button searchButton3 = new Button("Search");
+        HBox hbSearchButton3 = new HBox(10);
+        hbSearchButton3.getChildren().add(searchButton3);
+        reportsGrid.add(hbSearchButton3,4,0);
+        
+        final TextField searchPhone3 = new TextField();
+        searchPhone3.setPromptText("Enter a phone number");
+        reportsGrid.add(searchPhone3,1,1,3,1);
+        
+        final Button searchPhoneButton3 = new Button("Search");
+        HBox hbSearchPhoneButton3 = new HBox(10);
+        hbSearchPhoneButton3.getChildren().add(searchPhoneButton3);
+        reportsGrid.add(hbSearchPhoneButton3,4,1);
+        
         Label selectStudent2 = new Label("Select student:");
-        reportsGrid.add(selectStudent2, 0, 1);
+        reportsGrid.add(selectStudent2, 0, 2);
 
         final ComboBox findStudentReports = new ComboBox();
         findStudentReports.setItems(FXCollections.observableArrayList(namesArray));
         findStudentReports.setVisibleRowCount(3);
-        reportsGrid.add(findStudentReports, 1, 1, 3, 1);
+        reportsGrid.add(findStudentReports, 1, 2, 3, 1);
 
         Label completedGoals = new Label("Completed goals:");
-        reportsGrid.add(completedGoals, 3, 9, 3, 1);
+        reportsGrid.add(completedGoals, 2, 10, 3, 1);
 
         final TextArea completedGoalsList = new TextArea();
         completedGoalsList.setEditable(false);
-        reportsGrid.add(completedGoalsList, 3, 10, 3, 7);
+        reportsGrid.add(completedGoalsList, 2, 11, 3, 7);
 
         Label completedSubgoals = new Label("Completed subgoals:");
-        reportsGrid.add(completedSubgoals, 0, 9, 2, 1);
+        reportsGrid.add(completedSubgoals, 0, 10, 2, 1);
 
         final TextArea completedSubgoalsList = new TextArea();
         completedSubgoalsList.setEditable(false);
-        reportsGrid.add(completedSubgoalsList, 0, 10, 2, 3);
+        reportsGrid.add(completedSubgoalsList, 0, 11, 1, 3);
 
         Label remainingSubgoals = new Label("Remaining subgoals:");
-        reportsGrid.add(remainingSubgoals, 0, 13, 2, 1);
+        reportsGrid.add(remainingSubgoals, 0, 14, 2, 1);
 
         final TextArea remainingSubgoalsList = new TextArea();
         remainingSubgoalsList.setEditable(false);
-        reportsGrid.add(remainingSubgoalsList, 0, 14, 2, 3);
+        reportsGrid.add(remainingSubgoalsList, 0, 15, 1, 3);
 
         final Button printReport = new Button("Print Individual Report");
         HBox hbPrintReport = new HBox(10);
@@ -602,49 +654,49 @@ final class TabDemo extends Application {
         reportsGrid.add(hbPrintReport, 0, 18, 2, 1);
 
         Label studentLabel = new Label("Student name:");
-        reportsGrid.add(studentLabel, 0, 3);
+        reportsGrid.add(studentLabel, 0, 4);
 
         final TextField studentName = new TextField();
         studentName.setPromptText("Student Name");
         studentName.setEditable(false);
-        reportsGrid.add(studentName, 1, 3, 3, 1);
+        reportsGrid.add(studentName, 1, 4, 3, 1);
 
         Label goalLabel = new Label("Current goal(s):");
-        reportsGrid.add(goalLabel, 0, 4);
+        reportsGrid.add(goalLabel, 0, 5);
 
         final TextField primaryStudentGoal = new TextField();
         primaryStudentGoal.setPromptText("Primary Student Goal");
         primaryStudentGoal.setEditable(false);
-        reportsGrid.add(primaryStudentGoal, 1, 4, 3, 1);
+        reportsGrid.add(primaryStudentGoal, 1, 5, 3, 1);
 
         final Button selectGoalReport1 = new Button("Select");
         HBox hbSelectGoalReport1 = new HBox(10);
         hbSelectGoalReport1.getChildren().add(selectGoalReport1);
         selectGoalReport1.setDisable(true);
-        reportsGrid.add(hbSelectGoalReport1, 4, 4);
+        reportsGrid.add(hbSelectGoalReport1, 4, 5);
 
         final TextField secondaryStudentGoal = new TextField();
         secondaryStudentGoal.setPromptText("Secondary Student Goal");
         secondaryStudentGoal.setEditable(false);
-        reportsGrid.add(secondaryStudentGoal, 1, 5, 3, 1);
+        reportsGrid.add(secondaryStudentGoal, 1, 6, 3, 1);
 
         final Button selectGoalReport2 = new Button("Select");
         HBox hbSelectGoalReport2 = new HBox(10);
         hbSelectGoalReport2.getChildren().add(selectGoalReport2);
         selectGoalReport2.setDisable(true);
-        reportsGrid.add(hbSelectGoalReport2, 4, 5);
+        reportsGrid.add(hbSelectGoalReport2, 4, 6);
 
         final Label goalsCompleted = new Label();
         goalsCompleted.setVisible(false);
-        reportsGrid.add(goalsCompleted, 1, 6, 3, 1);
+        reportsGrid.add(goalsCompleted, 1, 7, 3, 1);
 
         final Label progressLabel = new Label();
         progressLabel.setVisible(false);
-        reportsGrid.add(progressLabel, 1, 7, 4, 1);
+        reportsGrid.add(progressLabel, 1, 8, 4, 1);
 
         final ProgressBar goalProgress = new ProgressBar();
         goalProgress.setVisible(false);
-        reportsGrid.add(goalProgress, 1, 8, 3, 1);
+        reportsGrid.add(goalProgress, 1, 9, 3, 1);
 
         Button printReportAll = new Button("Create Summary Report");
         HBox hbPrintReportAll = new HBox(10);
@@ -911,6 +963,7 @@ final class TabDemo extends Application {
                     searchMessage.setText("Please enter a name");
                     searchMessage.setVisible(true);
                 } else {
+                    //Consider inputs that aren't multi-part
                     String query = searchName.getText();
                     String firstName = query.substring(0, query.indexOf(" "));
                     String lastName = query.substring(query.indexOf(" ") + 1);
@@ -923,6 +976,23 @@ final class TabDemo extends Application {
                         searchMessage.setText("Student not found");
                         searchMessage.setVisible(true);
                     }
+                }
+                searchName.clear();
+            }
+        });
+        
+        searchPhoneButton.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent t) {
+                if (searchPhone.getLength() != 0) {
+                    String query = searchPhone.getText().replaceAll("\\D+","");
+                    for (Student student : students) {
+                        if (query.equals(student.phoneNumber.replaceAll("\\D+",""))) {
+                            String name = student.lastName + ", " + student.firstName;
+                            findStudentEdit.setValue(name);
+                            break;
+                        }
+                    }
+                    searchPhone.clear();
                 }
             }
         });
@@ -1024,12 +1094,48 @@ final class TabDemo extends Application {
         });
 
         // "Student Goals" tab Actions
+        searchButton2.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent t) {
+                if (searchName2.getLength() != 0) {
+                    //Consider inputs that aren't multi-part
+                    String query = searchName2.getText();
+                    String firstName = query.substring(0, query.indexOf(" "));
+                    String lastName = query.substring(query.indexOf(" ") + 1);
+                    String name = lastName + ", " + firstName;
+                    if (names.contains(name)) {
+                        findStudentGoals.setValue(name);
+                    } else {
+
+                    }
+                }
+                searchName2.clear();
+            }
+        });
+        
+        searchPhoneButton2.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent t) {
+                if (searchPhone2.getLength() != 0) {
+                    String query = searchPhone2.getText().replaceAll("\\D+","");
+                    for (Student student : students) {
+                        if (query.equals(student.phoneNumber.replaceAll("\\D+",""))) {
+                            String name = student.lastName + ", " + student.firstName;
+                            findStudentGoals.setValue(name);
+                            break;
+                        }
+                    }
+                    searchPhone2.clear();
+                }
+            }
+        });        
+        
         final ArrayList<CheckBox> checkBoxes = new ArrayList<CheckBox>();
 
         findStudentGoals.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
                 currentStudentGoal.clear();
                 secondStudentGoal.clear();
+                selectGoal1.setDisable(true);
+                selectGoal2.setDisable(true);
                 int size = checkBoxes.size();
                 if (size > 0) {
                     goalsGrid.getChildren().remove(hbSaveGoalChanges1);
@@ -1273,11 +1379,47 @@ final class TabDemo extends Application {
         });
 
         // "Reports" tab Actions
+        searchButton3.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent t) {
+                if (searchName3.getLength() != 0) {
+                    //Consider inputs that aren't multi-part
+                    String query = searchName3.getText();
+                    String firstName = query.substring(0, query.indexOf(" "));
+                    String lastName = query.substring(query.indexOf(" ") + 1);
+                    String name = lastName + ", " + firstName;
+                    if (names.contains(name)) {
+                        findStudentReports.setValue(name);
+                    } else {
+
+                    }
+                }
+                searchName3.clear();
+            }
+        });
+        
+        searchPhoneButton3.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent t) {
+                if (searchPhone3.getLength() != 0) {
+                    String query = searchPhone3.getText().replaceAll("\\D+","");
+                    for (Student student : students) {
+                        if (query.equals(student.phoneNumber.replaceAll("\\D+",""))) {
+                            String name = student.lastName + ", " + student.firstName;
+                            findStudentReports.setValue(name);
+                            break;
+                        }
+                    }
+                    searchPhone3.clear();
+                }
+            }
+        });         
+        
         findStudentReports.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
                 studentName.clear();
                 primaryStudentGoal.clear();
                 secondaryStudentGoal.clear();
+                selectGoalReport1.setDisable(true);
+                selectGoalReport2.setDisable(true);
                 goalsCompleted.setVisible(false);
                 progressLabel.setVisible(false);
                 goalProgress.setVisible(false);
