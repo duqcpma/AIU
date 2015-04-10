@@ -193,7 +193,12 @@ final class TabDemo extends Application {
    
             while(iterator.hasNext()){
                 Node<String,Student> currNode = iterator.next();
-                content = content + currNode.data.lastName + "," + currNode.data.phoneNumber.replaceAll("\\D+","") + "," + currNode.data.lastName + "," + currNode.data.firstName + "," + currNode.data.phoneNumber + "," + currNode.data.emailAddress + "," + currNode.data.goal.goal + "," + currNode.data.notes + System.getProperty("line.separator");
+                String notes;
+                if (currNode.data.notes.length() == 0)
+                    notes = " ";
+                else
+                    notes = currNode.data.notes;
+                content = content + currNode.data.lastName + "," + currNode.data.phoneNumber.replaceAll("\\D+","") + "," + currNode.data.lastName + "," + currNode.data.firstName + "," + currNode.data.phoneNumber + "," + currNode.data.emailAddress + "," + currNode.data.goal.goal + "," + notes + System.getProperty("line.separator");
             }
     
             File file = new File("C:\\Users\\mguyer92\\Google Drive\\database.txt");
@@ -282,22 +287,6 @@ final class TabDemo extends Application {
                                             currentStudent.notes));                
                
         }
-
-        Student adamBaumgardner = new Student("Baumgardner", "Adam", "(412) 580-8826",
-                "baumgardnera@duq.edu", new Goal(createEmail), "");
-        Student richBoyles = new Student("Boyles", "Rich", "(724) 550-3375",
-                "boylesr@duq.edu", new Goal(createEmail), "");
-        Student mikeGuyer = new Student("Guyer", "Mike", "(570) 807-0899",
-                "guyerm@duq.edu", new Goal(driversLicense), "");
-        students.add(adamBaumgardner);
-        students.add(richBoyles);
-        students.add(mikeGuyer);
-
-        /*
-        for (Student student : students) {
-            names.add(student.lastName + ", " + student.firstName);
-        }
-        */
 
         Object[] namesArray = names.toArray();
         Arrays.sort(namesArray);
