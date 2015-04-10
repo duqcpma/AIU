@@ -11,14 +11,14 @@ import java.util.Stack;
  *
  * @author Adam
  */
-public class AIUTreeIterator<K extends Comparable> {
-  Stack<Pair<Node<K>,Boolean>> stack = new Stack<Pair<Node<K>,Boolean>>();
+public class AIUTreeIterator<K extends Comparable,D> {
+  Stack<Pair<Node<K,D>,Boolean>> stack = new Stack<Pair<Node<K,D>,Boolean>>();
   
   private boolean flag = false;
-  private Node<K> node = null;
+  private Node<K,D> node = null;
   public AIUTreeIterator(AIUTree tree){
     node = tree.root;
-    Pair<Node<K>,Boolean> pair = new Pair<Node<K>,Boolean>(node,true);
+    Pair<Node<K,D>,Boolean> pair = new Pair<Node<K,D>,Boolean>(node,true);
     stack.push(pair);
   }
   
@@ -26,19 +26,19 @@ public class AIUTreeIterator<K extends Comparable> {
     return !stack.empty();
   }
   
-  public Node<K> next(){
-    Pair<Node<K>,Boolean> pair = stack.pop();
+  public Node<K,D> next(){
+    Pair<Node<K,D>,Boolean> pair = stack.pop();
     if(pair.second == true){
       pair.second = false;
       stack.push(pair);
       if(pair.first.left != null){
-        Pair<Node<K>,Boolean> pair2 = new Pair<Node<K>,Boolean>(pair.first.left,true);
+        Pair<Node<K,D>,Boolean> pair2 = new Pair<Node<K,D>,Boolean>(pair.first.left,true);
         stack.push(pair2);
       }
       return this.next();
     }
     else if(pair.second == false && pair.first.right != null){
-        Pair<Node<K>,Boolean> pair3 = new Pair<Node<K>,Boolean>(pair.first.right,true);
+        Pair<Node<K,D>,Boolean> pair3 = new Pair<Node<K,D>,Boolean>(pair.first.right,true);
         stack.push(pair3);
         return pair.first;
       }
