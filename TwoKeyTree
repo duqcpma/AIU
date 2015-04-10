@@ -1,0 +1,63 @@
+package aiumain;
+
+
+public class TwoKeyTree<K1 extends Comparable, K2 extends Comparable, D>{
+  
+  public AIUTree<K1,D> tree1 = new AIUTree<>();
+  public AIUTree<K2,D> tree2 = new AIUTree<>();
+  public AIUTree<K1,K2> tree3 = new AIUTree<>();    //tree3 and tree4 are used to link the two keys
+  public AIUTree<K2,K1> tree4 = new AIUTree<>();
+  
+  public void add(K1 key1, K2 key2, D data){
+    tree1.add(key1,data);
+    tree2.add(key2,data);
+    tree3.add(key1,key2);
+    tree4.add(key2,key1);
+  }
+  
+  public D find1(K1 key1){
+    return tree1.find(key1);
+  }
+  
+  public D find2(K2 key2){
+    return tree2.find(key2);
+  }
+  
+  public void modify1(K1 key1, D data){
+    K2 key2 = tree3.find(key1);
+    tree1.modify(key1,data);
+    tree2.modify(key2,data);
+  }
+  
+  public void modify2(K2 key2, D data){
+    K1 key1 = tree4.find(key2);
+    tree1.modify(key1,data);
+    tree2.modify(key2,data);
+  }
+  
+  public void change1(K1 key1, K2 key2){
+    tree2.remove(tree3.find(key1));   //remove the old key2 from tree2
+    tree2.add(key2,tree1.find(key1)); //add the new key2 to tree2 linked to the data at key1
+    tree4.remove(tree3.find(key1));   //remove the old key2 from tree4
+    tree3.modify(key1,key2);          //modify key1 to point to the new key2 in tree3
+    tree4.add(key2,key1);             //add a link from the new key2 to key1 in tree4
+  }
+  
+  public void change2(K2 key2, K1 key1){
+    tree1.remove(tree4.find(key2));    //remove the old key1 from tree1
+    tree1.add(key1,tree2.find(key2));  //add the new key1 to tree1 linked to the data at key2
+    tree3.remove(tree4.find(key2));    //remove the old key1 from tree3
+    tree4.modify(key2,key1);           //modify key2 to point to the new key1 in tree4
+    tree3.add(key1,key2);              //add a link from the new key1 to key2 in tree3
+  }
+  
+  public String list1(){
+    return tree1.toString();
+  }
+  
+  public String list2(){
+    return tree2.toString();
+  }
+  
+  
+}
