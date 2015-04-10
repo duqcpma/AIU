@@ -1,24 +1,19 @@
 package aiumain;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-
 
 /**
  *
  * @author Adam
  */
-public class AIUTree<K extends Comparable> {
+public class AIUTree<K extends Comparable,D> {
     
-    protected Node<K> root = null;
+    protected Node<K,D> root = null;
 
     public int height() {
         return height(root);
     }
 
-    private int height(Node<K> root) {
+    private int height(Node<K,D> root) {
         return root == null ? 0 : 1 + Math.max(height(root.left), height(root.right));
     }
 
@@ -26,15 +21,15 @@ public class AIUTree<K extends Comparable> {
         return size(root);
     }
 
-    private int size(Node<K> root) {
+    private int size(Node<K,D> root) {
         return root == null ? 0 : 1 + size(root.left) + size(root.right);
     }
 
-    public Student find(K key) {
+    public D find(K key) {
         return find(key, root);
     }
 
-    private Student find(K key, Node<K> root) {
+    private D find(K key, Node<K,D> root) {
         if(root == null)
             return null;
         int c = key.compareTo(root.key); 
@@ -46,14 +41,14 @@ public class AIUTree<K extends Comparable> {
             return find(key, root.right);
     }
 
-    public void add(K key, Student data) {
+    public void add(K key, D data) {
         root = add(key, data, root);
     }
 
-    private Node<K> add(K key, Student data, Node<K> root) {
+    private Node<K,D> add(K key, D data, Node<K,D> root) {
         // returns the tree with the added record.
         if(root == null)
-            return new Node<K>(key,data);
+            return new Node<K,D>(key,data);
         int c = key.compareTo(root.key); 
         
        //if(c == 0) {
@@ -72,11 +67,11 @@ public class AIUTree<K extends Comparable> {
         }
     }
 
-    public void modify(K key, Student data) {
+    public void modify(K key, D data) {
         modify(key, data, root);
     }
 
-    private void modify(K key, Student data, Node<K> root) {
+    private void modify(K key, D data, Node<K,D> root) {
         if(root == null) {
             System.err.println("Error: key not found: " + key);
             System.exit(1);
@@ -95,13 +90,13 @@ public class AIUTree<K extends Comparable> {
       return toString(root);
     }
 
-    private String toString(Node<K> root) {
+    private String toString(Node<K,D> root) {
         if(root == null)
             return "";
         return toString(root.left) + "(" + root.key + "," + root.data + ")" + toString(root.right);
     }
 
-    public Node<K> leftmost(Node<K> root) {
+    public Node<K,D> leftmost(Node<K,D> root) {
  // Assume root is not null.
         if(root.left == null)
             return root;
@@ -109,17 +104,17 @@ public class AIUTree<K extends Comparable> {
             return leftmost(root.left);
     }
 
-    private Pair<Node<K>,Node<K>> findAndRemoveLeftmost(Node<K> root) {
+    private Pair<Node<K,D>,Node<K,D>> findAndRemoveLeftmost(Node<K,D> root) {
  // Assume root is not null.
  // Returns the leftmost node and the tree with that node deleted.
         if(root.left == null)
-            return new Pair<Node<K>,Node<K>>(root, root.right);
+            return new Pair<Node<K,D>,Node<K,D>>(root, root.right);
         else {
-            Pair<Node<K>,Node<K>> pair = findAndRemoveLeftmost(root.left);
-            Node<K> leftmost = pair.first;
-            Node<K> newTree = pair.second;
+            Pair<Node<K,D>,Node<K,D>> pair = findAndRemoveLeftmost(root.left);
+            Node<K,D> leftmost = pair.first;
+            Node<K,D> newTree = pair.second;
             root.left = newTree;
-            return new Pair<Node<K>,Node<K>>(leftmost, root);
+            return new Pair<Node<K,D>,Node<K,D>>(leftmost, root);
         }
     }
 
@@ -127,7 +122,7 @@ public class AIUTree<K extends Comparable> {
         root = remove(key, root);
     }
 
-    private Node<K> remove(K key, Node<K> root) {
+    private Node<K,D> remove(K key, Node<K,D> root) {
         if(root == null) {
             System.err.println("Error: key not found: " + key);
             System.exit(1);
@@ -140,9 +135,9 @@ public class AIUTree<K extends Comparable> {
             else if(root.right == null)
                 return root.left;
             else { // two children, replace with leftmost node of right subtree.
-                Pair<Node<K>,Node<K>> pair = findAndRemoveLeftmost(root.right);
-                Node<K> leftmost = pair.first;
-                Node<K> newRight = pair.second;
+                Pair<Node<K,D>,Node<K,D>> pair = findAndRemoveLeftmost(root.right);
+                Node<K,D> leftmost = pair.first;
+                Node<K,D> newRight = pair.second;
                 leftmost.left = root.left;
                 leftmost.right = newRight;
                 return leftmost;
@@ -158,34 +153,8 @@ public class AIUTree<K extends Comparable> {
         }
     }
     
-    public void printTree(){
-        AIUTreeIterator iterator = new AIUTreeIterator(this);
-        try {
- 
-            String content = "";
-   
-            while(iterator.hasNext()){
-                Node<K> currNode = iterator.next();
-                content = content + currNode.data.lastName + "," + currNode.data.lastName + "," + currNode.data.firstName + "," + currNode.data.phoneNumber + "," + currNode.data.emailAddress + "," + currNode.data.goal.goal + System.getProperty("line.separator");
-            }
     
-            File file = new File("C:\\Users\\Adam\\Google Drive\\database.txt");
- 
-            // if file doesnt exists, then create it
-            if (!file.exists()) {
-            file.createNewFile();
-            }
- 
-            FileWriter fw = new FileWriter(file.getAbsoluteFile());
-            BufferedWriter bw = new BufferedWriter(fw);
-            bw.write(content);
-            bw.close();
- 
-            System.out.println("Done");
- 
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+
+    
     
 }
