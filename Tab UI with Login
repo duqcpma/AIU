@@ -150,6 +150,13 @@ final class Student {
     public String getNotes() {
         return this.notes;
     }
+    
+        public String toString(){
+        String str = this.lastName + ", " + this.firstName + System.getProperty("line.separator") + this.phoneNumber + "   " + this.emailAddress +
+        System.getProperty("line.separator") + "Goal:" + this.goal.goal + System.getProperty("line.separator") + "Notes: " + this.notes;
+        System.out.println(str);
+        return str;
+    }
 
 }
 
