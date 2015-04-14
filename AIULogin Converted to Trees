@@ -13,6 +13,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Scanner;
 import java.util.Stack;
 import javafx.application.Application;
@@ -37,6 +38,8 @@ import javafx.scene.control.TabPane;
 import static javafx.scene.control.TabPane.TabClosingPolicy.UNAVAILABLE;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
@@ -52,6 +55,22 @@ import javafx.stage.WindowEvent;
  *
  * @author mguyer92
  */
+final class Notes {
+
+    public String notes;
+    public Date date;
+
+    public Notes(String theNotes) {
+        notes = theNotes;
+        date = new Date();
+    }
+
+    public Notes(String theNotes, long time) {
+        notes = theNotes;
+        date = new Date(time);
+    }
+}
+
 final class Goal {
 
     public String goal;
@@ -114,7 +133,7 @@ final class Student {
     public String emailAddress;
     public int count = 0;
     public int hoursSince = 0;
-    public String notes;
+    public Notes notes;
     public int goalsCompleted = 0;
 
     public Goal goal;
@@ -122,7 +141,7 @@ final class Student {
     public ArrayList<Goal> completedGoals;
 
     public Student(String theLastName, String theFirstName, String thePhoneNumber, String theEmail,
-            Goal theGoal, String theNotes) {
+            Goal theGoal, Notes theNotes) {
         lastName = theLastName;
         firstName = theFirstName;
         phoneNumber = thePhoneNumber;
@@ -157,12 +176,12 @@ final class Student {
     }
 
     public String getNotes() {
-        return this.notes;
+        return this.notes.notes;
     }
-    
-        public String toString(){
-        String str = this.lastName + ", " + this.firstName + System.getProperty("line.separator") + this.phoneNumber + "   " + this.emailAddress +
-        System.getProperty("line.separator") + "Goal:" + this.goal.goal + System.getProperty("line.separator") + "Notes: " + this.notes;
+
+    public String toString() {
+        String str = this.lastName + ", " + this.firstName + System.getProperty("line.separator") + this.phoneNumber + "   " + this.emailAddress
+                + System.getProperty("line.separator") + "Goal:" + this.goal.goal + System.getProperty("line.separator") + "Notes: " + this.notes;
         System.out.println(str);
         return str;
     }
@@ -173,53 +192,56 @@ final class TabDemo extends Application {
 
     public ArrayList<UserAndPass> users = new ArrayList<UserAndPass>();
 
-    public static TwoKeyTree<String,String,Student> database;
-    
+    public static TwoKeyTree<String, String, Student> database;
+
     public boolean isAdmin = false;
 
     public void setAdmin(boolean b) {
         this.isAdmin = b;
     }
-    
-    public TabDemo(TwoKeyTree<String,String,Student> theDatabase) {
+
+    public TabDemo(TwoKeyTree<String, String, Student> theDatabase) {
         database = theDatabase;
     }
 
-    public static void saveTree(){
+    //public String convertDate() {};
+    
+    public static void saveTree() {
         AIUTreeIterator iterator = new AIUTreeIterator(database.tree1);
         try {
- 
+
             String content = "";
-   
-            while(iterator.hasNext()){
-                Node<String,Student> currNode = iterator.next();
+
+            while (iterator.hasNext()) {
+                Node<String, Student> currNode = iterator.next();
                 String notes;
-                if (currNode.data.notes.length() == 0)
+                if (currNode.data.notes.notes.length() == 0) {
                     notes = " ";
-                else
-                    notes = currNode.data.notes;
-                content = content + currNode.data.lastName + "," + currNode.data.phoneNumber.replaceAll("\\D+","") + "," + currNode.data.lastName + "," + currNode.data.firstName + "," + currNode.data.phoneNumber + "," + currNode.data.emailAddress + "," + currNode.data.goal.goal + "," + notes + System.getProperty("line.separator");
+                } else {
+                    notes = currNode.data.notes.notes;
+                }
+                content = content + currNode.data.lastName + "," + currNode.data.phoneNumber.replaceAll("\\D+", "") + "," + currNode.data.lastName + "," + currNode.data.firstName + "," + currNode.data.phoneNumber + "," + currNode.data.emailAddress + "," + currNode.data.goal.goal + "," + notes + System.getProperty("line.separator");
             }
-    
+
             File file = new File("C:\\Users\\mguyer92\\Google Drive\\database.txt");
- 
+
             // if file doesnt exists, then create it
             if (!file.exists()) {
-            file.createNewFile();
+                file.createNewFile();
             }
- 
+
             FileWriter fw = new FileWriter(file.getAbsoluteFile());
             BufferedWriter bw = new BufferedWriter(fw);
             bw.write(content);
             bw.close();
- 
+
             System.out.println("Database saved successfully.");
- 
+
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }    
-    
+    }
+
     @Override
     public void start(final Stage primaryStage) {
         primaryStage.setTitle("Tab Demo");
@@ -247,8 +269,6 @@ final class TabDemo extends Application {
         Label selectStudent = new Label("Select student:");
         editGrid.add(selectStudent, 0, 3);
 
-        final ArrayList<Student> students = new ArrayList<Student>();
-
         final Goal createEmail = new Goal("Create an email address");
         Subgoal emailSubgoal1 = new Subgoal("Go to gmail");
         Subgoal emailSubgoal2 = new Subgoal("Choose a unique user ID");
@@ -266,26 +286,28 @@ final class TabDemo extends Application {
         driversLicense.addSubgoal(licenseSubgoal3);
         driversLicense.addSubgoal(licenseSubgoal4);
         driversLicense.addSubgoal(licenseSubgoal5);
-        
+
         AIUTreeIterator goalUpdater = new AIUTreeIterator(database.tree1);
-        
+
         final ArrayList<String> names = new ArrayList<String>();
-        
+
         while (goalUpdater.hasNext()) {
             Student currentStudent = (Student) goalUpdater.next().data;
             String currentGoal = currentStudent.goal.goal;
             names.add(currentStudent.lastName + ", " + currentStudent.firstName);
-            if (currentGoal.equals("Create an email address"))
+            if (currentGoal.equals("Create an email address")) {
                 database.modify1(currentStudent.lastName, new Student(currentStudent.lastName,
-                                            currentStudent.firstName,currentStudent.phoneNumber,
-                                            currentStudent.emailAddress, new Goal(createEmail),
-                                            currentStudent.notes));
-            else // For now, current goal is acquire a driver's license
+                        currentStudent.firstName, currentStudent.phoneNumber,
+                        currentStudent.emailAddress, new Goal(createEmail),
+                        currentStudent.notes));
+            } else // For now, current goal is acquire a driver's license
+            {
                 database.modify1(currentStudent.lastName, new Student(currentStudent.lastName,
-                                            currentStudent.firstName,currentStudent.phoneNumber,
-                                            currentStudent.emailAddress, new Goal(driversLicense),
-                                            currentStudent.notes));                
-               
+                        currentStudent.firstName, currentStudent.phoneNumber,
+                        currentStudent.emailAddress, new Goal(driversLicense),
+                        currentStudent.notes));
+            }
+
         }
 
         Object[] namesArray = names.toArray();
@@ -309,16 +331,16 @@ final class TabDemo extends Application {
         searchMessage.setText("Please enter a name");
         searchMessage.setVisible(false);
         editGrid.add(searchMessage, 2, 1);
-        
+
         final TextField searchPhone = new TextField();
         searchPhone.setPromptText("Enter a phone number");
-        editGrid.add(searchPhone,2,1,2,1);
-        
+        editGrid.add(searchPhone, 2, 1, 2, 1);
+
         final Button searchPhoneButton = new Button("Search");
         HBox hbSearchPhoneButton = new HBox(10);
         hbSearchPhoneButton.setAlignment(Pos.BOTTOM_RIGHT);
         hbSearchPhoneButton.getChildren().add(searchPhoneButton);
-        editGrid.add(hbSearchPhoneButton,4,1);
+        editGrid.add(hbSearchPhoneButton, 4, 1);
 
         /*
          ArrayList<String> civicsGoalList = new ArrayList<String>();
@@ -373,13 +395,15 @@ final class TabDemo extends Application {
         currentGoals.setAlignment(Pos.CENTER_RIGHT);
         editGrid.add(currentGoals, 2, 5, 2, 1);
 
+        Separator theSeparator = new Separator();        
+        
         final ComboBox displayGoal = new ComboBox();
         displayGoal.setDisable(true);
         displayGoal.setItems(FXCollections.observableArrayList("Pass the US citizenship test",
                 "Register to vote", "Vote for the first time", "Increase involvement in the community",
                 "Gain volunteering experience to increase job skills", "Learn to use maps",
                 "Learn to communicate basic personal information", "Understand basic working rights",
-                new Separator(), "Create an email address", "Acquire a driver's license", new Separator(),
+                theSeparator, "Create an email address", "Acquire a driver's license", theSeparator,
                 "Transfer credits to school", "Get high school transcript", "Meet with academic advisor",
                 "Take TOEFL", "Take GRE", "Fill out school application", "Apply for financial aid"));
         editGrid.add(displayGoal, 2, 6, 2, 1);
@@ -397,7 +421,7 @@ final class TabDemo extends Application {
                 "Register to vote", "Vote for the first time", "Increase involvement in the community",
                 "Gain volunteering experience to increase job skills", "Learn to use maps",
                 "Learn to communicate basic personal information", "Understand basic working rights",
-                new Separator(), "Create an email address", "Acquire a driver's license", new Separator(),
+                theSeparator, "Create an email address", "Acquire a driver's license", theSeparator,
                 "Transfer credits to school", "Get high school transcript", "Meet with academic advisor",
                 "Take TOEFL", "Take GRE", "Fill out school application", "Apply for financial aid"));
         editGrid.add(displaySecondGoal, 2, 7, 2, 1);
@@ -459,26 +483,26 @@ final class TabDemo extends Application {
         goalsGrid.getColumnConstraints().add(new ColumnConstraints(150));
 
         Label searchForStudent = new Label("Search for a student:");
-        goalsGrid.add(searchForStudent,0,0);
-        
+        goalsGrid.add(searchForStudent, 0, 0);
+
         final TextField searchName2 = new TextField();
         searchName2.setPromptText("Enter a student name");
-        goalsGrid.add(searchName2,1,0);
-        
+        goalsGrid.add(searchName2, 1, 0);
+
         final Button searchButton2 = new Button("Search");
         HBox hbSearchButton2 = new HBox(10);
         hbSearchButton2.getChildren().add(searchButton2);
-        goalsGrid.add(hbSearchButton2,2,0);
-        
+        goalsGrid.add(hbSearchButton2, 2, 0);
+
         final TextField searchPhone2 = new TextField();
         searchPhone2.setPromptText("Enter a phone number");
-        goalsGrid.add(searchPhone2,1,1);
-        
+        goalsGrid.add(searchPhone2, 1, 1);
+
         final Button searchPhoneButton2 = new Button("Search");
         HBox hbSearchPhoneButton2 = new HBox(10);
         hbSearchPhoneButton2.getChildren().add(searchPhoneButton2);
-        goalsGrid.add(hbSearchPhoneButton2,2,1);
-        
+        goalsGrid.add(hbSearchPhoneButton2, 2, 1);
+
         Label studentLookUp = new Label("Select student:");
         goalsGrid.add(studentLookUp, 0, 2);
 
@@ -659,26 +683,26 @@ final class TabDemo extends Application {
         reportsGrid.getColumnConstraints().add(new ColumnConstraints(40));
 
         Label studentSearchReport = new Label("Search for a student:");
-        reportsGrid.add(studentSearchReport,0,0);
-        
+        reportsGrid.add(studentSearchReport, 0, 0);
+
         final TextField searchName3 = new TextField();
         searchName3.setPromptText("Enter a student name");
-        reportsGrid.add(searchName3,1,0,3,1);
-        
+        reportsGrid.add(searchName3, 1, 0, 3, 1);
+
         final Button searchButton3 = new Button("Search");
         HBox hbSearchButton3 = new HBox(10);
         hbSearchButton3.getChildren().add(searchButton3);
-        reportsGrid.add(hbSearchButton3,4,0);
-        
+        reportsGrid.add(hbSearchButton3, 4, 0);
+
         final TextField searchPhone3 = new TextField();
         searchPhone3.setPromptText("Enter a phone number");
-        reportsGrid.add(searchPhone3,1,1,3,1);
-        
+        reportsGrid.add(searchPhone3, 1, 1, 3, 1);
+
         final Button searchPhoneButton3 = new Button("Search");
         HBox hbSearchPhoneButton3 = new HBox(10);
         hbSearchPhoneButton3.getChildren().add(searchPhoneButton3);
-        reportsGrid.add(hbSearchPhoneButton3,4,1);
-        
+        reportsGrid.add(hbSearchPhoneButton3, 4, 1);
+
         Label selectStudent2 = new Label("Select student:");
         reportsGrid.add(selectStudent2, 0, 2);
 
@@ -877,16 +901,57 @@ final class TabDemo extends Application {
         manageGoalsGrid.setHgap(10);
         manageGoalsGrid.setVgap(10);
         manageGoalsGrid.setPadding(new Insets(25, 25, 25, 25));
-
-        Label modifyGoal = new Label("Modify an existing goal:");
-
-        Label selectGoal = new Label("Select a goal:");
+        manageGoalsGrid.getColumnConstraints().add(new ColumnConstraints(120));
+        manageGoalsGrid.getColumnConstraints().add(new ColumnConstraints(50));
+        manageGoalsGrid.getColumnConstraints().add(new ColumnConstraints(100));
 
         Label createGoal = new Label("Create a new goal:");
         manageGoalsGrid.add(createGoal, 0, 1);
 
         final TextField createdGoal = new TextField();
-        manageGoalsGrid.add(createdGoal, 1, 1);
+        manageGoalsGrid.add(createdGoal, 1, 1, 2, 1);
+
+        final Button addGoal = new Button("Add goal");
+        HBox hbAddGoal = new HBox(10);
+        hbAddGoal.getChildren().add(addGoal);
+        addGoal.setDisable(true);
+        manageGoalsGrid.add(hbAddGoal, 3, 1, 2, 1);
+
+        Label modifyGoal = new Label("Select an existing goal to modify:");
+        manageGoalsGrid.add(modifyGoal, 0, 3, 2, 1);
+
+        final ComboBox listOfGoals = new ComboBox();
+        listOfGoals.setItems(FXCollections.observableArrayList("Pass the US citizenship test",
+                "Register to vote", "Vote for the first time", "Increase involvement in the community",
+                "Gain volunteering experience to increase job skills", "Learn to use maps",
+                "Learn to communicate basic personal information", "Understand basic working rights",
+                new Separator(), "Create an email address", "Acquire a driver's license", new Separator(),
+                "Transfer credits to school", "Get high school transcript", "Meet with academic advisor",
+                "Take TOEFL", "Take GRE", "Fill out school application", "Apply for financial aid"));
+        manageGoalsGrid.add(listOfGoals, 2, 3, 3, 1);
+
+        Label goalStatementLabel = new Label("Goal statement:");
+        manageGoalsGrid.add(goalStatementLabel, 0, 5);
+
+        final TextField goalStatement = new TextField();
+        goalStatement.setPromptText("Statement of Goal");
+        goalStatement.setEditable(false);
+        manageGoalsGrid.add(goalStatement, 1, 5, 2, 1);
+
+        final Button editGoal = new Button("Edit");
+        HBox hbEditGoal = new HBox(10);
+        hbEditGoal.getChildren().add(editGoal);
+        editGoal.setDisable(true);
+        manageGoalsGrid.add(hbEditGoal, 3, 5);
+
+        final Button saveGoal = new Button("Save");
+        HBox hbSaveGoal = new HBox(10);
+        hbSaveGoal.getChildren().add(saveGoal);
+        saveGoal.setDisable(true);
+        manageGoalsGrid.add(hbSaveGoal, 4, 5);
+
+        Label subgoalEdit = new Label("Subgoals:");
+        manageGoalsGrid.add(subgoalEdit, 0, 7);
 
         // Popup Window
         final PopUpWindow popup = new PopUpWindow();
@@ -986,20 +1051,23 @@ final class TabDemo extends Application {
                     saveChanges.setDisable(false);
                     deleteStudent.setDisable(false);
                     final String choice = (String) findStudentEdit.getValue();
-                    String lastName = choice.substring(0,choice.indexOf(","));
+                    String lastName = choice.substring(0, choice.indexOf(","));
                     Student currentStudent = (Student) database.find1(lastName);
                     firstNameField.setText(currentStudent.firstName);
                     lastNameField.setText(currentStudent.lastName);
                     emailField.setText(currentStudent.emailAddress);
                     phoneNumberField.setText(currentStudent.phoneNumber);
                     displayGoal.setValue(currentStudent.goal.goal);
-                    if (currentStudent.secondGoal == null)
+                    if (currentStudent.secondGoal == null) {
                         displaySecondGoal.setValue(null);
-                    else
+                    } else {
                         displaySecondGoal.setValue(currentStudent.secondGoal.goal);
+                    }
                     changeGoal.setDisable(false);
                     changeSecondGoal.setDisable(false);
-                    noteArea.setText(currentStudent.notes);
+                    noteArea.setText("" + currentStudent.notes.notes + "\n"
+                                        + "Notes last updated on: " +
+                                        currentStudent.notes.date.toString());
                 } else {
                     firstNameField.setEditable(false);
                     lastNameField.setEditable(false);
@@ -1013,7 +1081,7 @@ final class TabDemo extends Application {
                 }
             }
         });
-
+        
         searchButton.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
                 if (searchName.getLength() == 0) {
@@ -1038,11 +1106,11 @@ final class TabDemo extends Application {
                 searchName.clear();
             }
         });
-        
+
         searchPhoneButton.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
                 if (searchPhone.getLength() != 0) {
-                    String query = searchPhone.getText().replaceAll("\\D+","");
+                    String query = searchPhone.getText().replaceAll("\\D+", "");
                     Student potentialMatch = (Student) database.find2(query);
                     if (potentialMatch != null) {
                         String name = potentialMatch.lastName + ", " + potentialMatch.firstName;
@@ -1053,6 +1121,25 @@ final class TabDemo extends Application {
             }
         });
 
+        
+        displayGoal.setOnMouseReleased(new EventHandler<MouseEvent>() {
+            public void handle(MouseEvent m) {
+                if (displayGoal.getValue() == theSeparator) {
+                    displayGoal.getSelectionModel().clearSelection();
+                    displayGoal.setValue(null);
+                }
+            }
+        });    
+        
+        displaySecondGoal.setOnMouseReleased(new EventHandler<MouseEvent>() {
+            public void handle(MouseEvent m) {
+                if (displaySecondGoal.getValue() == theSeparator) {
+                    displaySecondGoal.getSelectionModel().clearSelection();
+                    displaySecondGoal.setValue(null);
+                }
+            }
+        });            
+        
         changeGoal.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
                 displayGoal.setDisable(false);
@@ -1070,7 +1157,7 @@ final class TabDemo extends Application {
         saveChanges.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
                 if (firstNameField.getLength() == 0 || lastNameField.getLength() == 0
-                        || phoneNumberField.getLength() == 0) {
+                        || phoneNumberField.getLength() == 0 || displayGoal.getValue() == null) {
                     incompleteInput.setFill(Color.FIREBRICK);
                     incompleteInput.setText("Please fill out all required fields!");
                 } else {
@@ -1078,36 +1165,36 @@ final class TabDemo extends Application {
                         int index = names.indexOf("" + ((String) findStudentEdit.getValue()));
                         names.set(index, "" + lastNameField.getText() + ", " + firstNameField.getText());
                         String name = (String) findStudentEdit.getValue();
-                        String lastName = name.substring(0,name.indexOf(","));
+                        String lastName = name.substring(0, name.indexOf(","));
                         Goal previousGoal = ((Student) database.find1(lastName)).goal;
+                        Notes previousNotes = ((Student) database.find1(lastName)).notes;
+                        long noteStamp = previousNotes.date.getTime();
                         Student updatedStudent = new Student(lastNameField.getText(), firstNameField.getText(),
-                                                        phoneNumberField.getText(), emailField.getText(),
-                                                        previousGoal, noteArea.getText());
+                                phoneNumberField.getText(), emailField.getText(),
+                                previousGoal, new Notes(noteArea.getText(),noteStamp));
                         String previousPhoneNumber = database.find1(lastName).phoneNumber;
-                        if (lastName.equals(lastNameField.getText()) && 
-                                previousPhoneNumber.replaceAll("\\D+","").equals(phoneNumberField.getText().replaceAll("\\D+","")))
+                        if (lastName.equals(lastNameField.getText())
+                                && previousPhoneNumber.replaceAll("\\D+", "").equals(phoneNumberField.getText().replaceAll("\\D+", ""))) {
                             database.modify1(lastName, updatedStudent);
-                        else if (!lastName.equals(lastNameField.getText()) && 
-                                previousPhoneNumber.replaceAll("\\D+","").equals(phoneNumberField.getText().replaceAll("\\D+",""))) {
-                            database.change2(previousPhoneNumber.replaceAll("\\D+",""),lastNameField.getText());
-                            database.modify1(lastNameField.getText(),updatedStudent);                            
-                        }
-                        else if (lastName.equals(lastNameField.getText())) {
-                                database.change1(lastName,phoneNumberField.getText().replaceAll("\\D+",""));
-                                database.modify2(phoneNumberField.getText().replaceAll("\\D+",""),updatedStudent);
-                                }
-                        else {
-                            database.change1(lastName,phoneNumberField.getText().replaceAll("\\D+",""));
-                            database.change2(phoneNumberField.getText().replaceAll("\\D+",""),lastNameField.getText());
-                            database.modify1(lastNameField.getText(),updatedStudent);
+                        } else if (!lastName.equals(lastNameField.getText())
+                                && previousPhoneNumber.replaceAll("\\D+", "").equals(phoneNumberField.getText().replaceAll("\\D+", ""))) {
+                            database.change2(previousPhoneNumber.replaceAll("\\D+", ""), lastNameField.getText());
+                            database.modify1(lastNameField.getText(), updatedStudent);
+                        } else if (lastName.equals(lastNameField.getText())) {
+                            database.change1(lastName, phoneNumberField.getText().replaceAll("\\D+", ""));
+                            database.modify2(phoneNumberField.getText().replaceAll("\\D+", ""), updatedStudent);
+                        } else {
+                            database.change1(lastName, phoneNumberField.getText().replaceAll("\\D+", ""));
+                            database.change2(phoneNumberField.getText().replaceAll("\\D+", ""), lastNameField.getText());
+                            database.modify1(lastNameField.getText(), updatedStudent);
                         }
                         /*
-                        students.get(index).lastName = lastNameField.getText();
-                        students.get(index).firstName = firstNameField.getText();
-                        students.get(index).phoneNumber = phoneNumberField.getText();
-                        students.get(index).emailAddress = emailField.getText();
-                        students.get(index).secondGoal = new Goal(driversLicense);
-                        */
+                         students.get(index).lastName = lastNameField.getText();
+                         students.get(index).firstName = firstNameField.getText();
+                         students.get(index).phoneNumber = phoneNumberField.getText();
+                         students.get(index).emailAddress = emailField.getText();
+                         students.get(index).secondGoal = new Goal(driversLicense);
+                         */
                         //Generalize for arbitrary goal
 
                         findStudentEdit.getSelectionModel().clearSelection();
@@ -1152,7 +1239,7 @@ final class TabDemo extends Application {
                 if (popup.agreeToChanges) {
                     String currentStudent = (String) findStudentEdit.getValue();
                     names.remove(currentStudent);
-                    database.remove1(currentStudent.substring(0,currentStudent.indexOf(",")));
+                    database.remove1(currentStudent.substring(0, currentStudent.indexOf(",")));
                     Object[] updatedNames = names.toArray();
                     Arrays.sort(updatedNames);
                     findStudentEdit.setItems(FXCollections.observableArrayList(updatedNames));
@@ -1192,11 +1279,11 @@ final class TabDemo extends Application {
                 searchName2.clear();
             }
         });
-        
+
         searchPhoneButton2.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
                 if (searchPhone2.getLength() != 0) {
-                    String query = searchPhone2.getText().replaceAll("\\D+","");
+                    String query = searchPhone2.getText().replaceAll("\\D+", "");
                     Student potentialMatch = (Student) database.find2(query);
                     if (potentialMatch != null) {
                         String name = potentialMatch.lastName + ", " + potentialMatch.firstName;
@@ -1205,8 +1292,8 @@ final class TabDemo extends Application {
                     searchPhone2.clear();
                 }
             }
-        });        
-        
+        });
+
         final ArrayList<CheckBox> checkBoxes = new ArrayList<CheckBox>();
 
         findStudentGoals.setOnAction(new EventHandler<ActionEvent>() {
@@ -1265,7 +1352,7 @@ final class TabDemo extends Application {
                 }
                 checkBoxes.clear();
                 String studentName = (String) findStudentGoals.getValue();
-                String lastName = studentName.substring(0,studentName.indexOf(","));
+                String lastName = studentName.substring(0, studentName.indexOf(","));
                 Student currentStudent = (Student) database.find1(lastName);
                 Goal currentGoal = currentStudent.goal;
                 int n = currentGoal.subgoals.size();
@@ -1293,7 +1380,7 @@ final class TabDemo extends Application {
                 }
                 checkBoxes.clear();
                 String studentName = (String) findStudentGoals.getValue();
-                String lastName = studentName.substring(0,studentName.indexOf(","));
+                String lastName = studentName.substring(0, studentName.indexOf(","));
                 Student currentStudent = (Student) database.find1(lastName);
                 Goal currentGoal = currentStudent.secondGoal;
                 int n = currentGoal.subgoals.size();
@@ -1310,7 +1397,7 @@ final class TabDemo extends Application {
         saveGoalChanges1.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
                 String studentName = (String) findStudentGoals.getValue();
-                String lastName = studentName.substring(0,studentName.indexOf(","));
+                String lastName = studentName.substring(0, studentName.indexOf(","));
                 Student currentStudent = (Student) database.find1(lastName);
                 Goal currentGoal = currentStudent.goal;
                 int size = checkBoxes.size();
@@ -1318,8 +1405,8 @@ final class TabDemo extends Application {
                     currentGoal.subgoals.get(i).setComplete(checkBoxes.get(i).isSelected());
                 }
                 database.modify1(lastName, new Student(currentStudent.lastName, currentStudent.firstName,
-                                                currentStudent.phoneNumber, currentStudent.emailAddress,
-                                                currentGoal, currentStudent.notes));
+                        currentStudent.phoneNumber, currentStudent.emailAddress,
+                        currentGoal, currentStudent.notes));
                 findStudentGoals.getSelectionModel().clearSelection();
                 findStudentGoals.setValue(null);
                 findStudentReports.getSelectionModel().clearSelection();
@@ -1330,7 +1417,7 @@ final class TabDemo extends Application {
         saveGoalChanges2.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
                 String studentName = (String) findStudentGoals.getValue();
-                String lastName = studentName.substring(0,studentName.indexOf(","));
+                String lastName = studentName.substring(0, studentName.indexOf(","));
                 Student currentStudent = (Student) database.find1(lastName);
                 Goal currentGoal = currentStudent.secondGoal;
                 int size = checkBoxes.size();
@@ -1338,8 +1425,8 @@ final class TabDemo extends Application {
                     currentGoal.subgoals.get(i).setComplete(checkBoxes.get(i).isSelected());
                 }
                 database.modify1(lastName, new Student(currentStudent.lastName, currentStudent.firstName,
-                                                currentStudent.phoneNumber, currentStudent.emailAddress,
-                                                currentGoal, currentStudent.notes));                
+                        currentStudent.phoneNumber, currentStudent.emailAddress,
+                        currentGoal, currentStudent.notes));
                 findStudentGoals.getSelectionModel().clearSelection();
                 findStudentGoals.setValue(null);
                 findStudentReports.getSelectionModel().clearSelection();
@@ -1365,8 +1452,8 @@ final class TabDemo extends Application {
                     Student newStudent = new Student(lastNameField2.getText(),
                             firstNameField2.getText(),
                             phoneNumberField2.getText(),
-                            emailField2.getText(), new Goal(createEmail), noteArea2.getText());
-                    database.add(lastNameField2.getText(),phoneNumberField2.getText().replaceAll("\\D+",""),newStudent);
+                            emailField2.getText(), new Goal(createEmail), new Notes(noteArea2.getText()));
+                    database.add(lastNameField2.getText(), phoneNumberField2.getText().replaceAll("\\D+", ""), newStudent);
                     firstNameField2.clear();
                     lastNameField2.clear();
                     emailField2.clear();
@@ -1374,27 +1461,19 @@ final class TabDemo extends Application {
                     goals2.getSelectionModel().clearSelection();
                     goals2.setValue(null);
                     noteArea2.clear();
-                    studentAdded.setText("");
+                    studentAdded.setFill(Color.FIREBRICK);
+                    studentAdded.setText("Student added successfully!");
                 }
             }
         }
         );
 
-        goals2.setOnAction(new EventHandler<ActionEvent>() {
-            public void handle(ActionEvent t) {
-                if (goals2.getValue() == null) {
-                    studentAdded.setText("");
-                }
+        firstNameField2.setOnKeyPressed(new EventHandler<KeyEvent>() {
+            public void handle(KeyEvent k) {
+                studentAdded.setText("");
             }
         });
 
-        /* CAN FIX THIS WITH GOALS DROPDOWN
-         firstNameField2.setOnAction(new EventHandler<ActionEvent>() {
-         public void handle(ActionEvent t) {
-         studentAdded.setText("");
-         }
-         });
-         */
         // "Flags" tab Actions
         findStudentFlags.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
@@ -1414,10 +1493,10 @@ final class TabDemo extends Application {
 
                 } else {
                     String student = (String) findStudentFlags.getValue();
-                    String lastName = student.substring(0,student.indexOf(","));
+                    String lastName = student.substring(0, student.indexOf(","));
                     Student currentStudent = database.find1(lastName);
                     currentStudent.hoursSince = Integer.parseInt(timeSince.getText());
-                    database.modify1(lastName,currentStudent);
+                    database.modify1(lastName, currentStudent);
                     findStudentFlags.getSelectionModel().clearSelection();
                     findStudentFlags.setValue(null);
                     reportTimes.getSelectionModel().clearSelection();
@@ -1438,26 +1517,30 @@ final class TabDemo extends Application {
                     if (reportTimes.getValue().equals("0-12 Hours")) {
                         while (flagIterator.hasNext()) {
                             currentStudent = (Student) flagIterator.next().data;
-                            if (currentStudent.hoursSince <= 12)
+                            if (currentStudent.hoursSince <= 12) {
                                 listOfStudents += currentStudent.firstName + " " + currentStudent.lastName + "\n";
+                            }
                         }
                     } else if (reportTimes.getValue().equals("13-30 Hours")) {
                         while (flagIterator.hasNext()) {
                             currentStudent = (Student) flagIterator.next().data;
-                            if (currentStudent.hoursSince > 12 && currentStudent.hoursSince <= 30)
+                            if (currentStudent.hoursSince > 12 && currentStudent.hoursSince <= 30) {
                                 listOfStudents += currentStudent.firstName + " " + currentStudent.lastName + "\n";
+                            }
                         }
                     } else if (reportTimes.getValue().equals("31-60 Hours")) {
                         while (flagIterator.hasNext()) {
                             currentStudent = (Student) flagIterator.next().data;
-                            if (currentStudent.hoursSince > 30 && currentStudent.hoursSince <= 60)
+                            if (currentStudent.hoursSince > 30 && currentStudent.hoursSince <= 60) {
                                 listOfStudents += currentStudent.firstName + " " + currentStudent.lastName + "\n";
+                            }
                         }
                     } else {
                         while (flagIterator.hasNext()) {
                             currentStudent = (Student) flagIterator.next().data;
-                            if (currentStudent.hoursSince > 60)
+                            if (currentStudent.hoursSince > 60) {
                                 listOfStudents += currentStudent.firstName + " " + currentStudent.lastName + "\n";
+                            }
                         }
                     }
                     studentList.setText(listOfStudents);
@@ -1489,11 +1572,11 @@ final class TabDemo extends Application {
                 searchName3.clear();
             }
         });
-        
+
         searchPhoneButton3.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
                 if (searchPhone3.getLength() != 0) {
-                    String query = searchPhone3.getText().replaceAll("\\D+","");
+                    String query = searchPhone3.getText().replaceAll("\\D+", "");
                     Student potentialMatch = (Student) database.find2(query);
                     if (potentialMatch != null) {
                         String name = potentialMatch.lastName + ", " + potentialMatch.firstName;
@@ -1502,8 +1585,8 @@ final class TabDemo extends Application {
                     searchPhone3.clear();
                 }
             }
-        });         
-        
+        });
+
         findStudentReports.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
                 studentName.clear();
@@ -1538,7 +1621,7 @@ final class TabDemo extends Application {
         selectGoalReport1.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
                 String currentName = (String) findStudentReports.getValue();
-                String lastName = currentName.substring(0,currentName.indexOf(","));
+                String lastName = currentName.substring(0, currentName.indexOf(","));
                 Student currentStudent = database.find1(lastName);
                 int numSubgoals = currentStudent.goal.subgoals.size();
                 int numCompleted = currentStudent.goal.numCompletedSubgoals();
@@ -1564,7 +1647,7 @@ final class TabDemo extends Application {
         selectGoalReport2.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
                 String currentName = (String) findStudentReports.getValue();
-                String lastName = currentName.substring(0,currentName.indexOf(","));
+                String lastName = currentName.substring(0, currentName.indexOf(","));
                 Student currentStudent = database.find1(lastName);
                 int numSubgoals = currentStudent.secondGoal.subgoals.size();
                 int numCompleted = currentStudent.secondGoal.numCompletedSubgoals();
@@ -1742,6 +1825,52 @@ final class TabDemo extends Application {
             }
         });
 
+        //"Manage Goals" tab actions
+        createdGoal.setOnKeyReleased(new EventHandler<KeyEvent>() {
+            public void handle(KeyEvent k) {
+                if (createdGoal.getLength() == 0) {
+                    addGoal.setDisable(true);
+                } else {
+                    addGoal.setDisable(false);
+                }
+            }
+        });
+        
+        listOfGoals.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent t) {
+                if (listOfGoals.getValue() != null) {
+                    goalStatement.setText("Create an email address");
+                    editGoal.setDisable(false);
+                }
+                else {
+                    goalStatement.clear();
+                    editGoal.setDisable(true);
+                }
+            }
+        });
+
+        addGoal.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent t) {
+
+            }
+        });
+
+        editGoal.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent t) {
+                if (goalStatement.getLength() != 0) {
+                    goalStatement.setEditable(true);
+                    editGoal.setDisable(true);
+                    saveGoal.setDisable(false);
+                }
+            }
+        });
+        
+        saveGoal.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent t) {
+                
+            }
+        });
+
         //Create Tabs
         Tab editTab = new Tab();
         editTab.setText("Edit Profiles");
@@ -1795,7 +1924,7 @@ final class TabDemo extends Application {
         root.getChildren().add(mainPane);
         primaryStage.setScene(scene);
         primaryStage.show();
-        
+
         primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
             public void handle(WindowEvent we) {
                 saveTree();
@@ -1866,43 +1995,48 @@ final class PopUpWindow {
     }
 }
 
-final class Node <K extends Comparable,D> {
+final class Node<K extends Comparable, D> {
 
     public K key;
     public D data;
-    public Node<K,D> left, right;
+    public Node<K, D> left, right;
 
-    public Node(K k, D d, Node<K,D> l,Node <K,D> r) {
-        key = k; data = d; left = l; right = r;
+    public Node(K k, D d, Node<K, D> l, Node<K, D> r) {
+        key = k;
+        data = d;
+        left = l;
+        right = r;
     }
 
     public Node(K k, D d) {
-        this(k,d,null,null);
+        this(k, d, null, null);
     }
-    
+
     public String toString() {
-        return (String)key;
+        return (String) key;
     }
 }
 
-final class Pair <E1, E2> {
+final class Pair<E1, E2> {
+
     public E1 first;
     public E2 second;
+
     public Pair(E1 f, E2 s) {
         first = f;
         second = s;
     }
 }
 
-final class AIUTree<K extends Comparable,D> {
-    
-    protected Node<K,D> root = null;
+final class AIUTree<K extends Comparable, D> {
+
+    protected Node<K, D> root = null;
 
     public int height() {
         return height(root);
     }
 
-    private int height(Node<K,D> root) {
+    private int height(Node<K, D> root) {
         return root == null ? 0 : 1 + Math.max(height(root.left), height(root.right));
     }
 
@@ -1910,7 +2044,7 @@ final class AIUTree<K extends Comparable,D> {
         return size(root);
     }
 
-    private int size(Node<K,D> root) {
+    private int size(Node<K, D> root) {
         return root == null ? 0 : 1 + size(root.left) + size(root.right);
     }
 
@@ -1918,39 +2052,41 @@ final class AIUTree<K extends Comparable,D> {
         return find(key, root);
     }
 
-    private D find(K key, Node<K,D> root) {
-        if(root == null)
+    private D find(K key, Node<K, D> root) {
+        if (root == null) {
             return null;
-        int c = key.compareTo(root.key); 
-        if(c == 0)
+        }
+        int c = key.compareTo(root.key);
+        if (c == 0) {
             return root.data;
-        else if(c < 0) 
+        } else if (c < 0) {
             return find(key, root.left);
-         else // c > 0
+        } else // c > 0
+        {
             return find(key, root.right);
+        }
     }
 
     public void add(K key, D data) {
         root = add(key, data, root);
     }
 
-    private Node<K,D> add(K key, D data, Node<K,D> root) {
+    private Node<K, D> add(K key, D data, Node<K, D> root) {
         // returns the tree with the added record.
-        if(root == null)
-            return new Node<K,D>(key,data);
-        int c = key.compareTo(root.key); 
-        
-       //if(c == 0) {
-         //   System.err.println("Error: duplicate key: " + key);
-           // System.exit(1);
-            //return null;
-        //}
-        
-        if(c <= 0) {
-            root.left =  add(key, data, root.left);
-            return root;
+        if (root == null) {
+            return new Node<K, D>(key, data);
         }
-        else { // c > 0
+        int c = key.compareTo(root.key);
+
+       //if(c == 0) {
+        //   System.err.println("Error: duplicate key: " + key);
+        // System.exit(1);
+        //return null;
+        //}
+        if (c <= 0) {
+            root.left = add(key, data, root.left);
+            return root;
+        } else { // c > 0
             root.right = add(key, data, root.right);
             return root;
         }
@@ -1960,50 +2096,54 @@ final class AIUTree<K extends Comparable,D> {
         modify(key, data, root);
     }
 
-    private void modify(K key, D data, Node<K,D> root) {
-        if(root == null) {
+    private void modify(K key, D data, Node<K, D> root) {
+        if (root == null) {
             System.err.println("Error: key not found: " + key);
             System.exit(1);
         }
-         int c = key.compareTo(root.key);
-        if(c == 0)
+        int c = key.compareTo(root.key);
+        if (c == 0) {
             root.data = data;
-        else if(c < 0) 
+        } else if (c < 0) {
             modify(key, data, root.left);
-        else // c > 0
+        } else // c > 0
+        {
             modify(key, data, root.right);
+        }
     }
 
     @Override
     public String toString() {
-      return toString(root);
+        return toString(root);
     }
 
-    private String toString(Node<K,D> root) {
-        if(root == null)
+    private String toString(Node<K, D> root) {
+        if (root == null) {
             return "";
+        }
         return toString(root.left) + "(" + root.key + "," + root.data + ")" + toString(root.right);
     }
 
-    public Node<K,D> leftmost(Node<K,D> root) {
- // Assume root is not null.
-        if(root.left == null)
+    public Node<K, D> leftmost(Node<K, D> root) {
+        // Assume root is not null.
+        if (root.left == null) {
             return root;
-        else
+        } else {
             return leftmost(root.left);
+        }
     }
 
-    private Pair<Node<K,D>,Node<K,D>> findAndRemoveLeftmost(Node<K,D> root) {
+    private Pair<Node<K, D>, Node<K, D>> findAndRemoveLeftmost(Node<K, D> root) {
  // Assume root is not null.
- // Returns the leftmost node and the tree with that node deleted.
-        if(root.left == null)
-            return new Pair<Node<K,D>,Node<K,D>>(root, root.right);
-        else {
-            Pair<Node<K,D>,Node<K,D>> pair = findAndRemoveLeftmost(root.left);
-            Node<K,D> leftmost = pair.first;
-            Node<K,D> newTree = pair.second;
+        // Returns the leftmost node and the tree with that node deleted.
+        if (root.left == null) {
+            return new Pair<Node<K, D>, Node<K, D>>(root, root.right);
+        } else {
+            Pair<Node<K, D>, Node<K, D>> pair = findAndRemoveLeftmost(root.left);
+            Node<K, D> leftmost = pair.first;
+            Node<K, D> newTree = pair.second;
             root.left = newTree;
-            return new Pair<Node<K,D>,Node<K,D>>(leftmost, root);
+            return new Pair<Node<K, D>, Node<K, D>>(leftmost, root);
         }
     }
 
@@ -2011,149 +2151,147 @@ final class AIUTree<K extends Comparable,D> {
         root = remove(key, root);
     }
 
-    private Node<K,D> remove(K key, Node<K,D> root) {
-        if(root == null) {
+    private Node<K, D> remove(K key, Node<K, D> root) {
+        if (root == null) {
             System.err.println("Error: key not found: " + key);
             System.exit(1);
             return null;
         }
-        int c = key.compareTo(root.key); 
-        if(c == 0) {
-            if(root.left == null)
+        int c = key.compareTo(root.key);
+        if (c == 0) {
+            if (root.left == null) {
                 return root.right;
-            else if(root.right == null)
+            } else if (root.right == null) {
                 return root.left;
-            else { // two children, replace with leftmost node of right subtree.
-                Pair<Node<K,D>,Node<K,D>> pair = findAndRemoveLeftmost(root.right);
-                Node<K,D> leftmost = pair.first;
-                Node<K,D> newRight = pair.second;
+            } else { // two children, replace with leftmost node of right subtree.
+                Pair<Node<K, D>, Node<K, D>> pair = findAndRemoveLeftmost(root.right);
+                Node<K, D> leftmost = pair.first;
+                Node<K, D> newRight = pair.second;
                 leftmost.left = root.left;
                 leftmost.right = newRight;
                 return leftmost;
             }
-        }
-        else if(c < 0) {
+        } else if (c < 0) {
             root.left = remove(key, root.left);
             return root;
-        }
-        else { // c > 0
+        } else { // c > 0
             root.right = remove(key, root.right);
             return root;
         }
-    }      
-}
-
-final class TwoKeyTree<K1 extends Comparable, K2 extends Comparable, D>{
-  
-  public AIUTree<K1,D> tree1 = new AIUTree<>();
-  public AIUTree<K2,D> tree2 = new AIUTree<>();
-  public AIUTree<K1,K2> tree3 = new AIUTree<>();    //tree3 and tree4 are used to link the two keys
-  public AIUTree<K2,K1> tree4 = new AIUTree<>();
-  
-  public void add(K1 key1, K2 key2, D data){
-    tree1.add(key1,data);
-    tree2.add(key2,data);
-    tree3.add(key1,key2);
-    tree4.add(key2,key1);
-  }
-  
-  public D find1(K1 key1){
-    return tree1.find(key1);
-  }
-  
-  public D find2(K2 key2){
-    return tree2.find(key2);
-  }
-  
-  public void modify1(K1 key1, D data){
-    K2 key2 = tree3.find(key1);
-    tree1.modify(key1,data);
-    tree2.modify(key2,data);
-  }
-  
-  public void modify2(K2 key2, D data){
-    K1 key1 = tree4.find(key2);
-    tree1.modify(key1,data);
-    tree2.modify(key2,data);
-  }
-  
-  public void change1(K1 key1, K2 key2){
-    tree2.remove(tree3.find(key1));   //remove the old key2 from tree2
-    tree2.add(key2,tree1.find(key1)); //add the new key2 to tree2 linked to the data at key1
-    tree4.remove(tree3.find(key1));   //remove the old key2 from tree4
-    tree3.modify(key1,key2);          //modify key1 to point to the new key2 in tree3
-    tree4.add(key2,key1);             //add a link from the new key2 to key1 in tree4
-  }
-  
-  public void change2(K2 key2, K1 key1){
-    tree1.remove(tree4.find(key2));    //remove the old key1 from tree1
-    tree1.add(key1,tree2.find(key2));  //add the new key1 to tree1 linked to the data at key2
-    tree3.remove(tree4.find(key2));    //remove the old key1 from tree3
-    tree4.modify(key2,key1);           //modify key2 to point to the new key1 in tree4
-    tree3.add(key1,key2);              //add a link from the new key1 to key2 in tree3
-  }
-  
-  public void remove1(K1 key1) {
-      K2 key2 = tree3.find(key1);
-      tree1.remove(key1);
-      tree2.remove(key2);
-      tree3.remove(key1);
-      tree4.remove(key2);
-  }
-  
-  public void remove2(K2 key2) {
-      K1 key1 = tree4.find(key2);
-      tree1.remove(key1);
-      tree2.remove(key2);
-      tree3.remove(key1);
-      tree4.remove(key2);
-  }
-  
-  public String list1(){
-    return tree1.toString();
-  }
-  
-  public String list2(){
-    return tree2.toString();
-  } 
-}
-
-final class AIUTreeIterator<K extends Comparable,D> {
-  Stack<Pair<Node<K,D>,Boolean>> stack = new Stack<Pair<Node<K,D>,Boolean>>();
-  
-  private boolean flag = false;
-  private Node<K,D> node = null;
-  public AIUTreeIterator(AIUTree tree){
-    node = tree.root;
-    Pair<Node<K,D>,Boolean> pair = new Pair<Node<K,D>,Boolean>(node,true);
-    stack.push(pair);
-  }
-  
-  public boolean hasNext(){
-    return !stack.empty();
-  }
-  
-  public Node<K,D> next(){
-    Pair<Node<K,D>,Boolean> pair = stack.pop();
-    if(pair.second == true){
-      pair.second = false;
-      stack.push(pair);
-      if(pair.first.left != null){
-        Pair<Node<K,D>,Boolean> pair2 = new Pair<Node<K,D>,Boolean>(pair.first.left,true);
-        stack.push(pair2);
-      }
-      return this.next();
     }
-    else if(pair.second == false && pair.first.right != null){
-        Pair<Node<K,D>,Boolean> pair3 = new Pair<Node<K,D>,Boolean>(pair.first.right,true);
-        stack.push(pair3);
-        return pair.first;
-      }
-    else 
-      return pair.first;
-    }   
 }
 
+final class TwoKeyTree<K1 extends Comparable, K2 extends Comparable, D> {
+
+    public AIUTree<K1, D> tree1 = new AIUTree<>();
+    public AIUTree<K2, D> tree2 = new AIUTree<>();
+    public AIUTree<K1, K2> tree3 = new AIUTree<>();    //tree3 and tree4 are used to link the two keys
+    public AIUTree<K2, K1> tree4 = new AIUTree<>();
+
+    public void add(K1 key1, K2 key2, D data) {
+        tree1.add(key1, data);
+        tree2.add(key2, data);
+        tree3.add(key1, key2);
+        tree4.add(key2, key1);
+    }
+
+    public D find1(K1 key1) {
+        return tree1.find(key1);
+    }
+
+    public D find2(K2 key2) {
+        return tree2.find(key2);
+    }
+
+    public void modify1(K1 key1, D data) {
+        K2 key2 = tree3.find(key1);
+        tree1.modify(key1, data);
+        tree2.modify(key2, data);
+    }
+
+    public void modify2(K2 key2, D data) {
+        K1 key1 = tree4.find(key2);
+        tree1.modify(key1, data);
+        tree2.modify(key2, data);
+    }
+
+    public void change1(K1 key1, K2 key2) {
+        tree2.remove(tree3.find(key1));   //remove the old key2 from tree2
+        tree2.add(key2, tree1.find(key1)); //add the new key2 to tree2 linked to the data at key1
+        tree4.remove(tree3.find(key1));   //remove the old key2 from tree4
+        tree3.modify(key1, key2);          //modify key1 to point to the new key2 in tree3
+        tree4.add(key2, key1);             //add a link from the new key2 to key1 in tree4
+    }
+
+    public void change2(K2 key2, K1 key1) {
+        tree1.remove(tree4.find(key2));    //remove the old key1 from tree1
+        tree1.add(key1, tree2.find(key2));  //add the new key1 to tree1 linked to the data at key2
+        tree3.remove(tree4.find(key2));    //remove the old key1 from tree3
+        tree4.modify(key2, key1);           //modify key2 to point to the new key1 in tree4
+        tree3.add(key1, key2);              //add a link from the new key1 to key2 in tree3
+    }
+
+    public void remove1(K1 key1) {
+        K2 key2 = tree3.find(key1);
+        tree1.remove(key1);
+        tree2.remove(key2);
+        tree3.remove(key1);
+        tree4.remove(key2);
+    }
+
+    public void remove2(K2 key2) {
+        K1 key1 = tree4.find(key2);
+        tree1.remove(key1);
+        tree2.remove(key2);
+        tree3.remove(key1);
+        tree4.remove(key2);
+    }
+
+    public String list1() {
+        return tree1.toString();
+    }
+
+    public String list2() {
+        return tree2.toString();
+    }
+}
+
+final class AIUTreeIterator<K extends Comparable, D> {
+
+    Stack<Pair<Node<K, D>, Boolean>> stack = new Stack<Pair<Node<K, D>, Boolean>>();
+
+    private boolean flag = false;
+    private Node<K, D> node = null;
+
+    public AIUTreeIterator(AIUTree tree) {
+        node = tree.root;
+        Pair<Node<K, D>, Boolean> pair = new Pair<Node<K, D>, Boolean>(node, true);
+        stack.push(pair);
+    }
+
+    public boolean hasNext() {
+        return !stack.empty();
+    }
+
+    public Node<K, D> next() {
+        Pair<Node<K, D>, Boolean> pair = stack.pop();
+        if (pair.second == true) {
+            pair.second = false;
+            stack.push(pair);
+            if (pair.first.left != null) {
+                Pair<Node<K, D>, Boolean> pair2 = new Pair<Node<K, D>, Boolean>(pair.first.left, true);
+                stack.push(pair2);
+            }
+            return this.next();
+        } else if (pair.second == false && pair.first.right != null) {
+            Pair<Node<K, D>, Boolean> pair3 = new Pair<Node<K, D>, Boolean>(pair.first.right, true);
+            stack.push(pair3);
+            return pair.first;
+        } else {
+            return pair.first;
+        }
+    }
+}
 
 public class AIUWithTrees extends Application {
 
@@ -2249,23 +2387,22 @@ public class AIUWithTrees extends Application {
         scene.getStylesheets().add(AIUWithTrees.class.getResource("AIULogin.css").toExternalForm());
         primaryStage.show();
     }
-    
-    public static TwoKeyTree<String,String,Student> database = new TwoKeyTree<String,String,Student>();;
-    public static void plantTree(){
+
+    public static TwoKeyTree<String, String, Student> database = new TwoKeyTree<String, String, Student>();
+
+    ;
+    public static void plantTree() {
         Scanner fileIn = null;
-        try 
-        {
+        try {
             fileIn = new Scanner(new FileInputStream("C:\\Users\\mguyer92\\Google Drive\\database.txt"));
-        }
-        catch (FileNotFoundException e)
-        {
+        } catch (FileNotFoundException e) {
             System.out.println("A fatal error has occurred.");
             System.exit(0);
         }
-        while(fileIn.hasNextLine()){
+        while (fileIn.hasNextLine()) {
             String[] array = fileIn.nextLine().split(",");
-            database.add(array[0],array[1].replaceAll("\\D+",""), new Student(array[2],array[3],array[4],array[5],new Goal(array[6]),array[7]));
-        }      
+            database.add(array[0], array[1].replaceAll("\\D+", ""), new Student(array[2], array[3], array[4], array[5], new Goal(array[6]), new Notes(array[7])));
+        }
     }
 
     /**
