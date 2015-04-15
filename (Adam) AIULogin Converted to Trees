@@ -193,6 +193,8 @@ final class TabDemo extends Application {
     public ArrayList<UserAndPass> users = new ArrayList<UserAndPass>();
 
     public static TwoKeyTree<String, String, Student> database;
+    
+    public static AIUTree<String,Goal> goalTree;
 
     public boolean isAdmin = false;
 
@@ -200,8 +202,9 @@ final class TabDemo extends Application {
         this.isAdmin = b;
     }
 
-    public TabDemo(TwoKeyTree<String, String, Student> theDatabase) {
+    public TabDemo(TwoKeyTree<String, String, Student> theDatabase, AIUTree<String,Goal> theGoalTree) {
         database = theDatabase;
+        goalTree = theGoalTree;
     }
 
     //public String convertDate() {};
@@ -236,6 +239,48 @@ final class TabDemo extends Application {
             bw.close();
 
             System.out.println("Database saved successfully.");
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    public static void saveGoalTree() {
+        AIUTreeIterator iterator = new AIUTreeIterator(goalTree);
+        try {
+
+            String content = "";
+
+            while (iterator.hasNext()) {
+                Node<String, Goal> currNode = iterator.next();
+                String[] temp = new String[20];
+                for(int i = 0; i < 20; i++){
+                    if(i < currNode.data.subgoals.size())
+                        temp[i] = currNode.data.subgoals.get(i).subgoal;
+                    else
+                        temp[i] = " ";
+                }
+                content = content + currNode.data.goal + "," + temp[0] + "," + temp[1] + "," + temp[2] + "," + temp[3]
+                        + "," + temp[4] + "," + temp[5] + "," + temp[6] +
+                        "," + temp[7] + "," + temp[8] + "," + temp[9] +
+                        "," + temp[10] + "," + temp[11] + "," + temp[12] + "," + temp[13]
+                        + "," + temp[14] + "," + temp[15] + "," + temp[16] +
+                        "," + temp[17] + "," + temp[18] + "," + temp[19] + System.getProperty("line.separator");
+            }
+
+            File file = new File("C:\\Users\\Adam\\Google Drive\\goals.txt");
+
+            // if file doesnt exists, then create it
+            if (!file.exists()) {
+                file.createNewFile();
+            }
+
+            FileWriter fw = new FileWriter(file.getAbsoluteFile());
+            BufferedWriter bw = new BufferedWriter(fw);
+            bw.write(content);
+            bw.close();
+
+            System.out.println("Goals saved successfully.");
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -1928,6 +1973,7 @@ final class TabDemo extends Application {
         primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
             public void handle(WindowEvent we) {
                 saveTree();
+                saveGoalTree();
             }
         });
     }
@@ -2361,7 +2407,7 @@ public class AIUWithTrees extends Application {
                             userFound = true;
                             String currentUser = user.username;
                             //Send this currentUser to database!
-                            TabDemo tabDisplay = new TabDemo(database);
+                            TabDemo tabDisplay = new TabDemo(database,goalTree);
                             Stage tabStage = new Stage();
                             if (user.isAdmin) {
                                 tabDisplay.setAdmin(true);
@@ -2390,7 +2436,7 @@ public class AIUWithTrees extends Application {
 
     public static TwoKeyTree<String, String, Student> database = new TwoKeyTree<String, String, Student>();
 
-    ;
+    
     public static void plantTree() {
         Scanner fileIn = null;
         try {
@@ -2405,12 +2451,36 @@ public class AIUWithTrees extends Application {
             database.add(array[0], array[1].replaceAll("\\D+", ""), new Student(array[2], array[3], array[4], array[5], new Goal(array[6]), new Notes(array[7],noteDate)));
         }
     }
+    
+    public static AIUTree<String,Goal> goalTree = new AIUTree<>();
+    
+    public static void plantGoalTree(){
+        Scanner fileIn2 = null;
+        try{
+           fileIn2 = new Scanner(new FileInputStream("C:\\Users\\Adam\\Google Drive\\goals.txt")); 
+        }catch(FileNotFoundException e){
+            System.out.println("A fatal error has occurred.");
+            System.exit(0);
+        }
+        while(fileIn2.hasNextLine()){
+            String[] array = fileIn2.nextLine().split(",");
+            Goal currGoal = new Goal(array[0]);
+            for(int i = 1; i < 21; i++){
+                if(!array[i].equals(" "))
+                    currGoal.addSubgoal(new Subgoal(array[i]));
+                else
+                    break;
+            }
+            goalTree.add(currGoal.goal, currGoal);
+        }
+    }
 
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) {
         plantTree();
+        plantGoalTree();
         launch(args);
     }
 
