@@ -195,6 +195,8 @@ final class TabDemo extends Application {
     public static TwoKeyTree<String, String, Student> database;
     
     public static AIUTree<String,Goal> goalTree;
+    
+    public static AIUTree<String,UserAndPass> userTree;
 
     public boolean isAdmin = false;
 
@@ -202,9 +204,10 @@ final class TabDemo extends Application {
         this.isAdmin = b;
     }
 
-    public TabDemo(TwoKeyTree<String, String, Student> theDatabase, AIUTree<String,Goal> theGoalTree) {
+    public TabDemo(TwoKeyTree<String, String, Student> theDatabase, AIUTree<String,Goal> theGoalTree,AIUTree<String,UserAndPass> theUserTree) {
         database = theDatabase;
         goalTree = theGoalTree;
+        userTree = theUserTree;
     }
 
     //public String convertDate() {};
@@ -281,6 +284,39 @@ final class TabDemo extends Application {
             bw.close();
 
             System.out.println("Goals saved successfully.");
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    public static void saveUserTree() {
+        AIUTreeIterator iterator = new AIUTreeIterator(userTree);
+        try {
+
+            String content = "";
+
+            while (iterator.hasNext()) {
+                Node<String, UserAndPass> currNode = iterator.next();
+                String isAdmin = "0";
+                if(currNode.data.isAdmin)
+                    isAdmin = "1";
+                content = content + currNode.data.username + "," + currNode.data.password + "," + isAdmin + System.getProperty("line.separator");
+            }
+
+            File file = new File("C:\\Users\\Adam\\Google Drive\\database.txt");
+
+            // if file doesnt exists, then create it
+            if (!file.exists()) {
+                file.createNewFile();
+            }
+
+            FileWriter fw = new FileWriter(file.getAbsoluteFile());
+            BufferedWriter bw = new BufferedWriter(fw);
+            bw.write(content);
+            bw.close();
+
+            System.out.println("Database saved successfully.");
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -1974,6 +2010,7 @@ final class TabDemo extends Application {
             public void handle(WindowEvent we) {
                 saveTree();
                 saveGoalTree();
+                saveUserTree();
             }
         });
     }
@@ -2407,7 +2444,7 @@ public class AIUWithTrees extends Application {
                             userFound = true;
                             String currentUser = user.username;
                             //Send this currentUser to database!
-                            TabDemo tabDisplay = new TabDemo(database,goalTree);
+                            TabDemo tabDisplay = new TabDemo(database,goalTree,userTree);
                             Stage tabStage = new Stage();
                             if (user.isAdmin) {
                                 tabDisplay.setAdmin(true);
@@ -2474,6 +2511,25 @@ public class AIUWithTrees extends Application {
             goalTree.add(currGoal.goal, currGoal);
         }
     }
+    
+    public static AIUTree<String,UserAndPass> userTree = new AIUTree<>();
+    
+    public static void plantUserTree(){
+        Scanner fileIn3 = null;
+        try{
+           fileIn3 = new Scanner(new FileInputStream("C:\\Users\\Adam\\Google Drive\\users.txt")); 
+        }catch(FileNotFoundException e){
+            System.out.println("A fatal error has occurred.");
+            System.exit(0);
+        }
+        while(fileIn3.hasNextLine()){
+            String[] array = fileIn3.nextLine().split(",");
+            UserAndPass user = new UserAndPass(array[0],array[1]);
+            if(array[2].equals("1"))
+                user.setAdmin(true);
+            userTree.add(array[0], user);
+        }
+    }
 
     /**
      * @param args the command line arguments
@@ -2481,6 +2537,7 @@ public class AIUWithTrees extends Application {
     public static void main(String[] args) {
         plantTree();
         plantGoalTree();
+        plantUserTree();
         launch(args);
     }
 
