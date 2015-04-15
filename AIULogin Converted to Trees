@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package aiuwithtrees;
+package studentprogresstracker;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -220,10 +220,10 @@ final class TabDemo extends Application {
                 } else {
                     notes = currNode.data.notes.notes;
                 }
-                content = content + currNode.data.lastName + "," + currNode.data.phoneNumber.replaceAll("\\D+", "") + "," + currNode.data.lastName + "," + currNode.data.firstName + "," + currNode.data.phoneNumber + "," + currNode.data.emailAddress + "," + currNode.data.goal.goal + "," + notes + System.getProperty("line.separator");
+                content = content + currNode.data.lastName + "," + currNode.data.phoneNumber.replaceAll("\\D+", "") + "," + currNode.data.lastName + "," + currNode.data.firstName + "," + currNode.data.phoneNumber + "," + currNode.data.emailAddress + "," + currNode.data.goal.goal + "," + notes + "," + currNode.data.notes.date.getTime() + System.getProperty("line.separator");
             }
 
-            File file = new File("C:\\Users\\mguyer92\\Google Drive\\database.txt");
+            File file = new File("C:\\Users\\Adam\\Google Drive\\database.txt");
 
             // if file doesnt exists, then create it
             if (!file.exists()) {
@@ -2394,14 +2394,15 @@ public class AIUWithTrees extends Application {
     public static void plantTree() {
         Scanner fileIn = null;
         try {
-            fileIn = new Scanner(new FileInputStream("C:\\Users\\mguyer92\\Google Drive\\database.txt"));
+            fileIn = new Scanner(new FileInputStream("C:\\Users\\Adam\\Google Drive\\database.txt"));
         } catch (FileNotFoundException e) {
             System.out.println("A fatal error has occurred.");
             System.exit(0);
         }
         while (fileIn.hasNextLine()) {
             String[] array = fileIn.nextLine().split(",");
-            database.add(array[0], array[1].replaceAll("\\D+", ""), new Student(array[2], array[3], array[4], array[5], new Goal(array[6]), new Notes(array[7])));
+            Long noteDate = new Long(array[8]);
+            database.add(array[0], array[1].replaceAll("\\D+", ""), new Student(array[2], array[3], array[4], array[5], new Goal(array[6]), new Notes(array[7],noteDate)));
         }
     }
 
