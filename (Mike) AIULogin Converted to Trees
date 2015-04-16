@@ -364,7 +364,7 @@ final class TabDemo extends Application {
             width = 450;
             fillColor = Color.WHITE;
         }
-        Scene scene = new Scene(root, width, 575, fillColor);
+        Scene scene = new Scene(root, width, 625, fillColor);
 
         TabPane tabPane = new TabPane();
         BorderPane mainPane = new BorderPane();
@@ -1010,7 +1010,7 @@ final class TabDemo extends Application {
         manageGoalsGrid.add(createGoal, 0, 1);
 
         final TextField createdGoal = new TextField();
-        createdGoal.setPromptText("Enter a goal");
+        createdGoal.setPromptText("Enter a goal statement");
         manageGoalsGrid.add(createdGoal, 1, 1, 2, 1);
 
         Label goalTypeLabel = new Label("Select a goal type:");
@@ -1068,6 +1068,21 @@ final class TabDemo extends Application {
 
         Label subgoalEdit = new Label("Subgoals:");
         manageGoalsGrid.add(subgoalEdit, 0, 9);
+
+        Button deleteSubgoals = new Button("Delete Selected");
+        HBox hbDeleteSubgoals = new HBox(10);
+        hbDeleteSubgoals.getChildren().add(deleteSubgoals);
+        hbDeleteSubgoals.setAlignment(Pos.BOTTOM_RIGHT);
+
+        Label addSubgoalLabel = new Label("Add a subgoal:");
+
+        final TextField newSubgoal = new TextField();
+        newSubgoal.setPromptText("Enter a subgoal statement");
+
+        Button addSubgoal = new Button("Add");
+        HBox hbAddSubgoal = new HBox(10);
+        hbAddSubgoal.getChildren().add(addSubgoal);
+        addSubgoal.setDisable(true);
 
         // Popup Window
         final PopUpWindow popup = new PopUpWindow();
@@ -1484,7 +1499,6 @@ final class TabDemo extends Application {
                 if (size > 0) {
                     goalsGrid.getChildren().remove(hbSaveGoalChanges1);
                     goalsGrid.getChildren().remove(hbSaveGoalChanges2);
-
                 }
                 int numChildren = goalsGrid.getChildren().size();
                 for (int i = 0; i < size; i++) {
@@ -1991,11 +2005,36 @@ final class TabDemo extends Application {
             }
         });
 
+        final ArrayList<CheckBox> checkBoxes2 = new ArrayList<CheckBox>();
+
         listOfGoals.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
+                int size = checkBoxes2.size();
+                if (size > 0) {
+                    manageGoalsGrid.getChildren().remove(hbDeleteSubgoals);
+                    manageGoalsGrid.getChildren().remove(addSubgoalLabel);
+                    manageGoalsGrid.getChildren().remove(newSubgoal);
+                    manageGoalsGrid.getChildren().remove(hbAddSubgoal);
+                }
+                int numChildren = manageGoalsGrid.getChildren().size();
+                for (int i = 0; i < size; i++) {
+                    manageGoalsGrid.getChildren().remove(numChildren - i - 1);
+                }
+                checkBoxes2.clear();
                 if (listOfGoals.getValue() != null) {
                     goalStatement.setText((String) listOfGoals.getValue());
                     editGoal.setDisable(false);
+                    Goal currentGoal = goalTree.find((String) listOfGoals.getValue());
+                    int n = currentGoal.subgoals.size();
+                    for (int i = 0; i < n; i++) {
+                        CheckBox currentSubgoal = new CheckBox(currentGoal.subgoals.get(i).subgoal);
+                        manageGoalsGrid.add(currentSubgoal, 1, 10 + i, 2, 1);
+                        checkBoxes2.add(currentSubgoal);
+                    }
+                    manageGoalsGrid.add(hbDeleteSubgoals, 3, 11 + n, 2, 1);
+                    manageGoalsGrid.add(addSubgoalLabel, 0, 13 + n);
+                    manageGoalsGrid.add(newSubgoal, 1, 13 + n, 2, 1);
+                    manageGoalsGrid.add(hbAddSubgoal, 3, 13 + n, 2, 1);
                 } else {
                     goalStatement.clear();
                     editGoal.setDisable(true);
@@ -2196,22 +2235,132 @@ final class TabDemo extends Application {
                         listOfGoals.getItems().add(theSeparator);
                     }
                     listOfGoals.getItems().addAll(otherGoals);
-                    
-                    AIUTreeIterator<String,Student> updateStudents = new AIUTreeIterator(database.tree1);
-                    while(updateStudents.hasNext()) {
+
+                    AIUTreeIterator<String, Student> updateStudents = new AIUTreeIterator(database.tree1);
+                    while (updateStudents.hasNext()) {
                         Student currentStudent = (Student) updateStudents.next().data;
                         if (currentStudent.goal.goal.equals(oldGoalStatement)) {
                             Goal newGoal = currentStudent.goal;
                             newGoal.goal = newGoalStatement;
                             Student updatedStudent = new Student(currentStudent.lastName, currentStudent.firstName,
-                                                            currentStudent.phoneNumber, currentStudent.emailAddress,
-                                                            new Goal(newGoal), currentStudent.notes);
+                                    currentStudent.phoneNumber, currentStudent.emailAddress,
+                                    new Goal(newGoal), currentStudent.notes);
                             database.modify1(currentStudent.lastName, updatedStudent);
                         }
                     }
                     // Need to update the goals of students with that goal
 
                 }
+            }
+        });
+
+        deleteSubgoals.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent t) {
+                Goal currentGoal = goalTree.find((String) listOfGoals.getValue());
+                int deleteCount = 0;
+                int n = checkBoxes2.size();
+                for (int i = 0; i < n; i++) {
+                    if (checkBoxes2.get(i).isSelected()) {
+                        currentGoal.subgoals.remove(i - deleteCount);
+                        deleteCount++;
+                    }
+                }
+                goalTree.modify((String) listOfGoals.getValue(), new Goal(currentGoal));
+                AIUTreeIterator<String, Student> updateStudents = new AIUTreeIterator(database.tree1);
+                while (updateStudents.hasNext()) {
+                    Student currentStudent = (Student) updateStudents.next().data;
+                    Goal studentGoal = currentStudent.goal;
+                    if (studentGoal.goal.equals((String) listOfGoals.getValue())) {
+                        int deleteCount2 = 0;
+                        for (int i = 0; i < n; i++) {
+                            if (checkBoxes2.get(i).isSelected()) {
+                                studentGoal.subgoals.remove(i - deleteCount2);
+                                deleteCount2++;
+                            }
+                        }
+                        studentGoal = new Goal(studentGoal);
+                        Student updatedStudent = new Student(currentStudent.lastName, currentStudent.firstName,
+                                currentStudent.phoneNumber, currentStudent.emailAddress,
+                                studentGoal, currentStudent.notes);
+                        database.modify1(currentStudent.lastName, updatedStudent);
+                    }
+                }
+                manageGoalsGrid.getChildren().remove(hbDeleteSubgoals);
+                manageGoalsGrid.getChildren().remove(addSubgoalLabel);
+                manageGoalsGrid.getChildren().remove(newSubgoal);
+                manageGoalsGrid.getChildren().remove(hbAddSubgoal);
+                int numChildren = manageGoalsGrid.getChildren().size();
+                for (int i = 0; i < n; i++) {
+                    manageGoalsGrid.getChildren().remove(numChildren - i - 1);
+                }
+                checkBoxes2.clear();
+                goalStatement.setText((String) listOfGoals.getValue());
+                editGoal.setDisable(false);
+                Goal currentGoalUpdated = goalTree.find((String) listOfGoals.getValue());
+                int m = currentGoalUpdated.subgoals.size();
+                for (int i = 0; i < m; i++) {
+                    CheckBox currentSubgoal = new CheckBox(currentGoal.subgoals.get(i).subgoal);
+                    manageGoalsGrid.add(currentSubgoal, 1, 10 + i, 2, 1);
+                    checkBoxes2.add(currentSubgoal);
+                }
+                manageGoalsGrid.add(hbDeleteSubgoals, 3, 11 + m, 2, 1);
+                manageGoalsGrid.add(addSubgoalLabel, 0, 13 + m);
+                manageGoalsGrid.add(newSubgoal, 1, 13 + m, 2, 1);
+                manageGoalsGrid.add(hbAddSubgoal, 3, 13 + m, 2, 1);
+            }
+        });
+
+        newSubgoal.setOnKeyReleased(new EventHandler<KeyEvent>() {
+            public void handle(KeyEvent k) {
+                if (newSubgoal.getLength() == 0) {
+                    addSubgoal.setDisable(true);
+                } else if (newSubgoal.getLength() == 1) {
+                    addSubgoal.setDisable(false);
+                }
+            }
+        });
+
+        addSubgoal.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent t) {
+                Goal currentGoal = goalTree.find((String) listOfGoals.getValue());
+                currentGoal.subgoals.add(new Subgoal(newSubgoal.getText()));
+                goalTree.modify((String) listOfGoals.getValue(), new Goal(currentGoal));
+                AIUTreeIterator<String, Student> updateStudents = new AIUTreeIterator(database.tree1);
+                while (updateStudents.hasNext()) {
+                    Student currentStudent = (Student) updateStudents.next().data;
+                    Goal studentGoal = currentStudent.goal;
+                    if (studentGoal.goal.equals((String) listOfGoals.getValue())) {
+                        studentGoal.subgoals.add(new Subgoal(newSubgoal.getText()));
+                        studentGoal = new Goal(studentGoal);
+                        Student updatedStudent = new Student(currentStudent.lastName, currentStudent.firstName,
+                                currentStudent.phoneNumber, currentStudent.emailAddress,
+                                studentGoal, currentStudent.notes);
+                        database.modify1(currentStudent.lastName, updatedStudent);
+                    }
+                }
+                manageGoalsGrid.getChildren().remove(hbDeleteSubgoals);
+                manageGoalsGrid.getChildren().remove(addSubgoalLabel);
+                manageGoalsGrid.getChildren().remove(newSubgoal);
+                manageGoalsGrid.getChildren().remove(hbAddSubgoal);
+                newSubgoal.clear();
+                int numChildren = manageGoalsGrid.getChildren().size();
+                for (int i = 0; i < checkBoxes2.size(); i++) {
+                    manageGoalsGrid.getChildren().remove(numChildren - i - 1);
+                }
+                checkBoxes2.clear();
+                goalStatement.setText((String) listOfGoals.getValue());
+                editGoal.setDisable(false);
+                Goal currentGoalUpdated = goalTree.find((String) listOfGoals.getValue());
+                int m = currentGoalUpdated.subgoals.size();
+                for (int i = 0; i < m; i++) {
+                    CheckBox currentSubgoal = new CheckBox(currentGoal.subgoals.get(i).subgoal);
+                    manageGoalsGrid.add(currentSubgoal, 1, 10 + i, 2, 1);
+                    checkBoxes2.add(currentSubgoal);
+                }
+                manageGoalsGrid.add(hbDeleteSubgoals, 3, 11 + m, 2, 1);
+                manageGoalsGrid.add(addSubgoalLabel, 0, 13 + m);
+                manageGoalsGrid.add(newSubgoal, 1, 13 + m, 2, 1);
+                manageGoalsGrid.add(hbAddSubgoal, 3, 13 + m, 2, 1);
             }
         });
 
@@ -2261,10 +2410,14 @@ final class TabDemo extends Application {
         } else {
             scenetitle2.setText("");
         }
+
         scenetitle2.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
         mainPane.setCenter(tabPane);
+
         mainPane.setTop(scenetitle2);
+
         mainPane.setAlignment(scenetitle2, Pos.CENTER);
+
         mainPane.setMargin(scenetitle2, new Insets(10, 10, 10, 10));
 
         mainPane.prefHeightProperty().bind(scene.heightProperty());
@@ -2272,9 +2425,11 @@ final class TabDemo extends Application {
 
         root.getChildren().add(mainPane);
         primaryStage.setScene(scene);
+
         primaryStage.show();
 
         primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+
             public void handle(WindowEvent we) {
                 saveTree();
                 saveGoalTree();
