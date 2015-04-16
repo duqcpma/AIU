@@ -19,10 +19,10 @@ import java.util.Stack;
 import javafx.application.Application;
 import static javafx.application.Application.launch;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
-import javafx.geometry.Point2D;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Scene;
@@ -98,6 +98,7 @@ final class Goal {
             subgoalsCopy.add(subgoalCopy);
         }
         subgoals = subgoalsCopy;
+        goalType = theGoal.goalType;
     }
 
     public int numCompletedSubgoals() {
@@ -484,25 +485,19 @@ final class TabDemo extends Application {
 
         final ComboBox displayGoal = new ComboBox();
         displayGoal.setDisable(true);
-        for (String goal : civicsGoals) {
-            displayGoal.getItems().add(goal);
-        }
-        if (civicsGoals.size() != 0 && jobGoals.size() != 0)
+        displayGoal.getItems().addAll(civicsGoals);
+        if (civicsGoals.size() != 0 && jobGoals.size() != 0) {
             displayGoal.getItems().add(theSeparator);
-        for (String goal : jobGoals) {
-            displayGoal.getItems().add(goal);
         }
-        if (jobGoals.size() != 0 && postsecGoals.size() != 0)
+        displayGoal.getItems().addAll(jobGoals);
+        if (jobGoals.size() != 0 && postsecGoals.size() != 0) {
             displayGoal.getItems().add(theSeparator);
-        for (String goal : postsecGoals) {
-            displayGoal.getItems().add(goal);
         }
-        if (postsecGoals.size() != 0 && otherGoals.size() != 0)
+        displayGoal.getItems().addAll(postsecGoals);
+        if (postsecGoals.size() != 0 && otherGoals.size() != 0) {
             displayGoal.getItems().add(theSeparator);
-        for (String goal : otherGoals) {
-            displayGoal.getItems().add(goal);
         }
-
+        displayGoal.getItems().addAll(otherGoals);
         editGrid.add(displayGoal, 2, 6, 2, 1);
 
         final Button changeGoal = new Button("Change");
@@ -514,24 +509,19 @@ final class TabDemo extends Application {
 
         final ComboBox displaySecondGoal = new ComboBox();
         displaySecondGoal.setDisable(true);
-        for (String goal : civicsGoals) {
-            displaySecondGoal.getItems().add(goal);
-        }
-        if (civicsGoals.size() != 0 && jobGoals.size() != 0)
+        displaySecondGoal.getItems().addAll(civicsGoals);
+        if (civicsGoals.size() != 0 && jobGoals.size() != 0) {
             displaySecondGoal.getItems().add(theSeparator);
-        for (String goal : jobGoals) {
-            displaySecondGoal.getItems().add(goal);
         }
-        if (jobGoals.size() != 0 && postsecGoals.size() != 0)
+        displaySecondGoal.getItems().addAll(jobGoals);
+        if (jobGoals.size() != 0 && postsecGoals.size() != 0) {
             displaySecondGoal.getItems().add(theSeparator);
-        for (String goal : postsecGoals) {
-            displaySecondGoal.getItems().add(goal);
         }
-        if (postsecGoals.size() != 0 && otherGoals.size() != 0)
+        displaySecondGoal.getItems().addAll(postsecGoals);
+        if (postsecGoals.size() != 0 && otherGoals.size() != 0) {
             displaySecondGoal.getItems().add(theSeparator);
-        for (String goal : otherGoals) {
-            displaySecondGoal.getItems().add(goal);
         }
+        displaySecondGoal.getItems().addAll(otherGoals);
         editGrid.add(displaySecondGoal, 2, 7, 2, 1);
 
         final Button changeSecondGoal = new Button("Change");
@@ -674,48 +664,38 @@ final class TabDemo extends Application {
         newStudentGrid.add(goalSelection, 2, 2);
 
         final ComboBox goals2 = new ComboBox();
-        for (String goal : civicsGoals) {
-            goals2.getItems().add(goal);
-        }
-        if (civicsGoals.size() != 0 && jobGoals.size() != 0)
+        goals2.getItems().addAll(civicsGoals);
+        if (civicsGoals.size() != 0 && jobGoals.size() != 0) {
             goals2.getItems().add(theSeparator);
-        for (String goal : jobGoals) {
-            goals2.getItems().add(goal);
         }
-        if (jobGoals.size() != 0 && postsecGoals.size() != 0)
+        goals2.getItems().addAll(jobGoals);
+        if (jobGoals.size() != 0 && postsecGoals.size() != 0) {
             goals2.getItems().add(theSeparator);
-        for (String goal : postsecGoals) {
-            goals2.getItems().add(goal);
         }
-        if (postsecGoals.size() != 0 && otherGoals.size() != 0)
+        goals2.getItems().addAll(postsecGoals);
+        if (postsecGoals.size() != 0 && otherGoals.size() != 0) {
             goals2.getItems().add(theSeparator);
-        for (String goal : otherGoals) {
-            goals2.getItems().add(goal);
         }
+        goals2.getItems().addAll(otherGoals);
         newStudentGrid.add(goals2, 2, 3);
 
         Label secondGoalSelection = new Label("Select a second goal:");
         newStudentGrid.add(secondGoalSelection, 2, 4);
 
         final ComboBox secondGoals2 = new ComboBox();
-        for (String goal : civicsGoals) {
-            secondGoals2.getItems().add(goal);
-        }
-        if (civicsGoals.size() != 0 && jobGoals.size() != 0)
+        secondGoals2.getItems().addAll(civicsGoals);
+        if (civicsGoals.size() != 0 && jobGoals.size() != 0) {
             secondGoals2.getItems().add(theSeparator);
-        for (String goal : jobGoals) {
-            secondGoals2.getItems().add(goal);
         }
-        if (jobGoals.size() != 0 && postsecGoals.size() != 0)
+        secondGoals2.getItems().addAll(jobGoals);
+        if (jobGoals.size() != 0 && postsecGoals.size() != 0) {
             secondGoals2.getItems().add(theSeparator);
-        for (String goal : postsecGoals) {
-            secondGoals2.getItems().add(goal);
         }
-        if (postsecGoals.size() != 0 && otherGoals.size() != 0)
+        secondGoals2.getItems().addAll(postsecGoals);
+        if (postsecGoals.size() != 0 && otherGoals.size() != 0) {
             secondGoals2.getItems().add(theSeparator);
-        for (String goal : otherGoals) {
-            secondGoals2.getItems().add(goal);
         }
+        secondGoals2.getItems().addAll(otherGoals);
         newStudentGrid.add(secondGoals2, 2, 5);
 
         CheckBox hasEmail = new CheckBox("Student does not have an email address");
@@ -924,9 +904,10 @@ final class TabDemo extends Application {
 
         AIUTreeIterator userIterator = new AIUTreeIterator(userTree);
         final ArrayList<String> usernames = new ArrayList<String>();
-        while(userIterator.hasNext())
-            usernames.add(((UserAndPass)userIterator.next().data).username);
-        
+        while (userIterator.hasNext()) {
+            usernames.add(((UserAndPass) userIterator.next().data).username);
+        }
+
         final ComboBox userList = new ComboBox();
         userList.setItems(FXCollections.observableArrayList(usernames));
         adminGrid.add(userList, 1, 1);
@@ -1029,60 +1010,64 @@ final class TabDemo extends Application {
         manageGoalsGrid.add(createGoal, 0, 1);
 
         final TextField createdGoal = new TextField();
+        createdGoal.setPromptText("Enter a goal");
         manageGoalsGrid.add(createdGoal, 1, 1, 2, 1);
+
+        Label goalTypeLabel = new Label("Select a goal type:");
+        manageGoalsGrid.add(goalTypeLabel, 0, 3);
+
+        final ComboBox selectGoalType = new ComboBox();
+        selectGoalType.setItems(FXCollections.observableArrayList("Civics", "Job",
+                "Post-secondary", "Other"));
+        manageGoalsGrid.add(selectGoalType, 1, 3, 2, 1);
 
         final Button addGoal = new Button("Add goal");
         HBox hbAddGoal = new HBox(10);
         hbAddGoal.getChildren().add(addGoal);
         addGoal.setDisable(true);
-        manageGoalsGrid.add(hbAddGoal, 3, 1, 2, 1);
+        manageGoalsGrid.add(hbAddGoal, 3, 3, 2, 1);
 
         Label modifyGoal = new Label("Select an existing goal to modify:");
-        manageGoalsGrid.add(modifyGoal, 0, 3, 2, 1);
+        manageGoalsGrid.add(modifyGoal, 0, 5, 2, 1);
 
         final ComboBox listOfGoals = new ComboBox();
-        for (String goal : civicsGoals) {
-            listOfGoals.getItems().add(goal);
-        }
-        if (civicsGoals.size() != 0 && jobGoals.size() != 0)
+        listOfGoals.getItems().addAll(civicsGoals);
+        if (civicsGoals.size() != 0 && jobGoals.size() != 0) {
             listOfGoals.getItems().add(theSeparator);
-        for (String goal : jobGoals) {
-            listOfGoals.getItems().add(goal);
         }
-        if (jobGoals.size() != 0 && postsecGoals.size() != 0)
+        listOfGoals.getItems().addAll(jobGoals);
+        if (jobGoals.size() != 0 && postsecGoals.size() != 0) {
             listOfGoals.getItems().add(theSeparator);
-        for (String goal : postsecGoals) {
-           listOfGoals.getItems().add(goal);
         }
-        if (postsecGoals.size() != 0 && otherGoals.size() != 0)
+        listOfGoals.getItems().addAll(postsecGoals);
+        if (postsecGoals.size() != 0 && otherGoals.size() != 0) {
             listOfGoals.getItems().add(theSeparator);
-        for (String goal : otherGoals) {
-            listOfGoals.getItems().add(goal);
         }
-        manageGoalsGrid.add(listOfGoals, 2, 3, 3, 1);
+        listOfGoals.getItems().addAll(otherGoals);
+        manageGoalsGrid.add(listOfGoals, 2, 5, 3, 1);
 
         Label goalStatementLabel = new Label("Goal statement:");
-        manageGoalsGrid.add(goalStatementLabel, 0, 5);
+        manageGoalsGrid.add(goalStatementLabel, 0, 7);
 
         final TextField goalStatement = new TextField();
         goalStatement.setPromptText("Statement of Goal");
         goalStatement.setEditable(false);
-        manageGoalsGrid.add(goalStatement, 1, 5, 2, 1);
+        manageGoalsGrid.add(goalStatement, 1, 7, 2, 1);
 
         final Button editGoal = new Button("Edit");
         HBox hbEditGoal = new HBox(10);
         hbEditGoal.getChildren().add(editGoal);
         editGoal.setDisable(true);
-        manageGoalsGrid.add(hbEditGoal, 3, 5);
+        manageGoalsGrid.add(hbEditGoal, 3, 7);
 
         final Button saveGoal = new Button("Save");
         HBox hbSaveGoal = new HBox(10);
         hbSaveGoal.getChildren().add(saveGoal);
         saveGoal.setDisable(true);
-        manageGoalsGrid.add(hbSaveGoal, 4, 5);
+        manageGoalsGrid.add(hbSaveGoal, 4, 7);
 
         Label subgoalEdit = new Label("Subgoals:");
-        manageGoalsGrid.add(subgoalEdit, 0, 7);
+        manageGoalsGrid.add(subgoalEdit, 0, 9);
 
         // Popup Window
         final PopUpWindow popup = new PopUpWindow();
@@ -1169,6 +1154,8 @@ final class TabDemo extends Application {
                 displayGoal.setValue(null);
                 displaySecondGoal.getSelectionModel().clearSelection();
                 displaySecondGoal.setValue(null);
+                displayGoal.setDisable(true);
+                displaySecondGoal.setDisable(true);
                 noteArea.clear();
                 noteTime.clear();
                 incompleteInput.setText("");
@@ -1208,8 +1195,6 @@ final class TabDemo extends Application {
                     emailField.setEditable(false);
                     phoneNumberField.setEditable(false);
                     noteArea.setEditable(false);
-                    displayGoal.setDisable(true);
-                    displaySecondGoal.setDisable(true);
                     changeGoal.setDisable(true);
                     changeSecondGoal.setDisable(true);
                 }
@@ -1323,13 +1308,15 @@ final class TabDemo extends Application {
                         }
                         Goal previousSecondGoal = theStudent.secondGoal;
                         Goal newSecondGoal = null;
-                        if (displaySecondGoal.getValue() != null)
+                        if (displaySecondGoal.getValue() != null) {
                             newSecondGoal = new Goal(goalTree.find((String) displaySecondGoal.getValue()));
+                        }
                         Goal secondGoal;
-                        if (previousSecondGoal == null && newSecondGoal == null)
+                        if (previousSecondGoal == null && newSecondGoal == null) {
                             secondGoal = previousSecondGoal;
-                        else
+                        } else {
                             secondGoal = newSecondGoal;
+                        }
                         Notes previousNotes = theStudent.notes;
                         Notes note;
                         if (previousNotes.notes.equals(noteArea.getText())
@@ -1606,8 +1593,9 @@ final class TabDemo extends Application {
                             firstNameField2.getText(),
                             phoneNumberField2.getText(),
                             emailField2.getText(), new Goal(goalTree.find((String) goals2.getValue())), new Notes(noteArea2.getText()));
-                    if (secondGoals2.getValue() != null)
+                    if (secondGoals2.getValue() != null) {
                         newStudent.setSecondGoal(new Goal(goalTree.find((String) secondGoals2.getValue())));
+                    }
                     database.add(lastNameField2.getText(), phoneNumberField2.getText().replaceAll("\\D+", ""), newStudent);
                     firstNameField2.clear();
                     lastNameField2.clear();
@@ -1966,7 +1954,7 @@ final class TabDemo extends Application {
                             newUser.setAdmin(false);
                         }
                         usernames.add(newUsername.getText());
-                        userTree.add(newUsername.getText(),newUser);
+                        userTree.add(newUsername.getText(), newUser);
                         userList.setItems(FXCollections.observableArrayList(usernames));
                         newUsername.clear();
                         newPassword.clear();
@@ -1986,6 +1974,18 @@ final class TabDemo extends Application {
                 if (createdGoal.getLength() == 0) {
                     addGoal.setDisable(true);
                 } else {
+                    if (selectGoalType.getValue() != null) {
+                        addGoal.setDisable(false);
+                    }
+                }
+            }
+        });
+
+        selectGoalType.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent t) {
+                if (selectGoalType.getValue() != null && createdGoal.getLength() != 0) {
+                    addGoal.setDisable(false);
+                } else {
                     addGoal.setDisable(false);
                 }
             }
@@ -1994,7 +1994,7 @@ final class TabDemo extends Application {
         listOfGoals.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
                 if (listOfGoals.getValue() != null) {
-                    goalStatement.setText("Create an email address");
+                    goalStatement.setText((String) listOfGoals.getValue());
                     editGoal.setDisable(false);
                 } else {
                     goalStatement.clear();
@@ -2005,7 +2005,102 @@ final class TabDemo extends Application {
 
         addGoal.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
-
+                addGoal.setDisable(true);
+                Goal newGoal = new Goal(createdGoal.getText());
+                String goalType = (String) selectGoalType.getValue();
+                if (goalType.equals("Civics")) {
+                    newGoal.goalType = GoalType.CIVICS;
+                    civicsGoals.add(createdGoal.getText());
+                } else if (goalType.equals("Job")) {
+                    newGoal.goalType = GoalType.JOB;
+                    jobGoals.add(createdGoal.getText());
+                } else if (goalType.equals("Post-secondary")) {
+                    newGoal.goalType = GoalType.POSTSEC;
+                    postsecGoals.add(createdGoal.getText());
+                } else {
+                    newGoal.goalType = GoalType.OTHER;
+                    otherGoals.add(createdGoal.getText());
+                }
+                goalTree.add(createdGoal.getText(), newGoal);
+                createdGoal.clear();
+                selectGoalType.getSelectionModel().clearSelection();
+                selectGoalType.setValue(null);
+                displayGoal.getItems().clear();
+                displayGoal.getItems().addAll(civicsGoals);
+                if (civicsGoals.size() != 0 && jobGoals.size() != 0) {
+                    displayGoal.getItems().add(theSeparator);
+                }
+                displayGoal.getItems().addAll(jobGoals);
+                if (jobGoals.size() != 0 && postsecGoals.size() != 0) {
+                    displayGoal.getItems().add(theSeparator);
+                }
+                displayGoal.getItems().addAll(postsecGoals);
+                if (postsecGoals.size() != 0 && otherGoals.size() != 0) {
+                    displayGoal.getItems().add(theSeparator);
+                }
+                displayGoal.getItems().addAll(otherGoals);
+                displaySecondGoal.getItems().clear();
+                displaySecondGoal.getItems().addAll(civicsGoals);
+                if (civicsGoals.size() != 0 && jobGoals.size() != 0) {
+                    displaySecondGoal.getItems().add(theSeparator);
+                }
+                displaySecondGoal.getItems().addAll(jobGoals);
+                if (jobGoals.size() != 0 && postsecGoals.size() != 0) {
+                    displaySecondGoal.getItems().add(theSeparator);
+                }
+                displaySecondGoal.getItems().addAll(postsecGoals);
+                if (postsecGoals.size() != 0 && otherGoals.size() != 0) {
+                    displaySecondGoal.getItems().add(theSeparator);
+                }
+                displaySecondGoal.getItems().addAll(otherGoals);
+                goals2.getItems().clear();
+                goals2.getItems().addAll(civicsGoals);
+                if (civicsGoals.size() != 0 && jobGoals.size() != 0) {
+                    goals2.getItems().add(theSeparator);
+                }
+                goals2.getItems().addAll(jobGoals);
+                if (jobGoals.size() != 0 && postsecGoals.size() != 0) {
+                    goals2.getItems().add(theSeparator);
+                }
+                goals2.getItems().addAll(postsecGoals);
+                if (postsecGoals.size() != 0 && otherGoals.size() != 0) {
+                    goals2.getItems().add(theSeparator);
+                }
+                goals2.getItems().addAll(otherGoals);
+                secondGoals2.getItems().clear();
+                secondGoals2.getItems().addAll(civicsGoals);
+                if (civicsGoals.size() != 0 && jobGoals.size() != 0) {
+                    secondGoals2.getItems().add(theSeparator);
+                }
+                secondGoals2.getItems().addAll(jobGoals);
+                if (jobGoals.size() != 0 && postsecGoals.size() != 0) {
+                    secondGoals2.getItems().add(theSeparator);
+                }
+                secondGoals2.getItems().addAll(postsecGoals);
+                if (postsecGoals.size() != 0 && otherGoals.size() != 0) {
+                    secondGoals2.getItems().add(theSeparator);
+                }
+                secondGoals2.getItems().addAll(otherGoals);
+                listOfGoals.getItems().clear();
+                listOfGoals.getItems().addAll(civicsGoals);
+                if (civicsGoals.size() != 0 && jobGoals.size() != 0) {
+                    listOfGoals.getItems().add(theSeparator);
+                }
+                listOfGoals.getItems().addAll(jobGoals);
+                if (jobGoals.size() != 0 && postsecGoals.size() != 0) {
+                    listOfGoals.getItems().add(theSeparator);
+                }
+                listOfGoals.getItems().addAll(postsecGoals);
+                if (postsecGoals.size() != 0 && otherGoals.size() != 0) {
+                    listOfGoals.getItems().add(theSeparator);
+                }
+                listOfGoals.getItems().addAll(otherGoals);
+                findStudentEdit.getSelectionModel().clearSelection();
+                findStudentEdit.setValue(null);
+                findStudentGoals.getSelectionModel().clearSelection();
+                findStudentGoals.setValue(null);
+                findStudentReports.getSelectionModel().clearSelection();
+                findStudentReports.setValue(null);
             }
         });
 
@@ -2021,7 +2116,102 @@ final class TabDemo extends Application {
 
         saveGoal.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
+                if (goalStatement.getLength() != 0) {
+                    String oldGoalStatement = (String) listOfGoals.getValue();
+                    String newGoalStatement = goalStatement.getText();
+                    Goal oldGoal = (Goal) goalTree.find(oldGoalStatement);
+                    goalTree.remove(oldGoalStatement);
+                    oldGoal.goal = newGoalStatement;
+                    goalTree.add(newGoalStatement, new Goal(oldGoal));
+                    goalStatement.clear();
+                    listOfGoals.getSelectionModel().clearSelection();
+                    listOfGoals.setValue(null);
+                    displayGoal.getItems().clear();
+                    displayGoal.getItems().addAll(civicsGoals);
+                    if (civicsGoals.size() != 0 && jobGoals.size() != 0) {
+                        displayGoal.getItems().add(theSeparator);
+                    }
+                    displayGoal.getItems().addAll(jobGoals);
+                    if (jobGoals.size() != 0 && postsecGoals.size() != 0) {
+                        displayGoal.getItems().add(theSeparator);
+                    }
+                    displayGoal.getItems().addAll(postsecGoals);
+                    if (postsecGoals.size() != 0 && otherGoals.size() != 0) {
+                        displayGoal.getItems().add(theSeparator);
+                    }
+                    displayGoal.getItems().addAll(otherGoals);
+                    displaySecondGoal.getItems().clear();
+                    displaySecondGoal.getItems().addAll(civicsGoals);
+                    if (civicsGoals.size() != 0 && jobGoals.size() != 0) {
+                        displaySecondGoal.getItems().add(theSeparator);
+                    }
+                    displaySecondGoal.getItems().addAll(jobGoals);
+                    if (jobGoals.size() != 0 && postsecGoals.size() != 0) {
+                        displaySecondGoal.getItems().add(theSeparator);
+                    }
+                    displaySecondGoal.getItems().addAll(postsecGoals);
+                    if (postsecGoals.size() != 0 && otherGoals.size() != 0) {
+                        displaySecondGoal.getItems().add(theSeparator);
+                    }
+                    displaySecondGoal.getItems().addAll(otherGoals);
+                    goals2.getItems().clear();
+                    goals2.getItems().addAll(civicsGoals);
+                    if (civicsGoals.size() != 0 && jobGoals.size() != 0) {
+                        goals2.getItems().add(theSeparator);
+                    }
+                    goals2.getItems().addAll(jobGoals);
+                    if (jobGoals.size() != 0 && postsecGoals.size() != 0) {
+                        goals2.getItems().add(theSeparator);
+                    }
+                    goals2.getItems().addAll(postsecGoals);
+                    if (postsecGoals.size() != 0 && otherGoals.size() != 0) {
+                        goals2.getItems().add(theSeparator);
+                    }
+                    goals2.getItems().addAll(otherGoals);
+                    secondGoals2.getItems().clear();
+                    secondGoals2.getItems().addAll(civicsGoals);
+                    if (civicsGoals.size() != 0 && jobGoals.size() != 0) {
+                        secondGoals2.getItems().add(theSeparator);
+                    }
+                    secondGoals2.getItems().addAll(jobGoals);
+                    if (jobGoals.size() != 0 && postsecGoals.size() != 0) {
+                        secondGoals2.getItems().add(theSeparator);
+                    }
+                    secondGoals2.getItems().addAll(postsecGoals);
+                    if (postsecGoals.size() != 0 && otherGoals.size() != 0) {
+                        secondGoals2.getItems().add(theSeparator);
+                    }
+                    secondGoals2.getItems().addAll(otherGoals);
+                    listOfGoals.getItems().clear();
+                    listOfGoals.getItems().addAll(civicsGoals);
+                    if (civicsGoals.size() != 0 && jobGoals.size() != 0) {
+                        listOfGoals.getItems().add(theSeparator);
+                    }
+                    listOfGoals.getItems().addAll(jobGoals);
+                    if (jobGoals.size() != 0 && postsecGoals.size() != 0) {
+                        listOfGoals.getItems().add(theSeparator);
+                    }
+                    listOfGoals.getItems().addAll(postsecGoals);
+                    if (postsecGoals.size() != 0 && otherGoals.size() != 0) {
+                        listOfGoals.getItems().add(theSeparator);
+                    }
+                    listOfGoals.getItems().addAll(otherGoals);
+                    
+                    AIUTreeIterator<String,Student> updateStudents = new AIUTreeIterator(database.tree1);
+                    while(updateStudents.hasNext()) {
+                        Student currentStudent = (Student) updateStudents.next().data;
+                        if (currentStudent.goal.goal.equals(oldGoalStatement)) {
+                            Goal newGoal = currentStudent.goal;
+                            newGoal.goal = newGoalStatement;
+                            Student updatedStudent = new Student(currentStudent.lastName, currentStudent.firstName,
+                                                            currentStudent.phoneNumber, currentStudent.emailAddress,
+                                                            new Goal(newGoal), currentStudent.notes);
+                            database.modify1(currentStudent.lastName, updatedStudent);
+                        }
+                    }
+                    // Need to update the goals of students with that goal
 
+                }
             }
         });
 
