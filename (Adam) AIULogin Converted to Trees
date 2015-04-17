@@ -2972,11 +2972,12 @@ public class AIUWithTrees extends Application {
         while (fileIn.hasNextLine()) {
             String[] array = fileIn.nextLine().split(",");
             Long noteDate = new Long(array[9]);
-            Student student = new Student(array[2], array[3], array[4], array[5], new Goal(array[6]), new Notes(array[8].replaceAll("\\\\n", "\n"), noteDate));
-            student.goal.subgoals = goalTree.find(array[6]).subgoals;
+            Goal primaryGoal = goalTree.find(array[6]);
+            Goal secondaryGoal;
+            Student student = new Student(array[2], array[3], array[4], array[5], primaryGoal, new Notes(array[8].replaceAll("\\\\n", "\n"), noteDate));
             if(!array[7].equals(" ")){
-                student.setSecondGoal(new Goal(array[7]));
-                student.secondGoal.subgoals = goalTree.find(array[7]).subgoals;
+                secondaryGoal = goalTree.find(array[7]);
+                student.setSecondGoal(secondaryGoal);
             }
             for(int i = 10; i < 30; i++){
                 if(array[i].equals("1"))
