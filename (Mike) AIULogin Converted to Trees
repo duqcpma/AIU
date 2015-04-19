@@ -238,9 +238,66 @@ final class TabDemo extends Application {
                 if (currNode.data.notes.notes.length() == 0) {
                     notes = " ";
                 } else {
-                    notes = currNode.data.notes.notes;
+                    notes = currNode.data.notes.notes.replaceAll("\\n", "\\\\n");
                 }
-                content = content + currNode.data.lastName + "," + currNode.data.phoneNumber.replaceAll("\\D+", "") + "," + currNode.data.lastName + "," + currNode.data.firstName + "," + currNode.data.phoneNumber + "," + currNode.data.emailAddress + "," + currNode.data.goal.goal + "," + notes + "," + currNode.data.notes.date.getTime() + System.getProperty("line.separator");
+                Goal goal1 = currNode.data.goal;
+                Goal goal2 = currNode.data.secondGoal;
+
+                String secondGoalString;
+
+                if (goal2 != null) {
+                    secondGoalString = goal2.goal;
+                } else {
+                   secondGoalString = " ";
+                }
+
+                String[] sub1 = new String[20];
+                String[] sub2 = new String[20];
+
+                int size1 = goal1.subgoals.size();
+
+                if (size1 > 0) {
+                    for (int i = 0; i < size1; i++) {
+                        if (goal1.subgoals.get(i).isComplete) {
+                            sub1[i] = "1";
+                        } else {
+                            sub1[i] = "0";
+                        }
+                    }
+                }
+
+                for (int i = size1; i < 20; i++) {
+                    sub1[i] = " ";
+                }
+
+                if (goal2 != null) {
+                    int size2 = goal2.subgoals.size();
+                    if (size2 > 0) {
+                        for (int i = 0; i < size2; i++) {
+                            if (goal2.subgoals.get(i).isComplete) {
+                                sub2[i] = "1";
+                            } else {
+                                sub2[i] = "0";
+                            }
+                        }
+                    }
+                    for (int i = size2; i < 20; i++) {
+                        sub2[i] = " ";
+                    }
+                } else {
+                    for (int i = 0; i < 20; i++) {
+                        sub2[i] = " ";
+                    }
+                }
+
+                content = content + currNode.data.lastName + "," + currNode.data.phoneNumber.replaceAll("\\D+", "") + "," + currNode.data.lastName + ","
+                        + currNode.data.firstName + "," + currNode.data.phoneNumber + "," + currNode.data.emailAddress + "," + goal1.goal + "," + secondGoalString + ","
+                        + notes + "," + currNode.data.notes.date.getTime() + "," + sub1[0] + "," + sub1[1] + "," + sub1[2] + "," + sub1[3] + ","
+                        + sub1[4] + "," + sub1[5] + "," + sub1[6] + "," + sub1[7] + "," + sub1[8] + "," + sub1[9] + "," + sub1[10] + ","
+                        + sub1[11] + "," + sub1[12] + "," + sub1[13] + "," + sub1[14] + "," + sub1[15] + "," + sub1[16] + "," + sub1[17] + "," + sub1[18] + ","
+                        + sub1[19] + "," + sub2[0] + "," + sub2[1] + "," + sub2[2] + "," + sub2[3] + "," + sub2[4] + "," + sub2[5] + "," + sub2[6] + ","
+                        + sub2[7] + "," + sub2[8] + "," + sub2[9] + "," + sub2[10] + "," + sub2[11] + "," + sub2[12] + "," + sub2[13] + "," + sub2[14] + ","
+                        + sub2[15] + "," + sub2[16] + "," + sub2[17] + "," + sub2[18] + "," + sub2[19] + System.getProperty("line.separator");
             }
 
             File file = new File("C:\\Users\\mguyer92\\Google Drive\\database.txt");
@@ -1074,7 +1131,7 @@ final class TabDemo extends Application {
         HBox hbDeleteSubgoals = new HBox(10);
         hbDeleteSubgoals.getChildren().add(deleteSubgoals);
         hbDeleteSubgoals.setAlignment(Pos.BOTTOM_RIGHT);
-        
+
         Button updateOrder = new Button("Update order");
         HBox hbUpdateOrder = new HBox(10);
         hbUpdateOrder.getChildren().add(updateOrder);
@@ -2024,7 +2081,7 @@ final class TabDemo extends Application {
                     manageGoalsGrid.getChildren().remove(hbAddSubgoal);
                 }
                 int numChildren = manageGoalsGrid.getChildren().size();
-                for (int i = 0; i < 2*size; i++) {
+                for (int i = 0; i < 2 * size; i++) {
                     manageGoalsGrid.getChildren().remove(numChildren - i - 1);
                 }
                 checkBoxes2.clear();
@@ -2038,12 +2095,12 @@ final class TabDemo extends Application {
                         CheckBox currentSubgoal = new CheckBox(currentGoal.subgoals.get(i).subgoal);
                         manageGoalsGrid.add(currentSubgoal, 1, 10 + i, 2, 1);
                         checkBoxes2.add(currentSubgoal);
-                        TextField currentTextField = new TextField("" + (i+1));
-                        manageGoalsGrid.add(currentTextField, 3, 10+i);
+                        TextField currentTextField = new TextField("" + (i + 1));
+                        manageGoalsGrid.add(currentTextField, 3, 10 + i);
                         textFields.add(currentTextField);
                     }
                     manageGoalsGrid.add(hbDeleteSubgoals, 3, 11 + n, 2, 1);
-                    manageGoalsGrid.add(hbUpdateOrder,1,11+n,2,1);
+                    manageGoalsGrid.add(hbUpdateOrder, 1, 11 + n, 2, 1);
                     manageGoalsGrid.add(addSubgoalLabel, 0, 13 + n);
                     manageGoalsGrid.add(newSubgoal, 1, 13 + n, 2, 1);
                     manageGoalsGrid.add(hbAddSubgoal, 3, 13 + n, 2, 1);
@@ -2271,24 +2328,27 @@ final class TabDemo extends Application {
                 int size = textFields.size();
                 boolean[] valuesFound = new boolean[size];
                 for (TextField current : textFields) {
-                    if (current.getLength() == 0)
+                    if (current.getLength() == 0) {
                         break;
-                    if (Integer.parseInt(current.getText()) > size)
+                    }
+                    if (Integer.parseInt(current.getText()) > size) {
                         break; //flag error
-                    else
-                        valuesFound[Integer.parseInt(current.getText())-1] = true;
+                    } else {
+                        valuesFound[Integer.parseInt(current.getText()) - 1] = true;
+                    }
                 }
                 for (boolean b : valuesFound) {
-                    if (!b)
+                    if (!b) {
                         break;
-                    else
+                    } else {
                         for (TextField current : textFields) {
                             current.clear();
                         }
+                    }
                 }
             }
         });
-        
+
         deleteSubgoals.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
                 Goal currentGoal = goalTree.find((String) listOfGoals.getValue());
@@ -2326,7 +2386,7 @@ final class TabDemo extends Application {
                 manageGoalsGrid.getChildren().remove(newSubgoal);
                 manageGoalsGrid.getChildren().remove(hbAddSubgoal);
                 int numChildren = manageGoalsGrid.getChildren().size();
-                for (int i = 0; i < 2*n; i++) {
+                for (int i = 0; i < 2 * n; i++) {
                     manageGoalsGrid.getChildren().remove(numChildren - i - 1);
                 }
                 checkBoxes2.clear();
@@ -2339,12 +2399,12 @@ final class TabDemo extends Application {
                     CheckBox currentSubgoal = new CheckBox(currentGoal.subgoals.get(i).subgoal);
                     manageGoalsGrid.add(currentSubgoal, 1, 10 + i, 2, 1);
                     checkBoxes2.add(currentSubgoal);
-                    TextField currentTextField = new TextField("" + (i+1));
-                    manageGoalsGrid.add(currentTextField,3,10+i);
+                    TextField currentTextField = new TextField("" + (i + 1));
+                    manageGoalsGrid.add(currentTextField, 3, 10 + i);
                     textFields.add(currentTextField);
                 }
                 manageGoalsGrid.add(hbDeleteSubgoals, 3, 11 + m, 2, 1);
-                manageGoalsGrid.add(hbUpdateOrder,1,11+m,2,1);
+                manageGoalsGrid.add(hbUpdateOrder, 1, 11 + m, 2, 1);
                 manageGoalsGrid.add(addSubgoalLabel, 0, 13 + m);
                 manageGoalsGrid.add(newSubgoal, 1, 13 + m, 2, 1);
                 manageGoalsGrid.add(hbAddSubgoal, 3, 13 + m, 2, 1);
@@ -2388,7 +2448,7 @@ final class TabDemo extends Application {
                 manageGoalsGrid.getChildren().remove(hbAddSubgoal);
                 newSubgoal.clear();
                 int numChildren = manageGoalsGrid.getChildren().size();
-                for (int i = 0; i < 2*checkBoxes2.size(); i++) {
+                for (int i = 0; i < 2 * checkBoxes2.size(); i++) {
                     manageGoalsGrid.getChildren().remove(numChildren - i - 1);
                 }
                 checkBoxes2.clear();
@@ -2401,12 +2461,12 @@ final class TabDemo extends Application {
                     CheckBox currentSubgoal = new CheckBox(currentGoal.subgoals.get(i).subgoal);
                     manageGoalsGrid.add(currentSubgoal, 1, 10 + i, 2, 1);
                     checkBoxes2.add(currentSubgoal);
-                    TextField currentTextField = new TextField("" + (i+1));
-                    manageGoalsGrid.add(currentTextField,3,10+i);
+                    TextField currentTextField = new TextField("" + (i + 1));
+                    manageGoalsGrid.add(currentTextField, 3, 10 + i);
                     textFields.add(currentTextField);
                 }
                 manageGoalsGrid.add(hbDeleteSubgoals, 3, 11 + m, 2, 1);
-                manageGoalsGrid.add(hbUpdateOrder,1,11+m,2,1);
+                manageGoalsGrid.add(hbUpdateOrder, 1, 11 + m, 2, 1);
                 manageGoalsGrid.add(addSubgoalLabel, 0, 13 + m);
                 manageGoalsGrid.add(newSubgoal, 1, 13 + m, 2, 1);
                 manageGoalsGrid.add(hbAddSubgoal, 3, 13 + m, 2, 1);
@@ -2965,8 +3025,33 @@ public class AIUWithTrees extends Application {
         }
         while (fileIn.hasNextLine()) {
             String[] array = fileIn.nextLine().split(",");
-            Long noteDate = new Long(array[8]);
-            database.add(array[0], array[1].replaceAll("\\D+", ""), new Student(array[2], array[3], array[4], array[5], new Goal(array[6]), new Notes(array[7], noteDate)));
+            Long noteDate = new Long(array[9]);
+            Goal primaryGoal = goalTree.find(array[6]);
+            Goal secondaryGoal;
+            Student student = new Student(array[2], array[3], array[4], array[5], primaryGoal, new Notes(array[8].replaceAll("\\\\n", "\n"), noteDate));
+            if(!array[7].equals(" ")){
+                secondaryGoal = goalTree.find(array[7]);
+                student.setSecondGoal(secondaryGoal);
+            }
+            for(int i = 10; i < 30; i++){
+                if(array[i].equals("1"))
+                    student.goal.subgoals.get(i-10).setComplete(true);
+                else if(array[i].equals("0"))
+                    student.goal.subgoals.get(i-10).setComplete(false);     
+                else 
+                    break;
+            }
+            if(student.secondGoal!= null){
+                for(int i = 30; i < array.length; i++){
+                    if(array[i].equals("1"))
+                        student.secondGoal.subgoals.get(i-30).setComplete(true);
+                    else if(array[i].equals("0"))
+                        student.secondGoal.subgoals.get(i-30).setComplete(false);
+                    else
+                        break;
+                }
+            }    
+            database.add(array[0], array[1].replaceAll("\\D+", ""), student);
         }
     }
 
@@ -3024,8 +3109,8 @@ public class AIUWithTrees extends Application {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        plantTree();
         plantGoalTree();
+        plantTree();
         plantUserTree();
         launch(args);
     }
