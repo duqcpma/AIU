@@ -1005,6 +1005,7 @@ final class TabDemo extends Application {
         manageGoalsGrid.getColumnConstraints().add(new ColumnConstraints(120));
         manageGoalsGrid.getColumnConstraints().add(new ColumnConstraints(50));
         manageGoalsGrid.getColumnConstraints().add(new ColumnConstraints(100));
+        manageGoalsGrid.getColumnConstraints().add(new ColumnConstraints(40));
 
         Label createGoal = new Label("Create a new goal:");
         manageGoalsGrid.add(createGoal, 0, 1);
@@ -1073,6 +1074,10 @@ final class TabDemo extends Application {
         HBox hbDeleteSubgoals = new HBox(10);
         hbDeleteSubgoals.getChildren().add(deleteSubgoals);
         hbDeleteSubgoals.setAlignment(Pos.BOTTOM_RIGHT);
+        
+        Button updateOrder = new Button("Update order");
+        HBox hbUpdateOrder = new HBox(10);
+        hbUpdateOrder.getChildren().add(updateOrder);
 
         Label addSubgoalLabel = new Label("Add a subgoal:");
 
@@ -2006,21 +2011,24 @@ final class TabDemo extends Application {
         });
 
         final ArrayList<CheckBox> checkBoxes2 = new ArrayList<CheckBox>();
+        final ArrayList<TextField> textFields = new ArrayList<TextField>();
 
         listOfGoals.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
                 int size = checkBoxes2.size();
                 if (size > 0) {
                     manageGoalsGrid.getChildren().remove(hbDeleteSubgoals);
+                    manageGoalsGrid.getChildren().remove(hbUpdateOrder);
                     manageGoalsGrid.getChildren().remove(addSubgoalLabel);
                     manageGoalsGrid.getChildren().remove(newSubgoal);
                     manageGoalsGrid.getChildren().remove(hbAddSubgoal);
                 }
                 int numChildren = manageGoalsGrid.getChildren().size();
-                for (int i = 0; i < size; i++) {
+                for (int i = 0; i < 2*size; i++) {
                     manageGoalsGrid.getChildren().remove(numChildren - i - 1);
                 }
                 checkBoxes2.clear();
+                textFields.clear();
                 if (listOfGoals.getValue() != null) {
                     goalStatement.setText((String) listOfGoals.getValue());
                     editGoal.setDisable(false);
@@ -2030,8 +2038,12 @@ final class TabDemo extends Application {
                         CheckBox currentSubgoal = new CheckBox(currentGoal.subgoals.get(i).subgoal);
                         manageGoalsGrid.add(currentSubgoal, 1, 10 + i, 2, 1);
                         checkBoxes2.add(currentSubgoal);
+                        TextField currentTextField = new TextField("" + (i+1));
+                        manageGoalsGrid.add(currentTextField, 3, 10+i);
+                        textFields.add(currentTextField);
                     }
                     manageGoalsGrid.add(hbDeleteSubgoals, 3, 11 + n, 2, 1);
+                    manageGoalsGrid.add(hbUpdateOrder,1,11+n,2,1);
                     manageGoalsGrid.add(addSubgoalLabel, 0, 13 + n);
                     manageGoalsGrid.add(newSubgoal, 1, 13 + n, 2, 1);
                     manageGoalsGrid.add(hbAddSubgoal, 3, 13 + n, 2, 1);
@@ -2254,6 +2266,29 @@ final class TabDemo extends Application {
             }
         });
 
+        updateOrder.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent t) {
+                int size = textFields.size();
+                boolean[] valuesFound = new boolean[size];
+                for (TextField current : textFields) {
+                    if (current.getLength() == 0)
+                        break;
+                    if (Integer.parseInt(current.getText()) > size)
+                        break; //flag error
+                    else
+                        valuesFound[Integer.parseInt(current.getText())-1] = true;
+                }
+                for (boolean b : valuesFound) {
+                    if (!b)
+                        break;
+                    else
+                        for (TextField current : textFields) {
+                            current.clear();
+                        }
+                }
+            }
+        });
+        
         deleteSubgoals.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
                 Goal currentGoal = goalTree.find((String) listOfGoals.getValue());
@@ -2286,14 +2321,16 @@ final class TabDemo extends Application {
                     }
                 }
                 manageGoalsGrid.getChildren().remove(hbDeleteSubgoals);
+                manageGoalsGrid.getChildren().remove(hbUpdateOrder);
                 manageGoalsGrid.getChildren().remove(addSubgoalLabel);
                 manageGoalsGrid.getChildren().remove(newSubgoal);
                 manageGoalsGrid.getChildren().remove(hbAddSubgoal);
                 int numChildren = manageGoalsGrid.getChildren().size();
-                for (int i = 0; i < n; i++) {
+                for (int i = 0; i < 2*n; i++) {
                     manageGoalsGrid.getChildren().remove(numChildren - i - 1);
                 }
                 checkBoxes2.clear();
+                textFields.clear();
                 goalStatement.setText((String) listOfGoals.getValue());
                 editGoal.setDisable(false);
                 Goal currentGoalUpdated = goalTree.find((String) listOfGoals.getValue());
@@ -2302,11 +2339,17 @@ final class TabDemo extends Application {
                     CheckBox currentSubgoal = new CheckBox(currentGoal.subgoals.get(i).subgoal);
                     manageGoalsGrid.add(currentSubgoal, 1, 10 + i, 2, 1);
                     checkBoxes2.add(currentSubgoal);
+                    TextField currentTextField = new TextField("" + (i+1));
+                    manageGoalsGrid.add(currentTextField,3,10+i);
+                    textFields.add(currentTextField);
                 }
                 manageGoalsGrid.add(hbDeleteSubgoals, 3, 11 + m, 2, 1);
+                manageGoalsGrid.add(hbUpdateOrder,1,11+m,2,1);
                 manageGoalsGrid.add(addSubgoalLabel, 0, 13 + m);
                 manageGoalsGrid.add(newSubgoal, 1, 13 + m, 2, 1);
                 manageGoalsGrid.add(hbAddSubgoal, 3, 13 + m, 2, 1);
+                findStudentGoals.getSelectionModel().clearSelection();
+                findStudentGoals.setValue(null);
             }
         });
 
@@ -2339,15 +2382,17 @@ final class TabDemo extends Application {
                     }
                 }
                 manageGoalsGrid.getChildren().remove(hbDeleteSubgoals);
+                manageGoalsGrid.getChildren().remove(hbUpdateOrder);
                 manageGoalsGrid.getChildren().remove(addSubgoalLabel);
                 manageGoalsGrid.getChildren().remove(newSubgoal);
                 manageGoalsGrid.getChildren().remove(hbAddSubgoal);
                 newSubgoal.clear();
                 int numChildren = manageGoalsGrid.getChildren().size();
-                for (int i = 0; i < checkBoxes2.size(); i++) {
+                for (int i = 0; i < 2*checkBoxes2.size(); i++) {
                     manageGoalsGrid.getChildren().remove(numChildren - i - 1);
                 }
                 checkBoxes2.clear();
+                textFields.clear();
                 goalStatement.setText((String) listOfGoals.getValue());
                 editGoal.setDisable(false);
                 Goal currentGoalUpdated = goalTree.find((String) listOfGoals.getValue());
@@ -2356,11 +2401,17 @@ final class TabDemo extends Application {
                     CheckBox currentSubgoal = new CheckBox(currentGoal.subgoals.get(i).subgoal);
                     manageGoalsGrid.add(currentSubgoal, 1, 10 + i, 2, 1);
                     checkBoxes2.add(currentSubgoal);
+                    TextField currentTextField = new TextField("" + (i+1));
+                    manageGoalsGrid.add(currentTextField,3,10+i);
+                    textFields.add(currentTextField);
                 }
                 manageGoalsGrid.add(hbDeleteSubgoals, 3, 11 + m, 2, 1);
+                manageGoalsGrid.add(hbUpdateOrder,1,11+m,2,1);
                 manageGoalsGrid.add(addSubgoalLabel, 0, 13 + m);
                 manageGoalsGrid.add(newSubgoal, 1, 13 + m, 2, 1);
                 manageGoalsGrid.add(hbAddSubgoal, 3, 13 + m, 2, 1);
+                findStudentGoals.getSelectionModel().clearSelection();
+                findStudentGoals.setValue(null);
             }
         });
 
