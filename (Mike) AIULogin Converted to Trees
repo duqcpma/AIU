@@ -129,7 +129,7 @@ final class Subgoal {
         subgoal = theSubgoal;
         isComplete = false;
     }
-    
+
     public Subgoal(Subgoal theSubgoal) {
         subgoal = theSubgoal.subgoal;
         isComplete = theSubgoal.isComplete;
@@ -2098,8 +2098,10 @@ final class TabDemo extends Application {
                         manageGoalsGrid.add(currentTextField, 3, 10 + i);
                         textFields.add(currentTextField);
                     }
-                    manageGoalsGrid.add(hbDeleteSubgoals, 3, 11 + n, 2, 1);
-                    manageGoalsGrid.add(hbUpdateOrder, 1, 11 + n, 2, 1);
+                    if (n > 0) {
+                        manageGoalsGrid.add(hbDeleteSubgoals, 3, 11 + n, 2, 1);
+                        manageGoalsGrid.add(hbUpdateOrder, 1, 11 + n, 2, 1);
+                    }
                     manageGoalsGrid.add(addSubgoalLabel, 0, 13 + n);
                     manageGoalsGrid.add(newSubgoal, 1, 13 + n, 2, 1);
                     manageGoalsGrid.add(hbAddSubgoal, 3, 13 + n, 2, 1);
@@ -2358,15 +2360,16 @@ final class TabDemo extends Application {
                     goalTree.modify((String) listOfGoals.getValue(), new Goal(currentGoal));
                     AIUTreeIterator<String, Student> updateStudents = new AIUTreeIterator(database.tree1);
                     ArrayList<Subgoal> newSubgoals = new ArrayList<Subgoal>();
-                    for (int i=0; i < size; i++) {
+                    for (int i = 0; i < size; i++) {
                         newSubgoals.add(new Subgoal(""));
                     }
                     while (updateStudents.hasNext()) {
                         Student currentStudent = (Student) updateStudents.next().data;
                         Goal studentGoal = currentStudent.goal;
                         ArrayList<Subgoal> exactSubgoalCopies = new ArrayList<Subgoal>();
-                        for (Subgoal subgoal : studentGoal.subgoals)
+                        for (Subgoal subgoal : studentGoal.subgoals) {
                             exactSubgoalCopies.add(subgoal);
+                        }
                         if (studentGoal.goal.equals((String) listOfGoals.getValue())) {
                             for (int i = 0; i < size; i++) {
                                 int updatedValue2 = Integer.parseInt(textFields.get(i).getText());
@@ -2374,8 +2377,7 @@ final class TabDemo extends Application {
                                     //Subgoal tempSubgoal = studentGoal.subgoals.get(i);
                                     newSubgoals.set(updatedValue2 - 1, exactSubgoalCopies.get(i));
                                     //newSubgoals.get(updatedValue2 - 1).setComplete(tempSubgoal.isComplete);
-                                }
-                                else {
+                                } else {
                                     newSubgoals.set(i, studentGoal.subgoals.get(i));
                                 }
                             }
@@ -2486,6 +2488,15 @@ final class TabDemo extends Application {
                 manageGoalsGrid.add(hbAddSubgoal, 3, 13 + m, 2, 1);
                 findStudentGoals.getSelectionModel().clearSelection();
                 findStudentGoals.setValue(null);
+            }
+        });
+        
+        deleteSubgoals.setOnMouseReleased(new EventHandler<MouseEvent> () {
+            public void handle(MouseEvent m) {
+                if (checkBoxes2.size() == 0) {
+                    manageGoalsGrid.getChildren().remove(hbDeleteSubgoals);
+                    manageGoalsGrid.getChildren().remove(hbUpdateOrder);
+                }
             }
         });
 
