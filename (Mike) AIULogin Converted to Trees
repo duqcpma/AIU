@@ -146,7 +146,7 @@ final class Student {
     public String firstName;
     public String phoneNumber;
     public String emailAddress;
-    public int count = 0;
+    public Date lastUpdate;
     public int hoursSince = 0;
     public Notes notes;
     public int goalsCompleted = 0;
@@ -161,10 +161,21 @@ final class Student {
         firstName = theFirstName;
         phoneNumber = thePhoneNumber;
         emailAddress = theEmail;
-        count++;
+        lastUpdate = new Date();
         goal = theGoal;
         notes = theNotes;
     }
+    
+    public Student(String theLastName, String theFirstName, String thePhoneNumber, String theEmail,
+            long lastUpdateTime, Goal theGoal, Notes theNotes) {
+        lastName = theLastName;
+        firstName = theFirstName;
+        phoneNumber = thePhoneNumber;
+        emailAddress = theEmail;
+        lastUpdate = new Date(lastUpdateTime);
+        goal = theGoal;
+        notes = theNotes;
+    }    
 
     public void setSecondGoal(Goal theSecondGoal) {
         secondGoal = theSecondGoal;
@@ -205,8 +216,6 @@ final class Student {
 
 final class TabDemo extends Application {
 
-    public ArrayList<UserAndPass> users = new ArrayList<UserAndPass>();
-
     public static TwoKeyTree<String, String, Student> database;
 
     public static AIUTree<String, Goal> goalTree;
@@ -216,6 +225,8 @@ final class TabDemo extends Application {
     public String currentUser;
 
     public boolean isAdmin = false;
+    
+    public Date launchTime = new Date();
 
     public void setAdmin(boolean b) {
         this.isAdmin = b;
@@ -780,7 +791,7 @@ final class TabDemo extends Application {
         flagsGrid.setVgap(10);
         flagsGrid.setPadding(new Insets(25, 25, 25, 25));
         flagsGrid.getColumnConstraints().add(new ColumnConstraints(100));
-        flagsGrid.getColumnConstraints().add(new ColumnConstraints(100));
+        flagsGrid.getColumnConstraints().add(new ColumnConstraints(105));
         flagsGrid.getColumnConstraints().add(new ColumnConstraints(150));
 
         Label selectStudentFlags = new Label("Select a student:");
@@ -791,20 +802,22 @@ final class TabDemo extends Application {
         findStudentFlags.setVisibleRowCount(3);
         flagsGrid.add(findStudentFlags, 1, 1, 2, 1);
 
-        Label timeSinceLabel = new Label("Time (in hours) since last appointment:");
+        Label timeSinceLabel = new Label("Time (in days) since profile last updated:");
         flagsGrid.add(timeSinceLabel, 0, 3, 2, 1);
 
         final TextField timeSince = new TextField();
         timeSince.setEditable(false);
-        timeSince.setPromptText("Enter time in hours");
+        //timeSince.setPromptText("Enter time in hours");
         flagsGrid.add(timeSince, 2, 3);
 
+        /*
         final Button saveTime = new Button("Update");
         HBox hbSaveTime = new HBox(10);
         hbSaveTime.setAlignment(Pos.BOTTOM_LEFT);
         hbSaveTime.getChildren().add(saveTime);
         saveTime.setDisable(true);
         flagsGrid.add(hbSaveTime, 2, 5);
+        */
 
         Label unreportedStudents = new Label("Students who have not reported in:");
         flagsGrid.add(unreportedStudents, 0, 8, 2, 1);
@@ -1740,16 +1753,25 @@ final class TabDemo extends Application {
         // "Flags" tab Actions
         findStudentFlags.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
-                timeSince.setEditable(false);
                 timeSince.clear();
-                saveTime.setDisable(true);
+                //saveTime.setDisable(true);
                 if (findStudentFlags.getValue() != null) {
-                    timeSince.setEditable(true);
-                    saveTime.setDisable(false);
+                    Date currentTime = new Date();
+                    Student currentStudent = database.find1((String) findStudentFlags.getValue());
+                    double difference = (currentTime.getTime()-currentStudent.lastUpdate.getTime())/86400000.0;
+                    int differenceDays = (int) difference;
+                    double fractionalDay = difference - differenceDays;
+                    double fractionalDayInHours = fractionalDay*24;
+                    int differenceHours = (int) fractionalDayInHours;
+                    double fractionalHours = fractionalDayInHours - differenceHours;
+                    
+                    timeSince.setText("");
+                    //saveTime.setDisable(false);
                 }
             }
         });
 
+        /*
         saveTime.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
                 if (timeSince.getLength() == 0) {
@@ -1767,6 +1789,7 @@ final class TabDemo extends Application {
                 }
             }
         });
+        */
 
         reportTimes.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
@@ -3310,7 +3333,7 @@ public class AIUWithTrees extends Application {
             Student student = new Student(array[2], array[3], array[4], array[5], new Goal(primaryGoal), new Notes(array[8].replaceAll("\\\\n", "\n"), noteDate));
             if (!array[7].equals(" ")) {
                 secondaryGoal = goalTree.find(array[7]);
-                student.setSecondGoal(secondaryGoal);
+                student.setSecondGoal(new Goal(secondaryGoal));
             }
             for (int i = 10; i < 30; i++) {
                 if (array[i].equals("1")) {
