@@ -1145,6 +1145,11 @@ final class TabDemo extends Application {
         hbAddSubgoal.getChildren().add(addSubgoal);
         addSubgoal.setDisable(true);
 
+        Button deleteGoal = new Button("               Delete goal               ");
+        HBox hbDeleteGoal = new HBox(10);
+        hbDeleteGoal.setAlignment(Pos.CENTER);
+        hbDeleteGoal.getChildren().add(deleteGoal);
+
         // Popup Window
         final PopUpWindow popup = new PopUpWindow();
         final Stage popupStage = new Stage();
@@ -1179,6 +1184,12 @@ final class TabDemo extends Application {
         popupGrid.add(areYouSure3, 1, 1, 5, 1);
         areYouSure3.setVisible(false);
 
+        final Text areYouSure4 = new Text();
+        areYouSure4.setFill(Color.BLACK);
+        areYouSure4.setText("Are you sure you want to delete this goal?");
+        popupGrid.add(areYouSure4, 1, 1, 5, 1);
+        areYouSure4.setVisible(false);
+
         Button yes = new Button("Yes");
         HBox hbYes = new HBox(10);
         hbYes.setAlignment(Pos.BOTTOM_RIGHT);
@@ -1201,8 +1212,10 @@ final class TabDemo extends Application {
                     deleteStudent.fire();
                 } else if (popup.isUpdatingUser) {
                     saveUserChanges.fire();
-                } else {
+                } else if (popup.isDeletingUser) {
                     deleteUser.fire();
+                } else {
+                    deleteGoal.fire();
                 }
             }
         });
@@ -1214,7 +1227,7 @@ final class TabDemo extends Application {
             }
         });
 
-        final Scene popupScene = new Scene(popupGrid, 300, 100);
+        final Scene popupScene = new Scene(popupGrid, 300, 120);
         primaryStage.setResizable(false);
 
         primaryStage.setTitle("");
@@ -1252,14 +1265,19 @@ final class TabDemo extends Application {
                     lastNameField.setText(currentStudent.lastName);
                     emailField.setText(currentStudent.emailAddress);
                     phoneNumberField.setText(currentStudent.phoneNumber);
-                    displayGoal.setValue(currentStudent.goal.goal);
+                    if (currentStudent.goal == null) {
+                        displayGoal.setValue(null);
+                    } else {
+                        displayGoal.setValue(currentStudent.goal.goal);
+                    }
                     if (currentStudent.secondGoal == null) {
                         displaySecondGoal.setValue(null);
                     } else {
                         displaySecondGoal.setValue(currentStudent.secondGoal.goal);
                     }
                     changeGoal.setDisable(false);
-                    changeSecondGoal.setDisable(false);
+                    if (currentStudent.goal != null)
+                        changeSecondGoal.setDisable(false);
                     if (!currentStudent.notes.notes.equals(" ")) {
                         noteArea.setText(currentStudent.notes.notes);
                     }
@@ -1334,7 +1352,14 @@ final class TabDemo extends Application {
                 if (displayGoal.getValue() == theSeparator) {
                     displayGoal.getSelectionModel().clearSelection();
                     displayGoal.setValue(null);
+                    changeSecondGoal.setDisable(true);
+                    displaySecondGoal.getSelectionModel().clearSelection();
+                    displaySecondGoal.setValue(null);
                 }
+                else if (displayGoal.getValue() == null)
+                    changeSecondGoal.setDisable(true);
+                else
+                    changeSecondGoal.setDisable(false);
             }
         });
 
@@ -1377,11 +1402,17 @@ final class TabDemo extends Application {
                         Goal previousGoal = theStudent.goal;
                         Goal newGoal = new Goal(goalTree.find((String) displayGoal.getValue()));
                         Goal goal;
-                        if (previousGoal.goal.equals(newGoal.goal)) {
-                            goal = previousGoal;
-                        } else {
-                            goal = newGoal;
+                        if (previousGoal != null) {
+                            if (newGoal == null)
+                                goal = newGoal;
+                            else if (previousGoal.goal.equals(newGoal.goal)) {
+                                goal = previousGoal;
+                            } else {
+                                goal = newGoal;
+                            }
                         }
+                        else
+                            goal = newGoal;
                         Goal previousSecondGoal = theStudent.secondGoal;
                         Goal newSecondGoal = null;
                         if (displaySecondGoal.getValue() != null) {
@@ -1390,8 +1421,14 @@ final class TabDemo extends Application {
                         Goal secondGoal;
                         if (previousSecondGoal == null && newSecondGoal == null) {
                             secondGoal = previousSecondGoal;
-                        } else {
+                        } else if (previousSecondGoal == null || newSecondGoal == null) {
                             secondGoal = newSecondGoal;
+                        }
+                        else {
+                            if (previousSecondGoal.goal.equals(newSecondGoal.goal))
+                                secondGoal = previousSecondGoal;
+                            else
+                                secondGoal = newSecondGoal;
                         }
                         Notes previousNotes = theStudent.notes;
                         Notes note;
@@ -1447,10 +1484,12 @@ final class TabDemo extends Application {
                     } else {
                         areYouSure2.setVisible(false);
                         areYouSure3.setVisible(false);
+                        areYouSure4.setVisible(false);
                         areYouSure1.setVisible(true);
                         popup.setDeletingStudent(false);
                         popup.setUpdatingStudent(true);
                         popup.setDeletingUser(false);
+                        popup.setDeletingGoal(false);
                         popup.setUpdatingUser(false);
                         popupStage.setScene(popupScene);
                         popupStage.show();
@@ -1475,11 +1514,13 @@ final class TabDemo extends Application {
                 } else {
                     areYouSure1.setVisible(false);
                     areYouSure3.setVisible(false);
+                    areYouSure4.setVisible(false);
                     areYouSure2.setVisible(true);
                     popup.setDeletingStudent(true);
                     popup.setUpdatingStudent(false);
                     popup.setDeletingUser(false);
                     popup.setUpdatingUser(false);
+                    popup.setDeletingGoal(false);
                     popupStage.setScene(popupScene);
                     popupStage.show();
                 }
@@ -1543,8 +1584,10 @@ final class TabDemo extends Application {
                     String lastName = studentName.substring(0, studentName.indexOf(","));
                     Student currentStudent = (Student) database.find1(lastName);
                     Goal currentGoal = currentStudent.goal;
-                    currentStudentGoal.setText(currentGoal.goal);
-                    selectGoal1.setDisable(false);
+                    if (currentGoal != null) {
+                        currentStudentGoal.setText(currentGoal.goal);
+                        selectGoal1.setDisable(false);
+                    }
                     Goal secondaryGoal = currentStudent.secondGoal;
                     if (secondaryGoal != null) {
                         secondStudentGoal.setText(secondaryGoal.goal);
@@ -1826,8 +1869,10 @@ final class TabDemo extends Application {
                     String lastName = choice2.substring(0, choice2.indexOf(","));
                     studentName.insertText(0, firstName + " " + lastName);
                     Student currentStudent = database.find1(lastName);
-                    primaryStudentGoal.setText(currentStudent.goal.goal);
-                    selectGoalReport1.setDisable(false);
+                    if (currentStudent.goal != null) {
+                        primaryStudentGoal.setText(currentStudent.goal.goal);
+                        selectGoalReport1.setDisable(false);
+                    }
                     if (currentStudent.secondGoal != null) {
                         secondaryStudentGoal.setText(currentStudent.secondGoal.goal);
                         selectGoalReport2.setDisable(false);
@@ -1974,10 +2019,12 @@ final class TabDemo extends Application {
                         areYouSure1.setVisible(true);
                         areYouSure2.setVisible(false);
                         areYouSure3.setVisible(false);
+                        areYouSure4.setVisible(false);
                         popup.setUpdatingUser(true);
                         popup.setDeletingUser(false);
                         popup.setUpdatingStudent(false);
                         popup.setDeletingStudent(false);
+                        popup.setDeletingGoal(false);
                         popupStage.setScene(popupScene);
                         popupStage.show();
                     }
@@ -2071,13 +2118,15 @@ final class TabDemo extends Application {
 
         listOfGoals.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
+                saveGoal.setDisable(true);
                 int size = checkBoxes2.size();
+                manageGoalsGrid.getChildren().remove(addSubgoalLabel);
+                manageGoalsGrid.getChildren().remove(newSubgoal);
+                manageGoalsGrid.getChildren().remove(hbAddSubgoal);
+                manageGoalsGrid.getChildren().remove(hbDeleteGoal);
                 if (size > 0) {
                     manageGoalsGrid.getChildren().remove(hbDeleteSubgoals);
                     manageGoalsGrid.getChildren().remove(hbUpdateOrder);
-                    manageGoalsGrid.getChildren().remove(addSubgoalLabel);
-                    manageGoalsGrid.getChildren().remove(newSubgoal);
-                    manageGoalsGrid.getChildren().remove(hbAddSubgoal);
                 }
                 int numChildren = manageGoalsGrid.getChildren().size();
                 for (int i = 0; i < 2 * size; i++) {
@@ -2105,6 +2154,7 @@ final class TabDemo extends Application {
                     manageGoalsGrid.add(addSubgoalLabel, 0, 13 + n);
                     manageGoalsGrid.add(newSubgoal, 1, 13 + n, 2, 1);
                     manageGoalsGrid.add(hbAddSubgoal, 3, 13 + n, 2, 1);
+                    manageGoalsGrid.add(hbDeleteGoal, 1, 16 + n, 3, 1);
                 } else {
                     goalStatement.clear();
                     editGoal.setDisable(true);
@@ -2233,8 +2283,18 @@ final class TabDemo extends Application {
                     oldGoal.goal = newGoalStatement;
                     goalTree.add(newGoalStatement, new Goal(oldGoal));
                     goalStatement.clear();
+                    saveGoal.setDisable(true);
                     listOfGoals.getSelectionModel().clearSelection();
                     listOfGoals.setValue(null);
+                    if (oldGoal.goalType == GoalType.CIVICS) {
+                        civicsGoals.set(civicsGoals.indexOf(oldGoalStatement), newGoalStatement);
+                    } else if (oldGoal.goalType == GoalType.JOB) {
+                        jobGoals.set(jobGoals.indexOf(oldGoalStatement), newGoalStatement);
+                    } else if (oldGoal.goalType == GoalType.POSTSEC) {
+                        postsecGoals.set(postsecGoals.indexOf(oldGoalStatement), newGoalStatement);
+                    } else {
+                        otherGoals.set(otherGoals.indexOf(oldGoalStatement), newGoalStatement);
+                    }
                     displayGoal.getItems().clear();
                     displayGoal.getItems().addAll(civicsGoals);
                     if (civicsGoals.size() != 0 && jobGoals.size() != 0) {
@@ -2394,6 +2454,7 @@ final class TabDemo extends Application {
                 manageGoalsGrid.getChildren().remove(addSubgoalLabel);
                 manageGoalsGrid.getChildren().remove(newSubgoal);
                 manageGoalsGrid.getChildren().remove(hbAddSubgoal);
+                manageGoalsGrid.getChildren().remove(hbDeleteGoal);
                 newSubgoal.clear();
                 int numChildren = manageGoalsGrid.getChildren().size();
                 for (int i = 0; i < 2 * checkBoxes2.size(); i++) {
@@ -2413,11 +2474,14 @@ final class TabDemo extends Application {
                     manageGoalsGrid.add(currentTextField, 3, 10 + i);
                     textFields.add(currentTextField);
                 }
-                manageGoalsGrid.add(hbDeleteSubgoals, 3, 11 + m, 2, 1);
-                manageGoalsGrid.add(hbUpdateOrder, 1, 11 + m, 2, 1);
+                if (m > 0) {
+                    manageGoalsGrid.add(hbDeleteSubgoals, 3, 11 + m, 2, 1);
+                    manageGoalsGrid.add(hbUpdateOrder, 1, 11 + m, 2, 1);
+                }
                 manageGoalsGrid.add(addSubgoalLabel, 0, 13 + m);
                 manageGoalsGrid.add(newSubgoal, 1, 13 + m, 2, 1);
                 manageGoalsGrid.add(hbAddSubgoal, 3, 13 + m, 2, 1);
+                manageGoalsGrid.add(hbDeleteGoal, 1, 16 + m, 3, 1);
                 findStudentEdit.getSelectionModel().clearSelection();
                 findStudentEdit.setValue(null);
                 findStudentGoals.getSelectionModel().clearSelection();
@@ -2463,6 +2527,7 @@ final class TabDemo extends Application {
                 manageGoalsGrid.getChildren().remove(addSubgoalLabel);
                 manageGoalsGrid.getChildren().remove(newSubgoal);
                 manageGoalsGrid.getChildren().remove(hbAddSubgoal);
+                manageGoalsGrid.getChildren().remove(hbDeleteGoal);
                 int numChildren = manageGoalsGrid.getChildren().size();
                 for (int i = 0; i < 2 * n; i++) {
                     manageGoalsGrid.getChildren().remove(numChildren - i - 1);
@@ -2481,17 +2546,20 @@ final class TabDemo extends Application {
                     manageGoalsGrid.add(currentTextField, 3, 10 + i);
                     textFields.add(currentTextField);
                 }
-                manageGoalsGrid.add(hbDeleteSubgoals, 3, 11 + m, 2, 1);
-                manageGoalsGrid.add(hbUpdateOrder, 1, 11 + m, 2, 1);
+                if (m > 0) {
+                    manageGoalsGrid.add(hbDeleteSubgoals, 3, 11 + m, 2, 1);
+                    manageGoalsGrid.add(hbUpdateOrder, 1, 11 + m, 2, 1);
+                }
                 manageGoalsGrid.add(addSubgoalLabel, 0, 13 + m);
                 manageGoalsGrid.add(newSubgoal, 1, 13 + m, 2, 1);
                 manageGoalsGrid.add(hbAddSubgoal, 3, 13 + m, 2, 1);
+                manageGoalsGrid.add(hbDeleteGoal, 1, 16 + m, 3, 1);
                 findStudentGoals.getSelectionModel().clearSelection();
                 findStudentGoals.setValue(null);
             }
         });
-        
-        deleteSubgoals.setOnMouseReleased(new EventHandler<MouseEvent> () {
+
+        deleteSubgoals.setOnMouseReleased(new EventHandler<MouseEvent>() {
             public void handle(MouseEvent m) {
                 if (checkBoxes2.size() == 0) {
                     manageGoalsGrid.getChildren().remove(hbDeleteSubgoals);
@@ -2559,6 +2627,125 @@ final class TabDemo extends Application {
                 manageGoalsGrid.add(hbAddSubgoal, 3, 13 + m, 2, 1);
                 findStudentGoals.getSelectionModel().clearSelection();
                 findStudentGoals.setValue(null);
+            }
+        });
+
+        deleteGoal.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent t) {
+                if (popup.agreeToChanges) {
+                    String goalString = (String) listOfGoals.getValue();
+                    GoalType goalType = goalTree.find(goalString).goalType;
+                    goalTree.remove(goalString);
+                    AIUTreeIterator<String, Student> updateStudents = new AIUTreeIterator(database.tree1);
+                    while (updateStudents.hasNext()) {
+                        Student currentStudent = (Student) updateStudents.next().data;
+                        if (currentStudent.goal.goal.equals(goalString)) {
+                            currentStudent.goal = currentStudent.secondGoal;
+                            currentStudent.secondGoal = null;
+                        }
+                        if (currentStudent.secondGoal != null) {
+                            if (currentStudent.secondGoal.goal.equals(goalString)) {
+                                currentStudent.secondGoal = null;
+                            }
+                        }
+                        database.modify1(currentStudent.lastName, currentStudent);
+                    }
+                    listOfGoals.getSelectionModel().clearSelection();
+                    listOfGoals.setValue(null);
+                    goalStatement.clear();
+                    if (goalType == GoalType.CIVICS) {
+                        civicsGoals.remove(goalString);
+                    } else if (goalType == GoalType.JOB) {
+                        jobGoals.remove(goalString);
+                    } else if (goalType == GoalType.POSTSEC) {
+                        postsecGoals.remove(goalString);
+                    } else {
+                        otherGoals.remove(goalString);
+                    }
+                    displayGoal.getItems().clear();
+                    displayGoal.getItems().addAll(civicsGoals);
+                    if (civicsGoals.size() != 0 && jobGoals.size() != 0) {
+                        displayGoal.getItems().add(theSeparator);
+                    }
+                    displayGoal.getItems().addAll(jobGoals);
+                    if (jobGoals.size() != 0 && postsecGoals.size() != 0) {
+                        displayGoal.getItems().add(theSeparator);
+                    }
+                    displayGoal.getItems().addAll(postsecGoals);
+                    if (postsecGoals.size() != 0 && otherGoals.size() != 0) {
+                        displayGoal.getItems().add(theSeparator);
+                    }
+                    displayGoal.getItems().addAll(otherGoals);
+                    displaySecondGoal.getItems().clear();
+                    displaySecondGoal.getItems().addAll(civicsGoals);
+                    if (civicsGoals.size() != 0 && jobGoals.size() != 0) {
+                        displaySecondGoal.getItems().add(theSeparator);
+                    }
+                    displaySecondGoal.getItems().addAll(jobGoals);
+                    if (jobGoals.size() != 0 && postsecGoals.size() != 0) {
+                        displaySecondGoal.getItems().add(theSeparator);
+                    }
+                    displaySecondGoal.getItems().addAll(postsecGoals);
+                    if (postsecGoals.size() != 0 && otherGoals.size() != 0) {
+                        displaySecondGoal.getItems().add(theSeparator);
+                    }
+                    displaySecondGoal.getItems().addAll(otherGoals);
+                    goals2.getItems().clear();
+                    goals2.getItems().addAll(civicsGoals);
+                    if (civicsGoals.size() != 0 && jobGoals.size() != 0) {
+                        goals2.getItems().add(theSeparator);
+                    }
+                    goals2.getItems().addAll(jobGoals);
+                    if (jobGoals.size() != 0 && postsecGoals.size() != 0) {
+                        goals2.getItems().add(theSeparator);
+                    }
+                    goals2.getItems().addAll(postsecGoals);
+                    if (postsecGoals.size() != 0 && otherGoals.size() != 0) {
+                        goals2.getItems().add(theSeparator);
+                    }
+                    goals2.getItems().addAll(otherGoals);
+                    secondGoals2.getItems().clear();
+                    secondGoals2.getItems().addAll(civicsGoals);
+                    if (civicsGoals.size() != 0 && jobGoals.size() != 0) {
+                        secondGoals2.getItems().add(theSeparator);
+                    }
+                    secondGoals2.getItems().addAll(jobGoals);
+                    if (jobGoals.size() != 0 && postsecGoals.size() != 0) {
+                        secondGoals2.getItems().add(theSeparator);
+                    }
+                    secondGoals2.getItems().addAll(postsecGoals);
+                    if (postsecGoals.size() != 0 && otherGoals.size() != 0) {
+                        secondGoals2.getItems().add(theSeparator);
+                    }
+                    secondGoals2.getItems().addAll(otherGoals);
+                    listOfGoals.getItems().clear();
+                    listOfGoals.getItems().addAll(civicsGoals);
+                    if (civicsGoals.size() != 0 && jobGoals.size() != 0) {
+                        listOfGoals.getItems().add(theSeparator);
+                    }
+                    listOfGoals.getItems().addAll(jobGoals);
+                    if (jobGoals.size() != 0 && postsecGoals.size() != 0) {
+                        listOfGoals.getItems().add(theSeparator);
+                    }
+                    listOfGoals.getItems().addAll(postsecGoals);
+                    if (postsecGoals.size() != 0 && otherGoals.size() != 0) {
+                        listOfGoals.getItems().add(theSeparator);
+                    }
+                    listOfGoals.getItems().addAll(otherGoals);
+                    popup.setAgreeToChanges(false);
+                } else {
+                    areYouSure4.setVisible(true);
+                    areYouSure1.setVisible(false);
+                    areYouSure2.setVisible(false);
+                    areYouSure3.setVisible(false);
+                    popup.setDeletingGoal(true);
+                    popup.setUpdatingStudent(false);
+                    popup.setDeletingStudent(false);
+                    popup.setUpdatingUser(false);
+                    popup.setDeletingUser(false);
+                    popupStage.setScene(popupScene);
+                    popupStage.show();
+                }
             }
         });
 
@@ -2677,6 +2864,7 @@ final class PopUpWindow {
     public boolean isUpdatingStudent = false;
     public boolean isUpdatingUser = false;
     public boolean isDeletingUser = false;
+    public boolean isDeletingGoal = false;
 
     public void setAgreeToChanges(boolean b) {
         this.agreeToChanges = b;
@@ -2696,6 +2884,10 @@ final class PopUpWindow {
 
     public void setDeletingUser(boolean b) {
         this.isDeletingUser = b;
+    }
+
+    public void setDeletingGoal(boolean b) {
+        this.isDeletingGoal = b;
     }
 }
 
