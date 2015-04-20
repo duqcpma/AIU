@@ -307,7 +307,7 @@ final class TabDemo extends Application {
                 }
 
                 content = content + currNode.data.lastName + "," + currNode.data.phoneNumber.replaceAll("\\D+", "") + "," + currNode.data.lastName + ","
-                        + currNode.data.firstName + "," + currNode.data.phoneNumber + "," + currNode.data.emailAddress + "," + goal1.goal + "," + secondGoalString + ","
+                        + currNode.data.firstName + "," + currNode.data.phoneNumber + "," + currNode.data.emailAddress + "," + currNode.data.lastUpdate.getTime() + "," + goal1.goal + "," + secondGoalString + ","
                         + notes + "," + currNode.data.notes.date.getTime() + "," + sub1[0] + "," + sub1[1] + "," + sub1[2] + "," + sub1[3] + ","
                         + sub1[4] + "," + sub1[5] + "," + sub1[6] + "," + sub1[7] + "," + sub1[8] + "," + sub1[9] + "," + sub1[10] + ","
                         + sub1[11] + "," + sub1[12] + "," + sub1[13] + "," + sub1[14] + "," + sub1[15] + "," + sub1[16] + "," + sub1[17] + "," + sub1[18] + ","
@@ -791,7 +791,7 @@ final class TabDemo extends Application {
         flagsGrid.setVgap(10);
         flagsGrid.setPadding(new Insets(25, 25, 25, 25));
         flagsGrid.getColumnConstraints().add(new ColumnConstraints(100));
-        flagsGrid.getColumnConstraints().add(new ColumnConstraints(105));
+        flagsGrid.getColumnConstraints().add(new ColumnConstraints(100));
         flagsGrid.getColumnConstraints().add(new ColumnConstraints(150));
 
         Label selectStudentFlags = new Label("Select a student:");
@@ -802,7 +802,7 @@ final class TabDemo extends Application {
         findStudentFlags.setVisibleRowCount(3);
         flagsGrid.add(findStudentFlags, 1, 1, 2, 1);
 
-        Label timeSinceLabel = new Label("Time (in days) since profile last updated:");
+        Label timeSinceLabel = new Label("Time since profile last updated:");
         flagsGrid.add(timeSinceLabel, 0, 3, 2, 1);
 
         final TextField timeSince = new TextField();
@@ -1757,15 +1757,18 @@ final class TabDemo extends Application {
                 //saveTime.setDisable(true);
                 if (findStudentFlags.getValue() != null) {
                     Date currentTime = new Date();
-                    Student currentStudent = database.find1((String) findStudentFlags.getValue());
+                    String studentName = (String) findStudentFlags.getValue();
+                    Student currentStudent = database.find1(studentName.substring(0,studentName.indexOf(",")));
                     double difference = (currentTime.getTime()-currentStudent.lastUpdate.getTime())/86400000.0;
                     int differenceDays = (int) difference;
                     double fractionalDay = difference - differenceDays;
                     double fractionalDayInHours = fractionalDay*24;
                     int differenceHours = (int) fractionalDayInHours;
                     double fractionalHours = fractionalDayInHours - differenceHours;
-                    
-                    timeSince.setText("");
+                    double fractionalHoursInMinutes = fractionalHours*60;
+                    int differenceMinutes = (int) fractionalHoursInMinutes;
+                    timeSince.setText("" + differenceDays + " days, " + differenceHours + " hours, and " +
+                            differenceMinutes + " minutes");
                     //saveTime.setDisable(false);
                 }
             }
@@ -3327,29 +3330,30 @@ public class AIUWithTrees extends Application {
         }
         while (fileIn.hasNextLine()) {
             String[] array = fileIn.nextLine().split(",");
-            Long noteDate = new Long(array[9]);
-            Goal primaryGoal = goalTree.find(array[6]);
+            Long noteDate = new Long(array[10]);
+            Long lastUpdate = new Long(array[6]);
+            Goal primaryGoal = goalTree.find(array[7]);
             Goal secondaryGoal;
-            Student student = new Student(array[2], array[3], array[4], array[5], new Goal(primaryGoal), new Notes(array[8].replaceAll("\\\\n", "\n"), noteDate));
-            if (!array[7].equals(" ")) {
-                secondaryGoal = goalTree.find(array[7]);
+            Student student = new Student(array[2], array[3], array[4], array[5], lastUpdate, new Goal(primaryGoal), new Notes(array[8].replaceAll("\\\\n", "\n"), noteDate));
+            if (!array[8].equals(" ")) {
+                secondaryGoal = goalTree.find(array[8]);
                 student.setSecondGoal(new Goal(secondaryGoal));
             }
-            for (int i = 10; i < 30; i++) {
+            for (int i = 11; i < 31; i++) {
                 if (array[i].equals("1")) {
-                    student.goal.subgoals.get(i - 10).setComplete(true);
+                    student.goal.subgoals.get(i - 11).setComplete(true);
                 } else if (array[i].equals("0")) {
-                    student.goal.subgoals.get(i - 10).setComplete(false);
+                    student.goal.subgoals.get(i - 11).setComplete(false);
                 } else {
                     break;
                 }
             }
             if (student.secondGoal != null) {
-                for (int i = 30; i < array.length; i++) {
+                for (int i = 31; i < array.length; i++) {
                     if (array[i].equals("1")) {
-                        student.secondGoal.subgoals.get(i - 30).setComplete(true);
+                        student.secondGoal.subgoals.get(i - 31).setComplete(true);
                     } else if (array[i].equals("0")) {
-                        student.secondGoal.subgoals.get(i - 30).setComplete(false);
+                        student.secondGoal.subgoals.get(i - 31).setComplete(false);
                     } else {
                         break;
                     }
