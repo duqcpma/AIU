@@ -147,7 +147,6 @@ final class Student {
     public String phoneNumber;
     public String emailAddress;
     public Date lastUpdate;
-    public int hoursSince = 0;
     public Notes notes;
     public int goalsCompleted = 0;
 
@@ -790,25 +789,47 @@ final class TabDemo extends Application {
         flagsGrid.setHgap(10);
         flagsGrid.setVgap(10);
         flagsGrid.setPadding(new Insets(25, 25, 25, 25));
+        flagsGrid.getColumnConstraints().add(new ColumnConstraints(120));
+        flagsGrid.getColumnConstraints().add(new ColumnConstraints(50));
+        flagsGrid.getColumnConstraints().add(new ColumnConstraints(70));
+        flagsGrid.getColumnConstraints().add(new ColumnConstraints(20));
         flagsGrid.getColumnConstraints().add(new ColumnConstraints(100));
-        flagsGrid.getColumnConstraints().add(new ColumnConstraints(100));
-        flagsGrid.getColumnConstraints().add(new ColumnConstraints(150));
 
+        Label studentSearchFlags = new Label("Search for a student:");
+        flagsGrid.add(studentSearchFlags,0,1);
+        
+        final TextField searchNameFlags = new TextField();
+        searchNameFlags.setPromptText("Enter a student name");
+        flagsGrid.add(searchNameFlags, 1, 1, 3, 1);
+        
+        Button searchButtonFlags = new Button("Search");
+        HBox hbSearchButtonFlags = new HBox(10);
+        hbSearchButtonFlags.getChildren().add(searchButtonFlags);
+        flagsGrid.add(hbSearchButtonFlags, 4, 1);
+        
+        final TextField searchPhoneFlags = new TextField();
+        searchPhoneFlags.setPromptText("Enter a phone number");
+        flagsGrid.add(searchPhoneFlags, 1, 2, 3, 1);
+        
+        Button searchPhoneButtonFlags = new Button("Search");
+        HBox hbSearchPhoneButtonFlags = new HBox(10);
+        hbSearchPhoneButtonFlags.getChildren().add(searchPhoneButtonFlags);
+        flagsGrid.add(hbSearchPhoneButtonFlags, 4, 2);
+        
         Label selectStudentFlags = new Label("Select a student:");
-        flagsGrid.add(selectStudentFlags, 0, 1);
+        flagsGrid.add(selectStudentFlags, 0, 4);
 
         final ComboBox findStudentFlags = new ComboBox();
         findStudentFlags.setItems(FXCollections.observableArrayList(namesArray));
         findStudentFlags.setVisibleRowCount(3);
-        flagsGrid.add(findStudentFlags, 1, 1, 2, 1);
+        flagsGrid.add(findStudentFlags, 1, 4, 2, 1);
 
         Label timeSinceLabel = new Label("Time since profile last updated:");
-        flagsGrid.add(timeSinceLabel, 0, 3, 2, 1);
+        flagsGrid.add(timeSinceLabel, 0, 6, 2, 1);
 
         final TextField timeSince = new TextField();
         timeSince.setEditable(false);
-        //timeSince.setPromptText("Enter time in hours");
-        flagsGrid.add(timeSince, 2, 3);
+        flagsGrid.add(timeSince, 2, 6, 3, 1);
 
         /*
         final Button saveTime = new Button("Update");
@@ -819,25 +840,25 @@ final class TabDemo extends Application {
         flagsGrid.add(hbSaveTime, 2, 5);
         */
 
-        Label unreportedStudents = new Label("Students who have not reported in:");
-        flagsGrid.add(unreportedStudents, 0, 8, 2, 1);
+        Label unreportedStudents = new Label("Students whose profile has not been updated in:");
+        flagsGrid.add(unreportedStudents, 0, 11, 3, 1);
 
         final ComboBox reportTimes = new ComboBox();
-        reportTimes.setItems(FXCollections.observableArrayList("0-12 Hours", "13-30 Hours",
-                "31-60 Hours", "60+ Hours"));
-        flagsGrid.add(reportTimes, 2, 8);
+        reportTimes.setItems(FXCollections.observableArrayList("0-2 weeks", "2-4 weeks",
+                "4-6 weeks", "6+ weeks"));
+        flagsGrid.add(reportTimes, 3, 11, 2, 1);
 
         final TextArea studentList = new TextArea();
         studentList.setPrefRowCount(6);
         studentList.setEditable(false);
-        flagsGrid.add(studentList, 0, 9, 3, 6);
+        flagsGrid.add(studentList, 0, 13, 5, 6);
 
         final Button printBtn = new Button("Print");
         HBox hbPrint = new HBox(10);
         hbPrint.setAlignment(Pos.BOTTOM_RIGHT);
         hbPrint.getChildren().add(printBtn);
         printBtn.setDisable(true);
-        flagsGrid.add(hbPrint, 2, 17);
+        flagsGrid.add(hbPrint, 4, 21);
 
         // "Reports" tab contents
         GridPane reportsGrid = new GridPane();
@@ -1751,6 +1772,38 @@ final class TabDemo extends Application {
         });
 
         // "Flags" tab Actions
+        searchButtonFlags.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent t) {
+                if (searchNameFlags.getLength() != 0) {
+                    //Consider inputs that aren't multi-part
+                    String query = searchNameFlags.getText();
+                    String firstName = query.substring(0, query.indexOf(" "));
+                    String lastName = query.substring(query.indexOf(" ") + 1);
+                    String name = lastName + ", " + firstName;
+                    if (names.contains(name)) {
+                        findStudentFlags.setValue(name);
+                    } else {
+
+                    }
+                }
+                searchNameFlags.clear();
+            }
+        });
+
+        searchPhoneButtonFlags.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent t) {
+                if (searchPhoneFlags.getLength() != 0) {
+                    String query = searchPhoneFlags.getText().replaceAll("\\D+", "");
+                    Student potentialMatch = (Student) database.find2(query);
+                    if (potentialMatch != null) {
+                        String name = potentialMatch.lastName + ", " + potentialMatch.firstName;
+                        findStudentFlags.setValue(name);
+                    }
+                    searchPhoneFlags.clear();
+                }
+            }
+        });      
+        
         findStudentFlags.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
                 timeSince.clear();
@@ -1800,34 +1853,43 @@ final class TabDemo extends Application {
                 studentList.clear();
                 if (reportTimes.getValue() != null) {
                     printBtn.setDisable(false);
+                    Date currentTime = new Date();
                     String listOfStudents = "";
                     Student currentStudent;
                     AIUTreeIterator flagIterator = new AIUTreeIterator(database.tree1);
-                    if (reportTimes.getValue().equals("0-12 Hours")) {
+                    if (reportTimes.getValue().equals("0-2 weeks")) {
                         while (flagIterator.hasNext()) {
                             currentStudent = (Student) flagIterator.next().data;
-                            if (currentStudent.hoursSince <= 12) {
+                            double difference = (currentTime.getTime()-currentStudent.lastUpdate.getTime())/86400000.0;
+                            int differenceDays = (int) difference;
+                            if (differenceDays <= 13) {
                                 listOfStudents += currentStudent.firstName + " " + currentStudent.lastName + "\n";
                             }
                         }
-                    } else if (reportTimes.getValue().equals("13-30 Hours")) {
+                    } else if (reportTimes.getValue().equals("2-4 weeks")) {
                         while (flagIterator.hasNext()) {
                             currentStudent = (Student) flagIterator.next().data;
-                            if (currentStudent.hoursSince > 12 && currentStudent.hoursSince <= 30) {
+                            double difference = (currentTime.getTime()-currentStudent.lastUpdate.getTime())/86400000.0;
+                            int differenceDays = (int) difference;                            
+                            if (differenceDays > 13 && differenceDays <= 27) {
                                 listOfStudents += currentStudent.firstName + " " + currentStudent.lastName + "\n";
                             }
                         }
-                    } else if (reportTimes.getValue().equals("31-60 Hours")) {
+                    } else if (reportTimes.getValue().equals("4-6 weeks")) {
                         while (flagIterator.hasNext()) {
                             currentStudent = (Student) flagIterator.next().data;
-                            if (currentStudent.hoursSince > 30 && currentStudent.hoursSince <= 60) {
+                            double difference = (currentTime.getTime()-currentStudent.lastUpdate.getTime())/86400000.0;
+                            int differenceDays = (int) difference;                            
+                            if (differenceDays > 27 && differenceDays <= 41) {
                                 listOfStudents += currentStudent.firstName + " " + currentStudent.lastName + "\n";
                             }
                         }
                     } else {
                         while (flagIterator.hasNext()) {
                             currentStudent = (Student) flagIterator.next().data;
-                            if (currentStudent.hoursSince > 60) {
+                            double difference = (currentTime.getTime()-currentStudent.lastUpdate.getTime())/86400000.0;
+                            int differenceDays = (int) difference;                            
+                            if (differenceDays > 41) {
                                 listOfStudents += currentStudent.firstName + " " + currentStudent.lastName + "\n";
                             }
                         }
