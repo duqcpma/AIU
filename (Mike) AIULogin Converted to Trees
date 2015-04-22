@@ -227,17 +227,20 @@ final class TabDemo extends Application {
 
     public static Date launchTime = new Date();
 
+    public static String administrativeNotes;
+
     public void setAdmin(boolean b) {
         this.isAdmin = b;
     }
 
     public TabDemo(TwoKeyTree<String, String, Student> theDatabase,
             AIUTree<String, Goal> theGoalTree, AIUTree<String, UserAndPass> theUserTree,
-            UserAndPass theCurrentUser) {
+            UserAndPass theCurrentUser, String theAdminNotes) {
         database = theDatabase;
         goalTree = theGoalTree;
         userTree = theUserTree;
         currentUser = theCurrentUser;
+        administrativeNotes = theAdminNotes;
     }
 
     //public String convertDate() {};
@@ -431,6 +434,29 @@ final class TabDemo extends Application {
         }
     }
 
+    public static void saveAdminNotes() {
+        try {
+            String content = administrativeNotes;
+
+            File file = new File("C:\\Users\\mguyer92\\Google Drive\\adminNotes.txt");
+
+            // if file doesnt exists, then create it
+            if (!file.exists()) {
+                file.createNewFile();
+            }
+
+            FileWriter fw = new FileWriter(file.getAbsoluteFile());
+            BufferedWriter bw = new BufferedWriter(fw);
+            bw.write(content);
+            bw.close();
+
+            System.out.println("Database saved successfully.");
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }        
+    }
+    
     @Override
     public void start(final Stage primaryStage) {
         primaryStage.setTitle("Tab Demo");
@@ -458,6 +484,10 @@ final class TabDemo extends Application {
         homeGrid.setHgap(10);
         homeGrid.setVgap(10);
         homeGrid.setPadding(new Insets(25, 25, 25, 25));
+        if (!isAdmin) {
+            homeGrid.getColumnConstraints().add(new ColumnConstraints(120));
+            homeGrid.getColumnConstraints().add(new ColumnConstraints(180));
+        }
 
         Text welcome = new Text("Welcome, " + currentUser.firstName + "!");
         welcome.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
@@ -465,13 +495,14 @@ final class TabDemo extends Application {
 
         Label lastLogIn = new Label("Last log-in on:");
         homeGrid.add(lastLogIn, 0, 3);
-        
+
         TextField lastLogInTime = new TextField();
         lastLogInTime.setEditable(false);
-        if (currentUser.lastLogin == null)
+        if (currentUser.lastLogin == null) {
             lastLogInTime.setText("N/A");
-        else
+        } else {
             lastLogInTime.setText(currentUser.lastLogin.toString());
+        }
         homeGrid.add(lastLogInTime, 1, 3);
 
         Label adminNotesLabel = new Label("Administrative notes:");
@@ -481,7 +512,18 @@ final class TabDemo extends Application {
         if (!isAdmin) {
             adminNotes.setEditable(false);
         }
+        adminNotes.setText(administrativeNotes);
         homeGrid.add(adminNotes, 0, 6, 2, 1);
+
+        TextField newAdminNote = new TextField();
+        newAdminNote.setPromptText("Enter an administrative note");
+        homeGrid.add(newAdminNote, 0, 8, 2, 1);
+
+        Button addAdminNote = new Button("Add note");
+        HBox hbAddAdminNote = new HBox(10);
+        addAdminNote.setDisable(true);
+        hbAddAdminNote.getChildren().add(addAdminNote);
+        homeGrid.add(hbAddAdminNote, 3, 8);
 
         Label withoutGoals = new Label("Students currently without goals:");
         homeGrid.add(withoutGoals, 0, 10);
@@ -1342,6 +1384,37 @@ final class TabDemo extends Application {
 
         primaryStage.setTitle("");
 
+        // "Home" tab Actions
+        newAdminNote.setOnKeyReleased(new EventHandler<KeyEvent>() {
+            public void handle(KeyEvent k) {
+                if (newAdminNote.getLength() == 0) {
+                    addAdminNote.setDisable(true);
+                } else {
+                    addAdminNote.setDisable(false);
+                }
+            }
+        });
+
+        addAdminNote.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent t) {
+                administrativeNotes += newAdminNote.getText()
+                        + " (" + currentUser.firstName + " " + currentUser.lastName + ") \n";
+                newAdminNote.clear();
+                addAdminNote.setDisable(true);
+                adminNotes.setText(administrativeNotes);
+            }
+        });
+
+        adminNotes.setOnKeyReleased(new EventHandler<KeyEvent>() {
+            public void handle(KeyEvent k) {
+                String rawNotes = adminNotes.getText();
+                while (rawNotes.lastIndexOf("\n") == rawNotes.length()-1)
+                    rawNotes = rawNotes.substring(0,rawNotes.length()-1);
+                rawNotes += "\n";         
+                administrativeNotes = rawNotes;
+            }
+        });
+        
         // "Edit Profiles" tab Actions
         findStudentEdit.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
@@ -3135,6 +3208,7 @@ final class TabDemo extends Application {
                 saveTree();
                 saveGoalTree();
                 saveUserTree();
+                saveAdminNotes();
             }
         });
     }
@@ -3590,7 +3664,7 @@ public class AIUWithTrees extends Application {
                                 && pwBox.getText().equals(user.password)) {
                             userFound = true;
                             TabDemo tabDisplay = new TabDemo(database, goalTree,
-                                    userTree, user);
+                                    userTree, user, adminNotes);
                             Stage tabStage = new Stage();
                             if (user.isAdmin) {
                                 tabDisplay.setAdmin(true);
@@ -3622,6 +3696,8 @@ public class AIUWithTrees extends Application {
     public static AIUTree<String, Goal> goalTree = new AIUTree<String, Goal>();
 
     public static AIUTree<String, UserAndPass> userTree = new AIUTree<String, UserAndPass>();
+    
+    public static String adminNotes = "";
 
     public static void plantTree() {
         Scanner fileIn = null;
@@ -3712,9 +3788,9 @@ public class AIUWithTrees extends Application {
             if (!array[5].equals(" ")) {
                 Long lastLoginTime = new Long(array[5]);
                 user = new UserAndPass(array[0], array[1], array[3], array[4], lastLoginTime);
-            }
-            else
+            } else {
                 user = new UserAndPass(array[0], array[1], array[3], array[4]);
+            }
             if (array[2].equals("1")) {
                 user.setAdmin(true);
             }
@@ -3722,6 +3798,21 @@ public class AIUWithTrees extends Application {
         }
     }
 
+    public static void plantAdminNotes() {
+        Scanner fileIn4 = null;
+        try {
+            fileIn4 = new Scanner(new FileInputStream("C:\\Users\\mguyer92\\Google Drive\\adminNotes.txt"));
+        } catch (FileNotFoundException e) {
+            System.out.println("A fatal error has occurred.");
+            System.exit(0);
+        }
+        while (fileIn4.hasNextLine()) {
+            String currentLine = fileIn4.nextLine();
+            if (currentLine.replaceAll(" ", "").length() != 0)
+                adminNotes += currentLine + "\n";
+        }        
+    }
+    
     /**
      * @param args the command line arguments
      */
@@ -3729,6 +3820,7 @@ public class AIUWithTrees extends Application {
         plantGoalTree();
         plantTree();
         plantUserTree();
+        plantAdminNotes();
         launch(args);
     }
 
