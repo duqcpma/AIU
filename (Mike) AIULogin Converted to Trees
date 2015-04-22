@@ -455,9 +455,9 @@ final class TabDemo extends Application {
 
         } catch (IOException e) {
             e.printStackTrace();
-        }        
+        }
     }
-    
+
     @Override
     public void start(final Stage primaryStage) {
         primaryStage.setTitle("Tab Demo");
@@ -775,12 +775,12 @@ final class TabDemo extends Application {
         hbSelectGoal1.getChildren().add(selectGoal1);
         selectGoal1.setDisable(true);
         goalsGrid.add(hbSelectGoal1, 2, 3);
-        
+
         final Button markGoal1Complete = new Button("Mark as complete");
         HBox hbMarkGoal1Complete = new HBox(10);
         hbMarkGoal1Complete.getChildren().add(markGoal1Complete);
         markGoal1Complete.setDisable(true);
-        goalsGrid.add(hbMarkGoal1Complete,3,3);
+        goalsGrid.add(hbMarkGoal1Complete, 3, 3);
 
         final TextField secondStudentGoal = new TextField();
         secondStudentGoal.setEditable(false);
@@ -791,12 +791,12 @@ final class TabDemo extends Application {
         hbSelectGoal2.getChildren().add(selectGoal2);
         selectGoal2.setDisable(true);
         goalsGrid.add(hbSelectGoal2, 2, 4);
-       
+
         final Button markGoal2Complete = new Button("Mark as complete");
         HBox hbMarkGoal2Complete = new HBox(10);
         hbMarkGoal2Complete.getChildren().add(markGoal2Complete);
         markGoal2Complete.setDisable(true);
-        goalsGrid.add(hbMarkGoal2Complete,3,4);        
+        goalsGrid.add(hbMarkGoal2Complete, 3, 4);
 
         Label subgoals = new Label("Subgoals:");
         goalsGrid.add(subgoals, 0, 5);
@@ -980,7 +980,7 @@ final class TabDemo extends Application {
         //reportsGrid.getColumnConstraints().add(new ColumnConstraints(50));
         reportsGrid.getColumnConstraints().add(new ColumnConstraints(45));
         reportsGrid.getColumnConstraints().add(new ColumnConstraints(40));
-        
+
         DecimalFormat df = new DecimalFormat("#.00");
 
         Label studentSearchReport = new Label("Search for a student:");
@@ -1356,7 +1356,7 @@ final class TabDemo extends Application {
         areYouSure4.setText("Are you sure you want to delete this goal?");
         popupGrid.add(areYouSure4, 1, 1, 5, 1);
         areYouSure4.setVisible(false);
-        
+
         final Text areYouSure5 = new Text();
         areYouSure5.setFill(Color.BLACK);
         areYouSure5.setText("Are you sure you want to mark this goal as complete?");
@@ -1387,14 +1387,11 @@ final class TabDemo extends Application {
                     saveUserChanges.fire();
                 } else if (popup.isDeletingUser) {
                     deleteUser.fire();
-                }
-                else if (popup.isMarkingGoal1Complete) {
+                } else if (popup.isMarkingGoal1Complete) {
                     markGoal1Complete.fire();
-                }
-                else if (popup.isMarkingGoal2Complete) {
+                } else if (popup.isMarkingGoal2Complete) {
                     markGoal2Complete.fire();
-                }
-                else {
+                } else {
                     deleteGoal.fire();
                 }
             }
@@ -1436,13 +1433,16 @@ final class TabDemo extends Application {
         adminNotes.setOnKeyReleased(new EventHandler<KeyEvent>() {
             public void handle(KeyEvent k) {
                 String rawNotes = adminNotes.getText();
-                while (rawNotes.lastIndexOf("\n") == rawNotes.length()-1)
-                    rawNotes = rawNotes.substring(0,rawNotes.length()-1);
-                rawNotes += "\n";         
+                if (!rawNotes.isEmpty()) {
+                    while (rawNotes.lastIndexOf("\n") == rawNotes.length() - 1) {
+                        rawNotes = rawNotes.substring(0, rawNotes.length() - 1);
+                    }
+                    rawNotes += "\n";
+                }
                 administrativeNotes = rawNotes;
             }
         });
-        
+
         // "Edit Profiles" tab Actions
         findStudentEdit.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
@@ -1851,8 +1851,9 @@ final class TabDemo extends Application {
                     if (currentGoal != null) {
                         currentStudentGoal.setText(currentGoal.goal);
                         selectGoal1.setDisable(false);
-                        if (!currentGoal.goal.equals("No current goal"))
+                        if (!currentGoal.goal.equals("No current goal")) {
                             markGoal1Complete.setDisable(false);
+                        }
                     }
                     Goal secondaryGoal = currentStudent.secondGoal;
                     if (secondaryGoal != null) {
@@ -1890,7 +1891,7 @@ final class TabDemo extends Application {
                 goalsGrid.add(hbSaveGoalChanges1, 1, 7 + n);
             }
         });
-        
+
         markGoal1Complete.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
                 if (popup.agreeToChanges) {
@@ -1898,17 +1899,17 @@ final class TabDemo extends Application {
                     String lastName = studentName.substring(0, studentName.indexOf(","));
                     Student currentStudent = database.find1(lastName);
                     Student updatedStudent = new Student(currentStudent.lastName, currentStudent.firstName,
-                                                        currentStudent.phoneNumber, currentStudent.emailAddress,
-                                                        goalTree.find("No current goal"), currentStudent.notes);
+                            currentStudent.phoneNumber, currentStudent.emailAddress,
+                            goalTree.find("No current goal"), currentStudent.notes);
                     updatedStudent.goalsCompleted = currentStudent.goalsCompleted + 1;
-                    if (currentStudent.secondGoal != null)
+                    if (currentStudent.secondGoal != null) {
                         updatedStudent.setSecondGoal(new Goal(currentStudent.secondGoal));
+                    }
                     database.modify1(lastName, updatedStudent);
                     popup.setAgreeToChanges(false);
                     findStudentGoals.getSelectionModel().clearSelection();
-                    findStudentGoals.setValue(null);    
-                }
-                else {
+                    findStudentGoals.setValue(null);
+                } else {
                     areYouSure5.setVisible(true);
                     areYouSure1.setVisible(false);
                     areYouSure2.setVisible(false);
@@ -1954,7 +1955,7 @@ final class TabDemo extends Application {
                 goalsGrid.add(hbSaveGoalChanges2, 1, 7 + n);
             }
         });
-        
+
         markGoal2Complete.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
                 if (popup.agreeToChanges) {
@@ -1966,9 +1967,8 @@ final class TabDemo extends Application {
                     database.modify1(lastName, currentStudent);
                     popup.setAgreeToChanges(false);
                     findStudentGoals.getSelectionModel().clearSelection();
-                    findStudentGoals.setValue(null);    
-                }
-                else {
+                    findStudentGoals.setValue(null);
+                } else {
                     areYouSure5.setVisible(true);
                     areYouSure1.setVisible(false);
                     areYouSure2.setVisible(false);
@@ -1985,7 +1985,7 @@ final class TabDemo extends Application {
                     popupStage.show();
                 }
             }
-        });        
+        });
 
         saveGoalChanges1.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
@@ -3402,7 +3402,7 @@ final class PopUpWindow {
     public void setUpdatingStudent(boolean b) {
         this.isUpdatingStudent = b;
     }
-    
+
     public void setMarkingGoal1Complete(boolean b) {
         this.isMarkingGoal1Complete = b;
     }
@@ -3410,7 +3410,7 @@ final class PopUpWindow {
     public void setMarkingGoal2Complete(boolean b) {
         this.isMarkingGoal2Complete = b;
     }
-    
+
     public void setUpdatingUser(boolean b) {
         this.isUpdatingUser = b;
     }
@@ -3824,7 +3824,7 @@ public class AIUWithTrees extends Application {
     public static AIUTree<String, Goal> goalTree = new AIUTree<String, Goal>();
 
     public static AIUTree<String, UserAndPass> userTree = new AIUTree<String, UserAndPass>();
-    
+
     public static String adminNotes = "";
 
     public static void plantTree() {
@@ -3937,11 +3937,12 @@ public class AIUWithTrees extends Application {
         }
         while (fileIn4.hasNextLine()) {
             String currentLine = fileIn4.nextLine();
-            if (currentLine.replaceAll(" ", "").length() != 0)
+            if (currentLine.replaceAll(" ", "").length() != 0) {
                 adminNotes += currentLine + "\n";
-        }        
+            }
+        }
     }
-    
+
     /**
      * @param args the command line arguments
      */
