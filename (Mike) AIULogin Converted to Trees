@@ -1353,7 +1353,6 @@ final class TabDemo extends Application {
 
         final Text areYouSure4 = new Text();
         areYouSure4.setFill(Color.BLACK);
-        areYouSure4.setText("Are you sure you want to delete this goal?");
         popupGrid.add(areYouSure4, 1, 1, 5, 1);
         areYouSure4.setVisible(false);
 
@@ -1888,7 +1887,8 @@ final class TabDemo extends Application {
                     goalsGrid.add(currentSubgoal, 1, 6 + i, 2, 1);
                     checkBoxes.add(currentSubgoal);
                 }
-                goalsGrid.add(hbSaveGoalChanges1, 1, 7 + n);
+                if (n > 0)
+                    goalsGrid.add(hbSaveGoalChanges1, 1, 7 + n);
             }
         });
 
@@ -1952,7 +1952,8 @@ final class TabDemo extends Application {
                     goalsGrid.add(currentSubgoal, 1, 6 + i, 2, 1);
                     checkBoxes.add(currentSubgoal);
                 }
-                goalsGrid.add(hbSaveGoalChanges2, 1, 7 + n);
+                if (n > 0)
+                    goalsGrid.add(hbSaveGoalChanges2, 1, 7 + n);
             }
         });
 
@@ -3218,6 +3219,17 @@ final class TabDemo extends Application {
                     findStudentReports.setValue(null);
                     popup.setAgreeToChanges(false);
                 } else {
+                    String goalString = (String) listOfGoals.getValue();
+                    AIUTreeIterator<String, Student> goalCounter = new AIUTreeIterator(database.tree1);
+                    int goalCount = 0;
+                    while (goalCounter.hasNext()) {
+                        Student currentStudent = (Student) goalCounter.next().data;
+                        if ((currentStudent.goal != null && currentStudent.goal.goal.equals(goalString)) || 
+                                (currentStudent.secondGoal != null && currentStudent.secondGoal.goal.equals(goalString)))
+                            goalCount++;
+                    }
+                    areYouSure4.setText("Are you sure you want to delete this goal? \n There are " +
+                            "currently " + goalCount + " students with this goal");
                     areYouSure4.setVisible(true);
                     areYouSure1.setVisible(false);
                     areYouSure2.setVisible(false);
@@ -3262,26 +3274,56 @@ final class TabDemo extends Application {
         editTab.setContent(editGrid);
         tabPane.getTabs().add(editTab);
 
+        editTab.setOnSelectionChanged(new EventHandler<Event>() {
+            public void handle(Event t) {
+                
+            }
+        });
+        
         Tab goalTab = new Tab();
         goalTab.setText("Student Goals");
         goalTab.setContent(goalsGrid);
         tabPane.getTabs().add(goalTab);
 
+        goalTab.setOnSelectionChanged(new EventHandler<Event>() {
+            public void handle(Event t) {
+                
+            }
+        });
+        
         Tab newStudentTab = new Tab();
         newStudentTab.setText("New Student");
         newStudentTab.setContent(newStudentGrid);
         tabPane.getTabs().add(newStudentTab);
 
+        newStudentTab.setOnSelectionChanged(new EventHandler<Event>() {
+            public void handle(Event t) {
+                
+            }
+        });
+        
         Tab flagsTab = new Tab();
         flagsTab.setText("Flags");
         flagsTab.setContent(flagsGrid);
         tabPane.getTabs().add(flagsTab);
+        
+        flagsTab.setOnSelectionChanged(new EventHandler<Event>() {
+            public void handle(Event t) {
+                
+            }
+        });
 
         Tab reportsTab = new Tab();
         reportsTab.setText("Reports");
         reportsTab.setContent(reportsGrid);
         tabPane.getTabs().add(reportsTab);
 
+        reportsTab.setOnSelectionChanged(new EventHandler<Event>() {
+            public void handle(Event t) {
+                
+            }
+        });
+        
         Tab adminTab = new Tab();
         adminTab.setText("Administration");
         adminTab.setContent(adminGrid);
@@ -3289,12 +3331,24 @@ final class TabDemo extends Application {
             tabPane.getTabs().add(adminTab);
         }
 
+        adminTab.setOnSelectionChanged(new EventHandler<Event>() {
+            public void handle(Event t) {
+                
+            }
+        });
+        
         Tab manageTab = new Tab();
         manageTab.setText("Manage Goals");
         manageTab.setContent(manageGoalsGrid);
         if (isAdmin) {
             tabPane.getTabs().add(manageTab);
         }
+        
+        manageTab.setOnSelectionChanged(new EventHandler<Event>() {
+            public void handle(Event t) {
+                
+            }
+        });
 
         Text scenetitle2 = new Text();
         if (isAdmin) {
