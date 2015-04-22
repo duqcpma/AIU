@@ -11,6 +11,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -310,7 +311,7 @@ final class TabDemo extends Application {
 
                 content = content + currNode.data.lastName + "," + currNode.data.phoneNumber.replaceAll("\\D+", "") + "," + currNode.data.lastName + ","
                         + currNode.data.firstName + "," + currNode.data.phoneNumber + "," + currNode.data.emailAddress + "," + currNode.data.lastUpdate.getTime() + "," + goal1.goal + "," + secondGoalString + ","
-                        + notes + "," + currNode.data.notes.date.getTime() + "," + sub1[0] + "," + sub1[1] + "," + sub1[2] + "," + sub1[3] + ","
+                        + currNode.data.goalsCompleted + "," + notes + "," + currNode.data.notes.date.getTime() + "," + sub1[0] + "," + sub1[1] + "," + sub1[2] + "," + sub1[3] + ","
                         + sub1[4] + "," + sub1[5] + "," + sub1[6] + "," + sub1[7] + "," + sub1[8] + "," + sub1[9] + "," + sub1[10] + ","
                         + sub1[11] + "," + sub1[12] + "," + sub1[13] + "," + sub1[14] + "," + sub1[15] + "," + sub1[16] + "," + sub1[17] + "," + sub1[18] + ","
                         + sub1[19] + "," + sub2[0] + "," + sub2[1] + "," + sub2[2] + "," + sub2[3] + "," + sub2[4] + "," + sub2[5] + "," + sub2[6] + ","
@@ -774,6 +775,12 @@ final class TabDemo extends Application {
         hbSelectGoal1.getChildren().add(selectGoal1);
         selectGoal1.setDisable(true);
         goalsGrid.add(hbSelectGoal1, 2, 3);
+        
+        final Button markGoal1Complete = new Button("Mark as complete");
+        HBox hbMarkGoal1Complete = new HBox(10);
+        hbMarkGoal1Complete.getChildren().add(markGoal1Complete);
+        markGoal1Complete.setDisable(true);
+        goalsGrid.add(hbMarkGoal1Complete,3,3);
 
         final TextField secondStudentGoal = new TextField();
         secondStudentGoal.setEditable(false);
@@ -784,6 +791,12 @@ final class TabDemo extends Application {
         hbSelectGoal2.getChildren().add(selectGoal2);
         selectGoal2.setDisable(true);
         goalsGrid.add(hbSelectGoal2, 2, 4);
+       
+        final Button markGoal2Complete = new Button("Mark as complete");
+        HBox hbMarkGoal2Complete = new HBox(10);
+        hbMarkGoal2Complete.getChildren().add(markGoal2Complete);
+        markGoal2Complete.setDisable(true);
+        goalsGrid.add(hbMarkGoal2Complete,3,4);        
 
         Label subgoals = new Label("Subgoals:");
         goalsGrid.add(subgoals, 0, 5);
@@ -967,6 +980,8 @@ final class TabDemo extends Application {
         //reportsGrid.getColumnConstraints().add(new ColumnConstraints(50));
         reportsGrid.getColumnConstraints().add(new ColumnConstraints(45));
         reportsGrid.getColumnConstraints().add(new ColumnConstraints(40));
+        
+        DecimalFormat df = new DecimalFormat("#.00");
 
         Label studentSearchReport = new Label("Search for a student:");
         reportsGrid.add(studentSearchReport, 0, 0);
@@ -1341,6 +1356,12 @@ final class TabDemo extends Application {
         areYouSure4.setText("Are you sure you want to delete this goal?");
         popupGrid.add(areYouSure4, 1, 1, 5, 1);
         areYouSure4.setVisible(false);
+        
+        final Text areYouSure5 = new Text();
+        areYouSure5.setFill(Color.BLACK);
+        areYouSure5.setText("Are you sure you want to mark this goal as complete?");
+        popupGrid.add(areYouSure5, 1, 1, 5, 1);
+        areYouSure5.setVisible(false);
 
         Button yes = new Button("Yes");
         HBox hbYes = new HBox(10);
@@ -1366,7 +1387,14 @@ final class TabDemo extends Application {
                     saveUserChanges.fire();
                 } else if (popup.isDeletingUser) {
                     deleteUser.fire();
-                } else {
+                }
+                else if (popup.isMarkingGoal1Complete) {
+                    markGoal1Complete.fire();
+                }
+                else if (popup.isMarkingGoal2Complete) {
+                    markGoal2Complete.fire();
+                }
+                else {
                     deleteGoal.fire();
                 }
             }
@@ -1379,7 +1407,7 @@ final class TabDemo extends Application {
             }
         });
 
-        final Scene popupScene = new Scene(popupGrid, 300, 120);
+        final Scene popupScene = new Scene(popupGrid, 450, 120);
         primaryStage.setResizable(false);
 
         primaryStage.setTitle("");
@@ -1686,11 +1714,14 @@ final class TabDemo extends Application {
                         areYouSure2.setVisible(false);
                         areYouSure3.setVisible(false);
                         areYouSure4.setVisible(false);
+                        areYouSure5.setVisible(false);
                         areYouSure1.setVisible(true);
                         popup.setDeletingStudent(false);
                         popup.setUpdatingStudent(true);
                         popup.setDeletingUser(false);
                         popup.setDeletingGoal(false);
+                        popup.setMarkingGoal1Complete(false);
+                        popup.setMarkingGoal2Complete(false);
                         popup.setUpdatingUser(false);
                         popupStage.setScene(popupScene);
                         popupStage.show();
@@ -1716,11 +1747,14 @@ final class TabDemo extends Application {
                     areYouSure1.setVisible(false);
                     areYouSure3.setVisible(false);
                     areYouSure4.setVisible(false);
+                    areYouSure5.setVisible(false);
                     areYouSure2.setVisible(true);
                     popup.setDeletingStudent(true);
                     popup.setUpdatingStudent(false);
                     popup.setDeletingUser(false);
                     popup.setUpdatingUser(false);
+                    popup.setMarkingGoal1Complete(false);
+                    popup.setMarkingGoal2Complete(false);
                     popup.setDeletingGoal(false);
                     popupStage.setScene(popupScene);
                     popupStage.show();
@@ -1796,6 +1830,8 @@ final class TabDemo extends Application {
                 secondStudentGoal.clear();
                 selectGoal1.setDisable(true);
                 selectGoal2.setDisable(true);
+                markGoal1Complete.setDisable(true);
+                markGoal2Complete.setDisable(true);
                 int size = checkBoxes.size();
                 if (size > 0) {
                     goalsGrid.getChildren().remove(hbSaveGoalChanges1);
@@ -1815,11 +1851,14 @@ final class TabDemo extends Application {
                     if (currentGoal != null) {
                         currentStudentGoal.setText(currentGoal.goal);
                         selectGoal1.setDisable(false);
+                        if (!currentGoal.goal.equals("No current goal"))
+                            markGoal1Complete.setDisable(false);
                     }
                     Goal secondaryGoal = currentStudent.secondGoal;
                     if (secondaryGoal != null) {
                         secondStudentGoal.setText(secondaryGoal.goal);
                         selectGoal2.setDisable(false);
+                        markGoal2Complete.setDisable(false);
                     }
                 }
             }
@@ -1851,6 +1890,42 @@ final class TabDemo extends Application {
                 goalsGrid.add(hbSaveGoalChanges1, 1, 7 + n);
             }
         });
+        
+        markGoal1Complete.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent t) {
+                if (popup.agreeToChanges) {
+                    String studentName = (String) findStudentGoals.getValue();
+                    String lastName = studentName.substring(0, studentName.indexOf(","));
+                    Student currentStudent = database.find1(lastName);
+                    Student updatedStudent = new Student(currentStudent.lastName, currentStudent.firstName,
+                                                        currentStudent.phoneNumber, currentStudent.emailAddress,
+                                                        goalTree.find("No current goal"), currentStudent.notes);
+                    updatedStudent.goalsCompleted = currentStudent.goalsCompleted + 1;
+                    if (currentStudent.secondGoal != null)
+                        updatedStudent.setSecondGoal(new Goal(currentStudent.secondGoal));
+                    database.modify1(lastName, updatedStudent);
+                    popup.setAgreeToChanges(false);
+                    findStudentGoals.getSelectionModel().clearSelection();
+                    findStudentGoals.setValue(null);    
+                }
+                else {
+                    areYouSure5.setVisible(true);
+                    areYouSure1.setVisible(false);
+                    areYouSure2.setVisible(false);
+                    areYouSure3.setVisible(false);
+                    areYouSure4.setVisible(false);
+                    popup.setMarkingGoal1Complete(true);
+                    popup.setMarkingGoal2Complete(false);
+                    popup.setUpdatingUser(false);
+                    popup.setDeletingUser(false);
+                    popup.setUpdatingStudent(false);
+                    popup.setDeletingStudent(false);
+                    popup.setDeletingGoal(false);
+                    popupStage.setScene(popupScene);
+                    popupStage.show();
+                }
+            }
+        });
 
         selectGoal2.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
@@ -1879,6 +1954,38 @@ final class TabDemo extends Application {
                 goalsGrid.add(hbSaveGoalChanges2, 1, 7 + n);
             }
         });
+        
+        markGoal2Complete.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent t) {
+                if (popup.agreeToChanges) {
+                    String studentName = (String) findStudentGoals.getValue();
+                    String lastName = studentName.substring(0, studentName.indexOf(","));
+                    Student currentStudent = database.find1(lastName);
+                    currentStudent.setSecondGoal(null);
+                    currentStudent.goalsCompleted = currentStudent.goalsCompleted + 1;
+                    database.modify1(lastName, currentStudent);
+                    popup.setAgreeToChanges(false);
+                    findStudentGoals.getSelectionModel().clearSelection();
+                    findStudentGoals.setValue(null);    
+                }
+                else {
+                    areYouSure5.setVisible(true);
+                    areYouSure1.setVisible(false);
+                    areYouSure2.setVisible(false);
+                    areYouSure3.setVisible(false);
+                    areYouSure4.setVisible(false);
+                    popup.setMarkingGoal2Complete(true);
+                    popup.setMarkingGoal1Complete(false);
+                    popup.setUpdatingUser(false);
+                    popup.setDeletingUser(false);
+                    popup.setUpdatingStudent(false);
+                    popup.setDeletingStudent(false);
+                    popup.setDeletingGoal(false);
+                    popupStage.setScene(popupScene);
+                    popupStage.show();
+                }
+            }
+        });        
 
         saveGoalChanges1.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
@@ -2259,7 +2366,7 @@ final class TabDemo extends Application {
                 Student currentStudent = database.find1(lastName);
                 int numSubgoals = currentStudent.secondGoal.subgoals.size();
                 int numCompleted = currentStudent.secondGoal.numCompletedSubgoals();
-                progressLabel.setText("Progress towards current goal: " + numCompleted * 100.0 / numSubgoals + "%");
+                progressLabel.setText("Progress towards current goal: " + df.format(numCompleted * 100.0 / numSubgoals) + "%");
                 goalProgress.setProgress(numCompleted * 1.0 / numSubgoals);
                 progressLabel.setVisible(true);
                 goalProgress.setVisible(true);
@@ -2368,10 +2475,13 @@ final class TabDemo extends Application {
                         areYouSure2.setVisible(false);
                         areYouSure3.setVisible(false);
                         areYouSure4.setVisible(false);
+                        areYouSure5.setVisible(false);
                         popup.setUpdatingUser(true);
                         popup.setDeletingUser(false);
                         popup.setUpdatingStudent(false);
                         popup.setDeletingStudent(false);
+                        popup.setMarkingGoal1Complete(false);
+                        popup.setMarkingGoal2Complete(false);
                         popup.setDeletingGoal(false);
                         popupStage.setScene(popupScene);
                         popupStage.show();
@@ -2397,10 +2507,15 @@ final class TabDemo extends Application {
                     areYouSure3.setVisible(true);
                     areYouSure1.setVisible(false);
                     areYouSure2.setVisible(false);
+                    areYouSure4.setVisible(false);
+                    areYouSure5.setVisible(false);
                     popup.setDeletingUser(true);
                     popup.setUpdatingUser(false);
                     popup.setDeletingStudent(false);
                     popup.setUpdatingStudent(false);
+                    popup.setDeletingGoal(false);
+                    popup.setMarkingGoal1Complete(false);
+                    popup.setMarkingGoal2Complete(false);
                     popupStage.setScene(popupScene);
                     popupStage.show();
                 }
@@ -3107,11 +3222,14 @@ final class TabDemo extends Application {
                     areYouSure1.setVisible(false);
                     areYouSure2.setVisible(false);
                     areYouSure3.setVisible(false);
+                    areYouSure5.setVisible(false);
                     popup.setDeletingGoal(true);
                     popup.setUpdatingStudent(false);
                     popup.setDeletingStudent(false);
                     popup.setUpdatingUser(false);
                     popup.setDeletingUser(false);
+                    popup.setMarkingGoal1Complete(false);
+                    popup.setMarkingGoal2Complete(false);
                     popupStage.setScene(popupScene);
                     popupStage.show();
                 }
@@ -3269,6 +3387,8 @@ final class PopUpWindow {
     public boolean isUpdatingStudent = false;
     public boolean isUpdatingUser = false;
     public boolean isDeletingUser = false;
+    public boolean isMarkingGoal1Complete = false;
+    public boolean isMarkingGoal2Complete = false;
     public boolean isDeletingGoal = false;
 
     public void setAgreeToChanges(boolean b) {
@@ -3282,7 +3402,15 @@ final class PopUpWindow {
     public void setUpdatingStudent(boolean b) {
         this.isUpdatingStudent = b;
     }
+    
+    public void setMarkingGoal1Complete(boolean b) {
+        this.isMarkingGoal1Complete = b;
+    }
 
+    public void setMarkingGoal2Complete(boolean b) {
+        this.isMarkingGoal2Complete = b;
+    }
+    
     public void setUpdatingUser(boolean b) {
         this.isUpdatingUser = b;
     }
@@ -3709,30 +3837,31 @@ public class AIUWithTrees extends Application {
         }
         while (fileIn.hasNextLine()) {
             String[] array = fileIn.nextLine().split(",");
-            Long noteDate = new Long(array[10]);
+            Long noteDate = new Long(array[11]);
             Long lastUpdate = new Long(array[6]);
             Goal primaryGoal = goalTree.find(array[7]);
             Goal secondaryGoal;
-            Student student = new Student(array[2], array[3], array[4], array[5], lastUpdate, new Goal(primaryGoal), new Notes(array[8].replaceAll("\\\\n", "\n"), noteDate));
+            Student student = new Student(array[2], array[3], array[4], array[5], lastUpdate, new Goal(primaryGoal), new Notes(array[10].replaceAll("\\\\n", "\n"), noteDate));
             if (!array[8].equals(" ")) {
                 secondaryGoal = goalTree.find(array[8]);
                 student.setSecondGoal(new Goal(secondaryGoal));
             }
-            for (int i = 11; i < 31; i++) {
+            student.goalsCompleted = Integer.parseInt(array[9]);
+            for (int i = 12; i < 32; i++) {
                 if (array[i].equals("1")) {
-                    student.goal.subgoals.get(i - 11).setComplete(true);
+                    student.goal.subgoals.get(i - 12).setComplete(true);
                 } else if (array[i].equals("0")) {
-                    student.goal.subgoals.get(i - 11).setComplete(false);
+                    student.goal.subgoals.get(i - 12).setComplete(false);
                 } else {
                     break;
                 }
             }
             if (student.secondGoal != null) {
-                for (int i = 31; i < array.length; i++) {
+                for (int i = 32; i < array.length; i++) {
                     if (array[i].equals("1")) {
-                        student.secondGoal.subgoals.get(i - 31).setComplete(true);
+                        student.secondGoal.subgoals.get(i - 32).setComplete(true);
                     } else if (array[i].equals("0")) {
-                        student.secondGoal.subgoals.get(i - 31).setComplete(false);
+                        student.secondGoal.subgoals.get(i - 32).setComplete(false);
                     } else {
                         break;
                     }
