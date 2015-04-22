@@ -19,8 +19,8 @@ import java.util.Stack;
 import javafx.application.Application;
 import static javafx.application.Application.launch;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -164,7 +164,7 @@ final class Student {
         goal = theGoal;
         notes = theNotes;
     }
-    
+
     public Student(String theLastName, String theFirstName, String thePhoneNumber, String theEmail,
             long lastUpdateTime, Goal theGoal, Notes theNotes) {
         lastName = theLastName;
@@ -174,7 +174,7 @@ final class Student {
         lastUpdate = new Date(lastUpdateTime);
         goal = theGoal;
         notes = theNotes;
-    }    
+    }
 
     public void setSecondGoal(Goal theSecondGoal) {
         secondGoal = theSecondGoal;
@@ -221,11 +221,11 @@ final class TabDemo extends Application {
 
     public static AIUTree<String, UserAndPass> userTree;
 
-    public String currentUser;
+    public static UserAndPass currentUser;
 
     public boolean isAdmin = false;
-    
-    public Date launchTime = new Date();
+
+    public static Date launchTime = new Date();
 
     public void setAdmin(boolean b) {
         this.isAdmin = b;
@@ -233,7 +233,7 @@ final class TabDemo extends Application {
 
     public TabDemo(TwoKeyTree<String, String, Student> theDatabase,
             AIUTree<String, Goal> theGoalTree, AIUTree<String, UserAndPass> theUserTree,
-            String theCurrentUser) {
+            UserAndPass theCurrentUser) {
         database = theDatabase;
         goalTree = theGoalTree;
         userTree = theUserTree;
@@ -400,7 +400,16 @@ final class TabDemo extends Application {
                 if (currNode.data.isAdmin) {
                     isAdmin = "1";
                 }
-                content = content + currNode.data.username + "," + currNode.data.password + "," + isAdmin + System.getProperty("line.separator");
+                if (currNode.data.username.equals(currentUser.username)) {
+                    content = content + currNode.data.username + "," + currNode.data.password + "," + isAdmin
+                            + "," + currNode.data.firstName + "," + currNode.data.lastName + "," + launchTime.getTime() + System.getProperty("line.separator");
+                } else if (currNode.data.lastLogin == null) {
+                    content = content + currNode.data.username + "," + currNode.data.password + "," + isAdmin
+                            + "," + currNode.data.firstName + "," + currNode.data.lastName + "," + " " + System.getProperty("line.separator");
+                } else {
+                    content = content + currNode.data.username + "," + currNode.data.password + "," + isAdmin
+                            + "," + currNode.data.firstName + "," + currNode.data.lastName + "," + currNode.data.lastLogin.getTime() + System.getProperty("line.separator");
+                }
             }
 
             File file = new File("C:\\Users\\mguyer92\\Google Drive\\users.txt");
@@ -430,18 +439,65 @@ final class TabDemo extends Application {
         int width;
         Color fillColor;
         if (isAdmin) {
-            width = 550;
+            width = 575;
             fillColor = Color.BEIGE;
         } else {
             width = 450;
             fillColor = Color.WHITE;
         }
-        Scene scene = new Scene(root, width, 625, fillColor);
+        Scene scene = new Scene(root, width, 650, fillColor);
 
         TabPane tabPane = new TabPane();
         BorderPane mainPane = new BorderPane();
 
         tabPane.setTabClosingPolicy(UNAVAILABLE);
+
+        // "Home" tab contents
+        GridPane homeGrid = new GridPane();
+        homeGrid.setAlignment(Pos.TOP_LEFT);
+        homeGrid.setHgap(10);
+        homeGrid.setVgap(10);
+        homeGrid.setPadding(new Insets(25, 25, 25, 25));
+
+        Text welcome = new Text("Welcome, " + currentUser.firstName + "!");
+        welcome.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
+        homeGrid.add(welcome, 0, 1);
+
+        Label lastLogIn = new Label("Last log-in on:");
+        homeGrid.add(lastLogIn, 0, 3);
+        
+        TextField lastLogInTime = new TextField();
+        lastLogInTime.setEditable(false);
+        if (currentUser.lastLogin == null)
+            lastLogInTime.setText("N/A");
+        else
+            lastLogInTime.setText(currentUser.lastLogin.toString());
+        homeGrid.add(lastLogInTime, 1, 3);
+
+        Label adminNotesLabel = new Label("Administrative notes:");
+        homeGrid.add(adminNotesLabel, 0, 5);
+
+        TextArea adminNotes = new TextArea();
+        if (!isAdmin) {
+            adminNotes.setEditable(false);
+        }
+        homeGrid.add(adminNotes, 0, 6, 2, 1);
+
+        Label withoutGoals = new Label("Students currently without goals:");
+        homeGrid.add(withoutGoals, 0, 10);
+
+        TextArea studentsWithoutGoals = new TextArea();
+        studentsWithoutGoals.setEditable(false);
+        AIUTreeIterator<String, Student> studentGoalChecker = new AIUTreeIterator(database.tree1);
+        String goallessStudents = "";
+        while (studentGoalChecker.hasNext()) {
+            Student currentStudent = (Student) studentGoalChecker.next().data;
+            if (currentStudent.goal.goal.equals("No current goal")) {
+                goallessStudents += currentStudent.firstName + " " + currentStudent.lastName + "\n";
+            }
+        }
+        studentsWithoutGoals.setText(goallessStudents);
+        homeGrid.add(studentsWithoutGoals, 0, 11, 2, 1);
 
         // "Edit Profiles" tab contents
         GridPane editGrid = new GridPane();
@@ -796,26 +852,26 @@ final class TabDemo extends Application {
         flagsGrid.getColumnConstraints().add(new ColumnConstraints(100));
 
         Label studentSearchFlags = new Label("Search for a student:");
-        flagsGrid.add(studentSearchFlags,0,1);
-        
+        flagsGrid.add(studentSearchFlags, 0, 1);
+
         final TextField searchNameFlags = new TextField();
         searchNameFlags.setPromptText("Enter a student name");
         flagsGrid.add(searchNameFlags, 1, 1, 3, 1);
-        
+
         Button searchButtonFlags = new Button("Search");
         HBox hbSearchButtonFlags = new HBox(10);
         hbSearchButtonFlags.getChildren().add(searchButtonFlags);
         flagsGrid.add(hbSearchButtonFlags, 4, 1);
-        
+
         final TextField searchPhoneFlags = new TextField();
         searchPhoneFlags.setPromptText("Enter a phone number");
         flagsGrid.add(searchPhoneFlags, 1, 2, 3, 1);
-        
+
         Button searchPhoneButtonFlags = new Button("Search");
         HBox hbSearchPhoneButtonFlags = new HBox(10);
         hbSearchPhoneButtonFlags.getChildren().add(searchPhoneButtonFlags);
         flagsGrid.add(hbSearchPhoneButtonFlags, 4, 2);
-        
+
         Label selectStudentFlags = new Label("Select a student:");
         flagsGrid.add(selectStudentFlags, 0, 4);
 
@@ -832,14 +888,13 @@ final class TabDemo extends Application {
         flagsGrid.add(timeSince, 2, 6, 3, 1);
 
         /*
-        final Button saveTime = new Button("Update");
-        HBox hbSaveTime = new HBox(10);
-        hbSaveTime.setAlignment(Pos.BOTTOM_LEFT);
-        hbSaveTime.getChildren().add(saveTime);
-        saveTime.setDisable(true);
-        flagsGrid.add(hbSaveTime, 2, 5);
-        */
-
+         final Button saveTime = new Button("Update");
+         HBox hbSaveTime = new HBox(10);
+         hbSaveTime.setAlignment(Pos.BOTTOM_LEFT);
+         hbSaveTime.getChildren().add(saveTime);
+         saveTime.setDisable(true);
+         flagsGrid.add(hbSaveTime, 2, 5);
+         */
         Label unreportedStudents = new Label("Students whose profile has not been updated in:");
         flagsGrid.add(unreportedStudents, 0, 11, 3, 1);
 
@@ -1023,68 +1078,88 @@ final class TabDemo extends Application {
         passwordMatch1.setVisible(false);
         adminGrid.add(passwordMatch1, 2, 4);
 
+        final TextField userFirstName = new TextField();
+        userFirstName.setPromptText("First name");
+        userFirstName.setEditable(false);
+        adminGrid.add(userFirstName, 0, 5, 2, 1);
+
+        final TextField userLastName = new TextField();
+        userLastName.setPromptText("Last name");
+        userLastName.setEditable(false);
+        adminGrid.add(userLastName, 0, 6, 2, 1);
+
         final Label setAdmin = new Label("Set as administrator:");
         setAdmin.setVisible(false);
-        adminGrid.add(setAdmin, 0, 5);
+        adminGrid.add(setAdmin, 0, 7);
 
         final ChoiceBox isAdministrator = new ChoiceBox();
         isAdministrator.setItems(FXCollections.observableArrayList("Yes", "No"));
         isAdministrator.setVisible(false);
-        adminGrid.add(isAdministrator, 1, 5);
+        adminGrid.add(isAdministrator, 1, 7);
 
         final Button saveUserChanges = new Button("Save Changes");
         final HBox hbSaveUserChanges = new HBox(10);
         hbSaveUserChanges.setAlignment(Pos.BOTTOM_RIGHT);
         hbSaveUserChanges.getChildren().add(saveUserChanges);
         hbSaveUserChanges.setVisible(false);
-        adminGrid.add(hbSaveUserChanges, 1, 6);
+        adminGrid.add(hbSaveUserChanges, 1, 8);
 
         final Button deleteUser = new Button("Delete User");
         final HBox hbDeleteUser = new HBox(10);
         hbDeleteUser.setAlignment(Pos.BOTTOM_LEFT);
         hbDeleteUser.getChildren().add(deleteUser);
         hbDeleteUser.setVisible(false);
-        adminGrid.add(hbDeleteUser, 0, 6);
+        adminGrid.add(hbDeleteUser, 0, 8);
 
         Label addUser = new Label("Create a new user account:");
-        adminGrid.add(addUser, 0, 7);
+        adminGrid.add(addUser, 0, 9);
 
         final TextField newUsername = new TextField();
         newUsername.setPromptText("Username");
-        adminGrid.add(newUsername, 0, 8, 2, 1);
+        adminGrid.add(newUsername, 0, 10, 2, 1);
 
         final PasswordField newPassword = new PasswordField();
         newPassword.setPromptText("Password");
-        adminGrid.add(newPassword, 0, 9, 2, 1);
+        adminGrid.add(newPassword, 0, 11, 2, 1);
 
         final PasswordField confirmNewPassword = new PasswordField();
         confirmNewPassword.setPromptText("Confirm password");
-        adminGrid.add(confirmNewPassword, 0, 10, 2, 1);
+        adminGrid.add(confirmNewPassword, 0, 12, 2, 1);
 
         final Text passwordMatch2 = new Text();
         passwordMatch2.setFill(Color.FIREBRICK);
         passwordMatch2.setText("Passwords do not match!");
         passwordMatch2.setVisible(false);
-        adminGrid.add(passwordMatch2, 2, 10);
+        adminGrid.add(passwordMatch2, 2, 12);
+
+        final TextField userFirstName2 = new TextField();
+        userFirstName2.setPromptText("First name");
+        userFirstName2.setEditable(false);
+        adminGrid.add(userFirstName2, 0, 13, 2, 1);
+
+        final TextField userLastName2 = new TextField();
+        userLastName2.setPromptText("Last name");
+        userLastName2.setEditable(false);
+        adminGrid.add(userLastName2, 0, 14, 2, 1);
 
         Label setAdmin2 = new Label("Set as administrator:");
-        adminGrid.add(setAdmin2, 0, 11);
+        adminGrid.add(setAdmin2, 0, 15);
 
         final ChoiceBox isAdministrator2 = new ChoiceBox();
         isAdministrator2.setItems(FXCollections.observableArrayList("Yes", "No"));
-        adminGrid.add(isAdministrator2, 1, 11);
+        adminGrid.add(isAdministrator2, 1, 15);
 
         final Text newUserAdded = new Text();
         newUserAdded.setFill(Color.FIREBRICK);
         newUserAdded.setText("Please fill out all fields!");
         newUserAdded.setVisible(false);
-        adminGrid.add(newUserAdded, 0, 12);
+        adminGrid.add(newUserAdded, 0, 16);
 
         Button addNewUser = new Button("Add user");
         HBox hbNewUser = new HBox(10);
         hbNewUser.setAlignment(Pos.BOTTOM_LEFT);
         hbNewUser.getChildren().add(addNewUser);
-        adminGrid.add(hbNewUser, 1, 12);
+        adminGrid.add(hbNewUser, 1, 16);
 
         // "Manage Goals" tab contents
         GridPane manageGoalsGrid = new GridPane();
@@ -1135,6 +1210,7 @@ final class TabDemo extends Application {
             listOfGoals.getItems().add(theSeparator);
         }
         listOfGoals.getItems().addAll(otherGoals);
+        listOfGoals.getItems().remove("No current goal");
         manageGoalsGrid.add(listOfGoals, 2, 5, 3, 1);
 
         Label goalStatementLabel = new Label("Goal statement:");
@@ -1310,8 +1386,9 @@ final class TabDemo extends Application {
                         displaySecondGoal.setValue(currentStudent.secondGoal.goal);
                     }
                     changeGoal.setDisable(false);
-                    if (currentStudent.goal != null)
+                    if (currentStudent.goal != null) {
                         changeSecondGoal.setDisable(false);
+                    }
                     if (!currentStudent.notes.notes.equals(" ")) {
                         noteArea.setText(currentStudent.notes.notes);
                     }
@@ -1336,22 +1413,39 @@ final class TabDemo extends Application {
                     searchMessage.setText("Please enter a name");
                     searchMessage.setVisible(true);
                 } else {
-                    //Consider inputs that aren't multi-part
                     String query = searchName.getText().toLowerCase();
                     int spaceIndex = query.indexOf(" ");
                     if (spaceIndex >= 0) {
-                        String firstName = query.substring(0, spaceIndex);
-                        String lastName = query.substring(spaceIndex + 1);
-                        firstName = firstName.substring(0, 1).toUpperCase() + firstName.substring(1);
-                        lastName = lastName.substring(0, 1).toUpperCase() + lastName.substring(1);
-                        String name = lastName + ", " + firstName;
-                        if (names.contains(name)) {
-                            findStudentEdit.setValue(name);
-                            searchMessage.setVisible(false);
+                        int commaIndex = query.indexOf(",");
+                        if (commaIndex < 0) {
+                            String firstName = query.substring(0, spaceIndex);
+                            String lastName = query.substring(spaceIndex + 1);
+                            firstName = firstName.substring(0, 1).toUpperCase() + firstName.substring(1);
+                            lastName = lastName.substring(0, 1).toUpperCase() + lastName.substring(1);
+                            String name = lastName + ", " + firstName;
+                            if (names.contains(name)) {
+                                findStudentEdit.setValue(name);
+                                searchMessage.setVisible(false);
+                            } else if (names.contains(firstName + ", " + lastName)) {
+                                findStudentEdit.setValue(firstName + ", " + lastName);
+                                searchMessage.setVisible(false);
+                            } else {
+                                searchMessage.setFill(Color.FIREBRICK);
+                                searchMessage.setText("Student not found");
+                                searchMessage.setVisible(true);
+                            }
                         } else {
-                            searchMessage.setFill(Color.FIREBRICK);
-                            searchMessage.setText("Student not found");
-                            searchMessage.setVisible(true);
+                            String lastName = query.substring(0, commaIndex);
+                            String firstName = query.substring(spaceIndex + 1);
+                            lastName = lastName.substring(0, 1).toUpperCase() + lastName.substring(1);
+                            firstName = firstName.substring(0, 1).toUpperCase() + firstName.substring(1);
+                            String name = lastName + ", " + firstName;
+                            if (names.contains(name)) {
+                                findStudentEdit.setValue(name);
+                                searchMessage.setVisible(false);
+                            } else {
+
+                            }
                         }
                     } else {
                         query = query.substring(0, 1).toUpperCase() + query.substring(1);
@@ -1389,11 +1483,11 @@ final class TabDemo extends Application {
                     changeSecondGoal.setDisable(true);
                     displaySecondGoal.getSelectionModel().clearSelection();
                     displaySecondGoal.setValue(null);
-                }
-                else if (displayGoal.getValue() == null)
+                } else if (displayGoal.getValue() == null) {
                     changeSecondGoal.setDisable(true);
-                else
+                } else {
                     changeSecondGoal.setDisable(false);
+                }
             }
         });
 
@@ -1437,16 +1531,16 @@ final class TabDemo extends Application {
                         Goal newGoal = new Goal(goalTree.find((String) displayGoal.getValue()));
                         Goal goal;
                         if (previousGoal != null) {
-                            if (newGoal == null)
+                            if (newGoal == null) {
                                 goal = newGoal;
-                            else if (previousGoal.goal.equals(newGoal.goal)) {
+                            } else if (previousGoal.goal.equals(newGoal.goal)) {
                                 goal = previousGoal;
                             } else {
                                 goal = newGoal;
                             }
-                        }
-                        else
+                        } else {
                             goal = newGoal;
+                        }
                         Goal previousSecondGoal = theStudent.secondGoal;
                         Goal newSecondGoal = null;
                         if (displaySecondGoal.getValue() != null) {
@@ -1457,12 +1551,12 @@ final class TabDemo extends Application {
                             secondGoal = previousSecondGoal;
                         } else if (previousSecondGoal == null || newSecondGoal == null) {
                             secondGoal = newSecondGoal;
-                        }
-                        else {
-                            if (previousSecondGoal.goal.equals(newSecondGoal.goal))
+                        } else {
+                            if (previousSecondGoal.goal.equals(newSecondGoal.goal)) {
                                 secondGoal = previousSecondGoal;
-                            else
+                            } else {
                                 secondGoal = newSecondGoal;
+                            }
                         }
                         Notes previousNotes = theStudent.notes;
                         Notes note;
@@ -1565,15 +1659,42 @@ final class TabDemo extends Application {
         searchButton2.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
                 if (searchName2.getLength() != 0) {
-                    //Consider inputs that aren't multi-part
-                    String query = searchName2.getText();
-                    String firstName = query.substring(0, query.indexOf(" "));
-                    String lastName = query.substring(query.indexOf(" ") + 1);
-                    String name = lastName + ", " + firstName;
-                    if (names.contains(name)) {
-                        findStudentGoals.setValue(name);
-                    } else {
+                    String query = searchName2.getText().toLowerCase();
+                    int spaceIndex = query.indexOf(" ");
+                    if (spaceIndex >= 0) {
+                        int commaIndex = query.indexOf(",");
+                        if (commaIndex < 0) {
+                            String firstName = query.substring(0, spaceIndex);
+                            String lastName = query.substring(spaceIndex + 1);
+                            firstName = firstName.substring(0, 1).toUpperCase() + firstName.substring(1);
+                            lastName = lastName.substring(0, 1).toUpperCase() + lastName.substring(1);
+                            String name = lastName + ", " + firstName;
+                            if (names.contains(name)) {
+                                findStudentGoals.setValue(name);
+                            } else if (names.contains(firstName + ", " + lastName)) {
+                                findStudentGoals.setValue(firstName + ", " + lastName);
+                            } else {
 
+                            }
+                        } else {
+                            String lastName = query.substring(0, commaIndex);
+                            String firstName = query.substring(spaceIndex + 1);
+                            lastName = lastName.substring(0, 1).toUpperCase() + lastName.substring(1);
+                            firstName = firstName.substring(0, 1).toUpperCase() + firstName.substring(1);
+                            String name = lastName + ", " + firstName;
+                            if (names.contains(name)) {
+                                findStudentGoals.setValue(name);
+                            } else {
+
+                            }
+                        }
+                    } else {
+                        query = query.substring(0, 1).toUpperCase() + query.substring(1);
+                        Student querySearch = database.find1(query);
+                        if (querySearch != null) {
+                            String name = querySearch.lastName + ", " + querySearch.firstName;
+                            findStudentGoals.setValue(name);
+                        }
                     }
                 }
                 searchName2.clear();
@@ -1727,6 +1848,14 @@ final class TabDemo extends Application {
         });
 
         // "New Student" tab Actions
+        hasEmail.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent t) {
+                if (hasEmail.isSelected()) {
+                    goals2.setValue("Create an email address");
+                }
+            }
+        });
+
         addStudent.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
                 if (firstNameField2.getLength() == 0 || lastNameField2.getLength() == 0
@@ -1775,15 +1904,42 @@ final class TabDemo extends Application {
         searchButtonFlags.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
                 if (searchNameFlags.getLength() != 0) {
-                    //Consider inputs that aren't multi-part
-                    String query = searchNameFlags.getText();
-                    String firstName = query.substring(0, query.indexOf(" "));
-                    String lastName = query.substring(query.indexOf(" ") + 1);
-                    String name = lastName + ", " + firstName;
-                    if (names.contains(name)) {
-                        findStudentFlags.setValue(name);
-                    } else {
+                    String query = searchNameFlags.getText().toLowerCase();
+                    int spaceIndex = query.indexOf(" ");
+                    if (spaceIndex >= 0) {
+                        int commaIndex = query.indexOf(",");
+                        if (commaIndex < 0) {
+                            String firstName = query.substring(0, spaceIndex);
+                            String lastName = query.substring(spaceIndex + 1);
+                            firstName = firstName.substring(0, 1).toUpperCase() + firstName.substring(1);
+                            lastName = lastName.substring(0, 1).toUpperCase() + lastName.substring(1);
+                            String name = lastName + ", " + firstName;
+                            if (names.contains(name)) {
+                                findStudentFlags.setValue(name);
+                            } else if (names.contains(firstName + ", " + lastName)) {
+                                findStudentFlags.setValue(firstName + ", " + lastName);
+                            } else {
 
+                            }
+                        } else {
+                            String lastName = query.substring(0, commaIndex);
+                            String firstName = query.substring(spaceIndex + 1);
+                            lastName = lastName.substring(0, 1).toUpperCase() + lastName.substring(1);
+                            firstName = firstName.substring(0, 1).toUpperCase() + firstName.substring(1);
+                            String name = lastName + ", " + firstName;
+                            if (names.contains(name)) {
+                                findStudentFlags.setValue(name);
+                            } else {
+
+                            }
+                        }
+                    } else {
+                        query = query.substring(0, 1).toUpperCase() + query.substring(1);
+                        Student querySearch = database.find1(query);
+                        if (querySearch != null) {
+                            String name = querySearch.lastName + ", " + querySearch.firstName;
+                            findStudentFlags.setValue(name);
+                        }
                     }
                 }
                 searchNameFlags.clear();
@@ -1802,8 +1958,8 @@ final class TabDemo extends Application {
                     searchPhoneFlags.clear();
                 }
             }
-        });      
-        
+        });
+
         findStudentFlags.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
                 timeSince.clear();
@@ -1811,42 +1967,41 @@ final class TabDemo extends Application {
                 if (findStudentFlags.getValue() != null) {
                     Date currentTime = new Date();
                     String studentName = (String) findStudentFlags.getValue();
-                    Student currentStudent = database.find1(studentName.substring(0,studentName.indexOf(",")));
-                    double difference = (currentTime.getTime()-currentStudent.lastUpdate.getTime())/86400000.0;
+                    Student currentStudent = database.find1(studentName.substring(0, studentName.indexOf(",")));
+                    double difference = (currentTime.getTime() - currentStudent.lastUpdate.getTime()) / 86400000.0;
                     int differenceDays = (int) difference;
                     double fractionalDay = difference - differenceDays;
-                    double fractionalDayInHours = fractionalDay*24;
+                    double fractionalDayInHours = fractionalDay * 24;
                     int differenceHours = (int) fractionalDayInHours;
                     double fractionalHours = fractionalDayInHours - differenceHours;
-                    double fractionalHoursInMinutes = fractionalHours*60;
+                    double fractionalHoursInMinutes = fractionalHours * 60;
                     int differenceMinutes = (int) fractionalHoursInMinutes;
-                    timeSince.setText("" + differenceDays + " days, " + differenceHours + " hours, and " +
-                            differenceMinutes + " minutes");
+                    timeSince.setText("" + differenceDays + " days, " + differenceHours + " hours, and "
+                            + differenceMinutes + " minutes");
                     //saveTime.setDisable(false);
                 }
             }
         });
 
         /*
-        saveTime.setOnAction(new EventHandler<ActionEvent>() {
-            public void handle(ActionEvent t) {
-                if (timeSince.getLength() == 0) {
+         saveTime.setOnAction(new EventHandler<ActionEvent>() {
+         public void handle(ActionEvent t) {
+         if (timeSince.getLength() == 0) {
 
-                } else {
-                    String student = (String) findStudentFlags.getValue();
-                    String lastName = student.substring(0, student.indexOf(","));
-                    Student currentStudent = database.find1(lastName);
-                    currentStudent.hoursSince = Integer.parseInt(timeSince.getText());
-                    database.modify1(lastName, currentStudent);
-                    findStudentFlags.getSelectionModel().clearSelection();
-                    findStudentFlags.setValue(null);
-                    reportTimes.getSelectionModel().clearSelection();
-                    reportTimes.setValue(null);
-                }
-            }
-        });
-        */
-
+         } else {
+         String student = (String) findStudentFlags.getValue();
+         String lastName = student.substring(0, student.indexOf(","));
+         Student currentStudent = database.find1(lastName);
+         currentStudent.hoursSince = Integer.parseInt(timeSince.getText());
+         database.modify1(lastName, currentStudent);
+         findStudentFlags.getSelectionModel().clearSelection();
+         findStudentFlags.setValue(null);
+         reportTimes.getSelectionModel().clearSelection();
+         reportTimes.setValue(null);
+         }
+         }
+         });
+         */
         reportTimes.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
                 printBtn.setDisable(true);
@@ -1860,7 +2015,7 @@ final class TabDemo extends Application {
                     if (reportTimes.getValue().equals("0-2 weeks")) {
                         while (flagIterator.hasNext()) {
                             currentStudent = (Student) flagIterator.next().data;
-                            double difference = (currentTime.getTime()-currentStudent.lastUpdate.getTime())/86400000.0;
+                            double difference = (currentTime.getTime() - currentStudent.lastUpdate.getTime()) / 86400000.0;
                             int differenceDays = (int) difference;
                             if (differenceDays <= 13) {
                                 listOfStudents += currentStudent.firstName + " " + currentStudent.lastName + "\n";
@@ -1869,8 +2024,8 @@ final class TabDemo extends Application {
                     } else if (reportTimes.getValue().equals("2-4 weeks")) {
                         while (flagIterator.hasNext()) {
                             currentStudent = (Student) flagIterator.next().data;
-                            double difference = (currentTime.getTime()-currentStudent.lastUpdate.getTime())/86400000.0;
-                            int differenceDays = (int) difference;                            
+                            double difference = (currentTime.getTime() - currentStudent.lastUpdate.getTime()) / 86400000.0;
+                            int differenceDays = (int) difference;
                             if (differenceDays > 13 && differenceDays <= 27) {
                                 listOfStudents += currentStudent.firstName + " " + currentStudent.lastName + "\n";
                             }
@@ -1878,8 +2033,8 @@ final class TabDemo extends Application {
                     } else if (reportTimes.getValue().equals("4-6 weeks")) {
                         while (flagIterator.hasNext()) {
                             currentStudent = (Student) flagIterator.next().data;
-                            double difference = (currentTime.getTime()-currentStudent.lastUpdate.getTime())/86400000.0;
-                            int differenceDays = (int) difference;                            
+                            double difference = (currentTime.getTime() - currentStudent.lastUpdate.getTime()) / 86400000.0;
+                            int differenceDays = (int) difference;
                             if (differenceDays > 27 && differenceDays <= 41) {
                                 listOfStudents += currentStudent.firstName + " " + currentStudent.lastName + "\n";
                             }
@@ -1887,8 +2042,8 @@ final class TabDemo extends Application {
                     } else {
                         while (flagIterator.hasNext()) {
                             currentStudent = (Student) flagIterator.next().data;
-                            double difference = (currentTime.getTime()-currentStudent.lastUpdate.getTime())/86400000.0;
-                            int differenceDays = (int) difference;                            
+                            double difference = (currentTime.getTime() - currentStudent.lastUpdate.getTime()) / 86400000.0;
+                            int differenceDays = (int) difference;
                             if (differenceDays > 41) {
                                 listOfStudents += currentStudent.firstName + " " + currentStudent.lastName + "\n";
                             }
@@ -1909,15 +2064,42 @@ final class TabDemo extends Application {
         searchButton3.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
                 if (searchName3.getLength() != 0) {
-                    //Consider inputs that aren't multi-part
-                    String query = searchName3.getText();
-                    String firstName = query.substring(0, query.indexOf(" "));
-                    String lastName = query.substring(query.indexOf(" ") + 1);
-                    String name = lastName + ", " + firstName;
-                    if (names.contains(name)) {
-                        findStudentReports.setValue(name);
-                    } else {
+                    String query = searchName3.getText().toLowerCase();
+                    int spaceIndex = query.indexOf(" ");
+                    if (spaceIndex >= 0) {
+                        int commaIndex = query.indexOf(",");
+                        if (commaIndex < 0) {
+                            String firstName = query.substring(0, spaceIndex);
+                            String lastName = query.substring(spaceIndex + 1);
+                            firstName = firstName.substring(0, 1).toUpperCase() + firstName.substring(1);
+                            lastName = lastName.substring(0, 1).toUpperCase() + lastName.substring(1);
+                            String name = lastName + ", " + firstName;
+                            if (names.contains(name)) {
+                                findStudentReports.setValue(name);
+                            } else if (names.contains(firstName + ", " + lastName)) {
+                                findStudentReports.setValue(firstName + ", " + lastName);
+                            } else {
 
+                            }
+                        } else {
+                            String lastName = query.substring(0, commaIndex);
+                            String firstName = query.substring(spaceIndex + 1);
+                            lastName = lastName.substring(0, 1).toUpperCase() + lastName.substring(1);
+                            firstName = firstName.substring(0, 1).toUpperCase() + firstName.substring(1);
+                            String name = lastName + ", " + firstName;
+                            if (names.contains(name)) {
+                                findStudentReports.setValue(name);
+                            } else {
+
+                            }
+                        }
+                    } else {
+                        query = query.substring(0, 1).toUpperCase() + query.substring(1);
+                        Student querySearch = database.find1(query);
+                        if (querySearch != null) {
+                            String name = querySearch.lastName + ", " + querySearch.firstName;
+                            findStudentReports.setValue(name);
+                        }
                     }
                 }
                 searchName3.clear();
@@ -2041,12 +2223,16 @@ final class TabDemo extends Application {
                 username.clear();
                 password.clear();
                 confirmPassword.clear();
+                userFirstName.clear();
+                userLastName.clear();
                 isAdministrator.setDisable(false);
                 deleteUser.setDisable(false);
                 if (userList.getValue() != null) {
                     username.setEditable(true);
                     password.setEditable(true);
                     confirmPassword.setEditable(true);
+                    userFirstName.setEditable(true);
+                    userLastName.setEditable(true);
                     setAdmin.setVisible(true);
                     isAdministrator.setVisible(true);
                     hbSaveUserChanges.setVisible(true);
@@ -2057,12 +2243,14 @@ final class TabDemo extends Application {
                     username.insertText(0, currentUserAndPass.username);
                     password.insertText(0, currentUserAndPass.password);
                     confirmPassword.insertText(0, currentUserAndPass.password);
+                    userFirstName.setText(currentUserAndPass.firstName);
+                    userLastName.setText(currentUserAndPass.lastName);
                     if (currentUserAndPass.isAdmin) {
                         isAdministrator.setValue("Yes");
                     } else {
                         isAdministrator.setValue("No");
                     }
-                    if (currentUser.equals(currentUserSelected)) {
+                    if (currentUser.username.equals(currentUserSelected)) {
                         isAdministrator.setDisable(true);
                         deleteUser.setDisable(true);
                     }
@@ -2084,9 +2272,8 @@ final class TabDemo extends Application {
                     if (popup.agreeToChanges) {
                         int userIndex = usernames.indexOf((String) userList.getValue());
                         usernames.set(userIndex, username.getText());
-
                         UserAndPass updatedUser = new UserAndPass(username.getText(),
-                                password.getText());
+                                password.getText(), userFirstName.getText(), userLastName.getText());
                         if (((String) isAdministrator.getValue()).equals("Yes")) {
                             updatedUser.setAdmin(true);
                         } else {
@@ -2151,13 +2338,15 @@ final class TabDemo extends Application {
             public void handle(ActionEvent t) {
                 if (newUsername.getLength() == 0 || newPassword.getLength() == 0
                         || confirmNewPassword.getLength() == 0
+                        || userFirstName2.getLength() == 0
+                        || userLastName2.getLength() == 0
                         || isAdministrator2.getValue() == null) {
                     newUserAdded.setVisible(true);
                 } else {
                     newUserAdded.setVisible(false);
                     if (newPassword.getText().equals(confirmNewPassword.getText())) {
                         UserAndPass newUser = new UserAndPass(newUsername.getText(),
-                                newPassword.getText());
+                                newPassword.getText(), userFirstName2.getText(), userLastName2.getText());
                         if (((String) isAdministrator2.getValue()).equals("Yes")) {
                             newUser.setAdmin(true);
                         } else {
@@ -2169,6 +2358,8 @@ final class TabDemo extends Application {
                         newUsername.clear();
                         newPassword.clear();
                         confirmNewPassword.clear();
+                        userFirstName2.clear();
+                        userLastName2.clear();
                         isAdministrator2.getSelectionModel().clearSelection();
                         isAdministrator2.setValue(null);
                     } else {
@@ -2342,6 +2533,7 @@ final class TabDemo extends Application {
                     listOfGoals.getItems().add(theSeparator);
                 }
                 listOfGoals.getItems().addAll(otherGoals);
+                listOfGoals.getItems().remove("No current goal");
                 findStudentEdit.getSelectionModel().clearSelection();
                 findStudentEdit.setValue(null);
                 findStudentGoals.getSelectionModel().clearSelection();
@@ -2453,6 +2645,7 @@ final class TabDemo extends Application {
                         listOfGoals.getItems().add(theSeparator);
                     }
                     listOfGoals.getItems().addAll(otherGoals);
+                    listOfGoals.getItems().remove("No current goal");
 
                     AIUTreeIterator<String, Student> updateStudents = new AIUTreeIterator(database.tree1);
                     while (updateStudents.hasNext()) {
@@ -2644,6 +2837,8 @@ final class TabDemo extends Application {
                 manageGoalsGrid.add(hbDeleteGoal, 1, 16 + m, 3, 1);
                 findStudentGoals.getSelectionModel().clearSelection();
                 findStudentGoals.setValue(null);
+                findStudentReports.getSelectionModel().clearSelection();
+                findStudentReports.setValue(null);
             }
         });
 
@@ -2715,6 +2910,8 @@ final class TabDemo extends Application {
                 manageGoalsGrid.add(hbAddSubgoal, 3, 13 + m, 2, 1);
                 findStudentGoals.getSelectionModel().clearSelection();
                 findStudentGoals.setValue(null);
+                findStudentReports.getSelectionModel().clearSelection();
+                findStudentReports.setValue(null);
             }
         });
 
@@ -2728,8 +2925,12 @@ final class TabDemo extends Application {
                     while (updateStudents.hasNext()) {
                         Student currentStudent = (Student) updateStudents.next().data;
                         if (currentStudent.goal.goal.equals(goalString)) {
-                            currentStudent.goal = currentStudent.secondGoal;
-                            currentStudent.secondGoal = null;
+                            if (currentStudent.secondGoal != null) {
+                                currentStudent.goal = currentStudent.secondGoal;
+                                currentStudent.secondGoal = null;
+                            } else {
+                                currentStudent.goal = goalTree.find("No current goal");
+                            }
                         }
                         if (currentStudent.secondGoal != null) {
                             if (currentStudent.secondGoal.goal.equals(goalString)) {
@@ -2820,6 +3021,13 @@ final class TabDemo extends Application {
                         listOfGoals.getItems().add(theSeparator);
                     }
                     listOfGoals.getItems().addAll(otherGoals);
+                    listOfGoals.getItems().remove("No current goal");
+                    findStudentEdit.getSelectionModel().clearSelection();
+                    findStudentEdit.setValue(null);
+                    findStudentGoals.getSelectionModel().clearSelection();
+                    findStudentGoals.setValue(null);
+                    findStudentReports.getSelectionModel().clearSelection();
+                    findStudentReports.setValue(null);
                     popup.setAgreeToChanges(false);
                 } else {
                     areYouSure4.setVisible(true);
@@ -2838,6 +3046,26 @@ final class TabDemo extends Application {
         });
 
         //Create Tabs
+        Tab homeTab = new Tab();
+        homeTab.setText("Home");
+        homeTab.setContent(homeGrid);
+        tabPane.getTabs().add(homeTab);
+
+        homeTab.setOnSelectionChanged(new EventHandler<Event>() {
+            public void handle(Event t) {
+                studentsWithoutGoals.clear();
+                AIUTreeIterator<String, Student> studentGoalChecker = new AIUTreeIterator(database.tree1);
+                String goallessStudents = "";
+                while (studentGoalChecker.hasNext()) {
+                    Student currentStudent = (Student) studentGoalChecker.next().data;
+                    if (currentStudent.goal.goal.equals("No current goal")) {
+                        goallessStudents += currentStudent.firstName + " " + currentStudent.lastName + "\n";
+                    }
+                }
+                studentsWithoutGoals.setText(goallessStudents);
+            }
+        });
+
         Tab editTab = new Tab();
         editTab.setText("Edit Profiles");
         editTab.setContent(editGrid);
@@ -2925,10 +3153,25 @@ final class UserAndPass {
     public String username;
     public String password;
     public boolean isAdmin = false;
+    public String firstName;
+    public String lastName;
+    public Date lastLogin;
 
-    public UserAndPass(String theUsername, String thePassword) {
+    public UserAndPass(String theUsername, String thePassword, String theFirstName,
+            String theLastName) {
         username = theUsername;
         password = thePassword;
+        firstName = theFirstName;
+        lastName = theLastName;
+    }
+
+    public UserAndPass(String theUsername, String thePassword, String theFirstName,
+            String theLastName, long lastLoginTime) {
+        username = theUsername;
+        password = thePassword;
+        firstName = theFirstName;
+        lastName = theLastName;
+        lastLogin = new Date(lastLoginTime);
     }
 
     public void changeUsername(String theUsername) {
@@ -3346,10 +3589,8 @@ public class AIUWithTrees extends Application {
                         if (userTextField.getText().equals(user.username)
                                 && pwBox.getText().equals(user.password)) {
                             userFound = true;
-                            String currentUser = user.username;
-                            //Send this currentUser to database!
                             TabDemo tabDisplay = new TabDemo(database, goalTree,
-                                    userTree, currentUser);
+                                    userTree, user);
                             Stage tabStage = new Stage();
                             if (user.isAdmin) {
                                 tabDisplay.setAdmin(true);
@@ -3467,7 +3708,13 @@ public class AIUWithTrees extends Application {
         }
         while (fileIn3.hasNextLine()) {
             String[] array = fileIn3.nextLine().split(",");
-            UserAndPass user = new UserAndPass(array[0], array[1]);
+            UserAndPass user;
+            if (!array[5].equals(" ")) {
+                Long lastLoginTime = new Long(array[5]);
+                user = new UserAndPass(array[0], array[1], array[3], array[4], lastLoginTime);
+            }
+            else
+                user = new UserAndPass(array[0], array[1], array[3], array[4]);
             if (array[2].equals("1")) {
                 user.setAdmin(true);
             }
