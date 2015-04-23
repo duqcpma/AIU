@@ -319,7 +319,7 @@ final class TabDemo extends Application {
                         + sub2[15] + "," + sub2[16] + "," + sub2[17] + "," + sub2[18] + "," + sub2[19] + System.getProperty("line.separator");
             }
 
-            File file = new File("C:\\Users\\mguyer92\\Google Drive\\database.txt");
+            File file = new File("C:\\Users\\" + System.getProperty("user.name") + "\\Google Drive\\database.txt");
 
             // if file doesnt exists, then create it
             if (!file.exists()) {
@@ -373,7 +373,7 @@ final class TabDemo extends Application {
                         + "," + temp[17] + "," + temp[18] + "," + temp[19] + System.getProperty("line.separator");
             }
 
-            File file = new File("C:\\Users\\mguyer92\\Google Drive\\goals.txt");
+            File file = new File("C:\\Users\\" + System.getProperty("user.name") + "\\Google Drive\\goals.txt");
 
             // if file doesnt exists, then create it
             if (!file.exists()) {
@@ -416,7 +416,7 @@ final class TabDemo extends Application {
                 }
             }
 
-            File file = new File("C:\\Users\\mguyer92\\Google Drive\\users.txt");
+            File file = new File("C:\\Users\\" + System.getProperty("user.name") + "\\Google Drive\\users.txt");
 
             // if file doesnt exists, then create it
             if (!file.exists()) {
@@ -439,7 +439,7 @@ final class TabDemo extends Application {
         try {
             String content = administrativeNotes;
 
-            File file = new File("C:\\Users\\mguyer92\\Google Drive\\adminNotes.txt");
+            File file = new File("C:\\Users\\" + System.getProperty("user.name") + "\\Google Drive\\adminNotes.txt");
 
             // if file doesnt exists, then create it
             if (!file.exists()) {
@@ -1119,6 +1119,12 @@ final class TabDemo extends Application {
         username.setEditable(false);
         adminGrid.add(username, 0, 2, 2, 1);
 
+        final Text usernameMatch1 = new Text();
+        usernameMatch1.setFill(Color.FIREBRICK);
+        usernameMatch1.setText("Username already exists!");
+        usernameMatch1.setVisible(false);
+        adminGrid.add(usernameMatch1, 2, 2);
+
         final PasswordField password = new PasswordField();
         password.setPromptText("Password");
         password.setEditable(false);
@@ -1154,6 +1160,12 @@ final class TabDemo extends Application {
         isAdministrator.setVisible(false);
         adminGrid.add(isAdministrator, 1, 7);
 
+        final Text userChangesFailed = new Text();
+        userChangesFailed.setFill(Color.FIREBRICK);
+        userChangesFailed.setText("Please fill out all fields!");
+        userChangesFailed.setVisible(false);
+        adminGrid.add(userChangesFailed, 2, 8);
+
         final Button saveUserChanges = new Button("Save Changes");
         final HBox hbSaveUserChanges = new HBox(10);
         hbSaveUserChanges.setAlignment(Pos.BOTTOM_RIGHT);
@@ -1175,6 +1187,12 @@ final class TabDemo extends Application {
         newUsername.setPromptText("Username");
         adminGrid.add(newUsername, 0, 10, 2, 1);
 
+        final Text usernameMatch2 = new Text();
+        usernameMatch2.setFill(Color.FIREBRICK);
+        usernameMatch2.setText("Username already exists!");
+        usernameMatch2.setVisible(false);
+        adminGrid.add(usernameMatch2, 2, 10);
+
         final PasswordField newPassword = new PasswordField();
         newPassword.setPromptText("Password");
         adminGrid.add(newPassword, 0, 11, 2, 1);
@@ -1191,12 +1209,10 @@ final class TabDemo extends Application {
 
         final TextField userFirstName2 = new TextField();
         userFirstName2.setPromptText("First name");
-        userFirstName2.setEditable(false);
         adminGrid.add(userFirstName2, 0, 13, 2, 1);
 
         final TextField userLastName2 = new TextField();
         userLastName2.setPromptText("Last name");
-        userLastName2.setEditable(false);
         adminGrid.add(userLastName2, 0, 14, 2, 1);
 
         Label setAdmin2 = new Label("Set as administrator:");
@@ -1887,8 +1903,9 @@ final class TabDemo extends Application {
                     goalsGrid.add(currentSubgoal, 1, 6 + i, 2, 1);
                     checkBoxes.add(currentSubgoal);
                 }
-                if (n > 0)
+                if (n > 0) {
                     goalsGrid.add(hbSaveGoalChanges1, 1, 7 + n);
+                }
             }
         });
 
@@ -1952,8 +1969,9 @@ final class TabDemo extends Application {
                     goalsGrid.add(currentSubgoal, 1, 6 + i, 2, 1);
                     checkBoxes.add(currentSubgoal);
                 }
-                if (n > 0)
+                if (n > 0) {
                     goalsGrid.add(hbSaveGoalChanges2, 1, 7 + n);
+                }
             }
         });
 
@@ -2449,46 +2467,60 @@ final class TabDemo extends Application {
 
         saveUserChanges.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
-                if (password.getText().equals(confirmPassword.getText())) {
-                    if (popup.agreeToChanges) {
-                        int userIndex = usernames.indexOf((String) userList.getValue());
-                        usernames.set(userIndex, username.getText());
-                        UserAndPass updatedUser = new UserAndPass(username.getText(),
-                                password.getText(), userFirstName.getText(), userLastName.getText());
-                        if (((String) isAdministrator.getValue()).equals("Yes")) {
-                            updatedUser.setAdmin(true);
-                        } else {
-                            updatedUser.setAdmin(false);
-                        }
-                        userTree.modify((String) userList.getValue(), updatedUser);
-
-                        userList.getSelectionModel().clearSelection();
-                        userList.setValue(null);
-
-                        userList.setItems(FXCollections.observableArrayList(usernames));
-
-                        popup.setAgreeToChanges(false);
-                        hbSaveUserChanges.setVisible(false);
-                        hbDeleteUser.setVisible(false);
-                    } else {
-                        passwordMatch1.setVisible(false);
-                        areYouSure1.setVisible(true);
-                        areYouSure2.setVisible(false);
-                        areYouSure3.setVisible(false);
-                        areYouSure4.setVisible(false);
-                        areYouSure5.setVisible(false);
-                        popup.setUpdatingUser(true);
-                        popup.setDeletingUser(false);
-                        popup.setUpdatingStudent(false);
-                        popup.setDeletingStudent(false);
-                        popup.setMarkingGoal1Complete(false);
-                        popup.setMarkingGoal2Complete(false);
-                        popup.setDeletingGoal(false);
-                        popupStage.setScene(popupScene);
-                        popupStage.show();
-                    }
+                if (username.getLength() == 0 || password.getLength() == 0
+                        || confirmPassword.getLength() == 0
+                        || userFirstName.getLength() == 0
+                        || userLastName.getLength() == 0) {
+                    userChangesFailed.setVisible(true);
                 } else {
-                    passwordMatch1.setVisible(true);
+                    userChangesFailed.setVisible(false);
+                    if (username.getText() != (String) userList.getValue()
+                            && usernames.contains(username.getText())) {
+                        usernameMatch1.setVisible(true);
+                    } else {
+                        usernameMatch1.setVisible(false);
+                        if (password.getText().equals(confirmPassword.getText())) {
+                            if (popup.agreeToChanges) {
+                                int userIndex = usernames.indexOf((String) userList.getValue());
+                                usernames.set(userIndex, username.getText());
+                                UserAndPass updatedUser = new UserAndPass(username.getText(),
+                                        password.getText(), userFirstName.getText(), userLastName.getText());
+                                if (((String) isAdministrator.getValue()).equals("Yes")) {
+                                    updatedUser.setAdmin(true);
+                                } else {
+                                    updatedUser.setAdmin(false);
+                                }
+                                userTree.modify((String) userList.getValue(), updatedUser);
+
+                                userList.getSelectionModel().clearSelection();
+                                userList.setValue(null);
+
+                                userList.setItems(FXCollections.observableArrayList(usernames));
+
+                                popup.setAgreeToChanges(false);
+                                hbSaveUserChanges.setVisible(false);
+                                hbDeleteUser.setVisible(false);
+                            } else {
+                                passwordMatch1.setVisible(false);
+                                areYouSure1.setVisible(true);
+                                areYouSure2.setVisible(false);
+                                areYouSure3.setVisible(false);
+                                areYouSure4.setVisible(false);
+                                areYouSure5.setVisible(false);
+                                popup.setUpdatingUser(true);
+                                popup.setDeletingUser(false);
+                                popup.setUpdatingStudent(false);
+                                popup.setDeletingStudent(false);
+                                popup.setMarkingGoal1Complete(false);
+                                popup.setMarkingGoal2Complete(false);
+                                popup.setDeletingGoal(false);
+                                popupStage.setScene(popupScene);
+                                popupStage.show();
+                            }
+                        } else {
+                            passwordMatch1.setVisible(true);
+                        }
+                    }
                 }
             }
         });
@@ -2533,26 +2565,30 @@ final class TabDemo extends Application {
                     newUserAdded.setVisible(true);
                 } else {
                     newUserAdded.setVisible(false);
-                    if (newPassword.getText().equals(confirmNewPassword.getText())) {
-                        UserAndPass newUser = new UserAndPass(newUsername.getText(),
-                                newPassword.getText(), userFirstName2.getText(), userLastName2.getText());
-                        if (((String) isAdministrator2.getValue()).equals("Yes")) {
-                            newUser.setAdmin(true);
-                        } else {
-                            newUser.setAdmin(false);
-                        }
-                        usernames.add(newUsername.getText());
-                        userTree.add(newUsername.getText(), newUser);
-                        userList.setItems(FXCollections.observableArrayList(usernames));
-                        newUsername.clear();
-                        newPassword.clear();
-                        confirmNewPassword.clear();
-                        userFirstName2.clear();
-                        userLastName2.clear();
-                        isAdministrator2.getSelectionModel().clearSelection();
-                        isAdministrator2.setValue(null);
+                    if (usernames.contains(newUsername.getText())) {
+                        usernameMatch2.setVisible(true);
                     } else {
-                        passwordMatch2.setVisible(true);
+                        if (newPassword.getText().equals(confirmNewPassword.getText())) {
+                            UserAndPass newUser = new UserAndPass(newUsername.getText(),
+                                    newPassword.getText(), userFirstName2.getText(), userLastName2.getText());
+                            if (((String) isAdministrator2.getValue()).equals("Yes")) {
+                                newUser.setAdmin(true);
+                            } else {
+                                newUser.setAdmin(false);
+                            }
+                            usernames.add(newUsername.getText());
+                            userTree.add(newUsername.getText(), newUser);
+                            userList.setItems(FXCollections.observableArrayList(usernames));
+                            newUsername.clear();
+                            newPassword.clear();
+                            confirmNewPassword.clear();
+                            userFirstName2.clear();
+                            userLastName2.clear();
+                            isAdministrator2.getSelectionModel().clearSelection();
+                            isAdministrator2.setValue(null);
+                        } else {
+                            passwordMatch2.setVisible(true);
+                        }
                     }
                 }
             }
@@ -3224,12 +3260,13 @@ final class TabDemo extends Application {
                     int goalCount = 0;
                     while (goalCounter.hasNext()) {
                         Student currentStudent = (Student) goalCounter.next().data;
-                        if ((currentStudent.goal != null && currentStudent.goal.goal.equals(goalString)) || 
-                                (currentStudent.secondGoal != null && currentStudent.secondGoal.goal.equals(goalString)))
+                        if ((currentStudent.goal != null && currentStudent.goal.goal.equals(goalString))
+                                || (currentStudent.secondGoal != null && currentStudent.secondGoal.goal.equals(goalString))) {
                             goalCount++;
+                        }
                     }
-                    areYouSure4.setText("Are you sure you want to delete this goal? \n There are " +
-                            "currently " + goalCount + " students with this goal");
+                    areYouSure4.setText("Are you sure you want to delete this goal? \n There are "
+                            + "currently " + goalCount + " students with this goal");
                     areYouSure4.setVisible(true);
                     areYouSure1.setVisible(false);
                     areYouSure2.setVisible(false);
@@ -3276,10 +3313,10 @@ final class TabDemo extends Application {
 
         editTab.setOnSelectionChanged(new EventHandler<Event>() {
             public void handle(Event t) {
-                
+
             }
         });
-        
+
         Tab goalTab = new Tab();
         goalTab.setText("Student Goals");
         goalTab.setContent(goalsGrid);
@@ -3287,10 +3324,10 @@ final class TabDemo extends Application {
 
         goalTab.setOnSelectionChanged(new EventHandler<Event>() {
             public void handle(Event t) {
-                
+
             }
         });
-        
+
         Tab newStudentTab = new Tab();
         newStudentTab.setText("New Student");
         newStudentTab.setContent(newStudentGrid);
@@ -3298,18 +3335,18 @@ final class TabDemo extends Application {
 
         newStudentTab.setOnSelectionChanged(new EventHandler<Event>() {
             public void handle(Event t) {
-                
+
             }
         });
-        
+
         Tab flagsTab = new Tab();
         flagsTab.setText("Flags");
         flagsTab.setContent(flagsGrid);
         tabPane.getTabs().add(flagsTab);
-        
+
         flagsTab.setOnSelectionChanged(new EventHandler<Event>() {
             public void handle(Event t) {
-                
+
             }
         });
 
@@ -3320,10 +3357,10 @@ final class TabDemo extends Application {
 
         reportsTab.setOnSelectionChanged(new EventHandler<Event>() {
             public void handle(Event t) {
-                
+
             }
         });
-        
+
         Tab adminTab = new Tab();
         adminTab.setText("Administration");
         adminTab.setContent(adminGrid);
@@ -3333,20 +3370,20 @@ final class TabDemo extends Application {
 
         adminTab.setOnSelectionChanged(new EventHandler<Event>() {
             public void handle(Event t) {
-                
+
             }
         });
-        
+
         Tab manageTab = new Tab();
         manageTab.setText("Manage Goals");
         manageTab.setContent(manageGoalsGrid);
         if (isAdmin) {
             tabPane.getTabs().add(manageTab);
         }
-        
+
         manageTab.setOnSelectionChanged(new EventHandler<Event>() {
             public void handle(Event t) {
-                
+
             }
         });
 
@@ -3884,7 +3921,7 @@ public class AIUWithTrees extends Application {
     public static void plantTree() {
         Scanner fileIn = null;
         try {
-            fileIn = new Scanner(new FileInputStream("C:\\Users\\mguyer92\\Google Drive\\database.txt"));
+            fileIn = new Scanner(new FileInputStream("C:\\Users\\" + System.getProperty("user.name") + "\\Google Drive\\database.txt"));
         } catch (FileNotFoundException e) {
             System.out.println("A fatal error has occurred.");
             System.exit(0);
@@ -3928,7 +3965,7 @@ public class AIUWithTrees extends Application {
     public static void plantGoalTree() {
         Scanner fileIn2 = null;
         try {
-            fileIn2 = new Scanner(new FileInputStream("C:\\Users\\mguyer92\\Google Drive\\goals.txt"));
+            fileIn2 = new Scanner(new FileInputStream("C:\\Users\\" + System.getProperty("user.name") + "\\Google Drive\\goals.txt"));
         } catch (FileNotFoundException e) {
             System.out.println("A fatal error has occurred.");
             System.exit(0);
@@ -3960,7 +3997,7 @@ public class AIUWithTrees extends Application {
     public static void plantUserTree() {
         Scanner fileIn3 = null;
         try {
-            fileIn3 = new Scanner(new FileInputStream("C:\\Users\\mguyer92\\Google Drive\\users.txt"));
+            fileIn3 = new Scanner(new FileInputStream("C:\\Users\\" + System.getProperty("user.name") + "\\Google Drive\\users.txt"));
         } catch (FileNotFoundException e) {
             System.out.println("A fatal error has occurred.");
             System.exit(0);
@@ -3984,7 +4021,7 @@ public class AIUWithTrees extends Application {
     public static void plantAdminNotes() {
         Scanner fileIn4 = null;
         try {
-            fileIn4 = new Scanner(new FileInputStream("C:\\Users\\mguyer92\\Google Drive\\adminNotes.txt"));
+            fileIn4 = new Scanner(new FileInputStream("C:\\Users\\" + System.getProperty("user.name") + "\\Google Drive\\adminNotes.txt"));
         } catch (FileNotFoundException e) {
             System.out.println("A fatal error has occurred.");
             System.exit(0);
