@@ -153,7 +153,7 @@ final class Student {
 
     public Goal goal;
     public Goal secondGoal;
-    public ArrayList<Goal> completedGoals;
+    public ArrayList<String> completedGoals = new ArrayList<String>();
 
     public Student(String theLastName, String theFirstName, String thePhoneNumber, String theEmail,
             Goal theGoal, Notes theNotes) {
@@ -311,6 +311,17 @@ final class TabDemo extends Application {
                         sub2[i] = " ";
                     }
                 }
+                
+                String completedGoals = ",";
+                
+                for (String goal : currNode.data.completedGoals) {
+                    completedGoals += goal + ",";
+                }
+                
+                if (completedGoals.length() > 1)
+                    completedGoals = completedGoals.substring(0,completedGoals.length()-1);
+                else
+                    completedGoals = "";
 
                 content = content + currNode.data.lastName + "," + currNode.data.phoneNumber.replaceAll("\\D+", "") + "," + currNode.data.lastName + ","
                         + currNode.data.firstName + "," + currNode.data.phoneNumber + "," + currNode.data.emailAddress + "," + currNode.data.lastUpdate.getTime() + "," + goal1.goal + "," + secondGoalString + ","
@@ -319,7 +330,7 @@ final class TabDemo extends Application {
                         + sub1[11] + "," + sub1[12] + "," + sub1[13] + "," + sub1[14] + "," + sub1[15] + "," + sub1[16] + "," + sub1[17] + "," + sub1[18] + ","
                         + sub1[19] + "," + sub2[0] + "," + sub2[1] + "," + sub2[2] + "," + sub2[3] + "," + sub2[4] + "," + sub2[5] + "," + sub2[6] + ","
                         + sub2[7] + "," + sub2[8] + "," + sub2[9] + "," + sub2[10] + "," + sub2[11] + "," + sub2[12] + "," + sub2[13] + "," + sub2[14] + ","
-                        + sub2[15] + "," + sub2[16] + "," + sub2[17] + "," + sub2[18] + "," + sub2[19] + System.getProperty("line.separator");
+                        + sub2[15] + "," + sub2[16] + "," + sub2[17] + "," + sub2[18] + "," + sub2[19] + completedGoals + System.getProperty("line.separator");
             }
 
             File file = new File("C:\\Users\\" + System.getProperty("user.name") + "\\Google Drive\\database.txt");
@@ -1600,7 +1611,7 @@ final class TabDemo extends Application {
 
         displayGoal.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
-                if (((String) displayGoal.getValue()).equals(theSeparator)) {
+                if (displayGoal.getValue() != null && ((String) displayGoal.getValue()).equals(theSeparator)) {
                     //displayGoal.getSelectionModel().clearSelection();
                     displayGoal.setValue(goalBackup);
                 }
@@ -1708,6 +1719,8 @@ final class TabDemo extends Application {
                                 phoneNumberField.getText(), emailField.getText(),
                                 goal, note);
                         updatedStudent.setSecondGoal(secondGoal);
+                        updatedStudent.goalsCompleted = theStudent.goalsCompleted;
+                        updatedStudent.completedGoals = theStudent.completedGoals;
                         String previousPhoneNumber = database.find1(lastName).phoneNumber;
                         if (lastName.equals(lastNameField.getText())
                                 && previousPhoneNumber.replaceAll("\\D+", "").equals(phoneNumberField.getText().replaceAll("\\D+", ""))) {
@@ -1941,6 +1954,8 @@ final class TabDemo extends Application {
                             currentStudent.phoneNumber, currentStudent.emailAddress,
                             goalTree.find("No current goal"), currentStudent.notes);
                     updatedStudent.goalsCompleted = currentStudent.goalsCompleted + 1;
+                    updatedStudent.completedGoals = currentStudent.completedGoals;
+                    updatedStudent.completedGoals.add(currentStudent.goal.goal);
                     if (currentStudent.secondGoal != null) {
                         updatedStudent.setSecondGoal(new Goal(currentStudent.secondGoal));
                     }
@@ -2003,8 +2018,10 @@ final class TabDemo extends Application {
                     String studentName = (String) findStudentGoals.getValue();
                     String lastName = studentName.substring(0, studentName.indexOf(","));
                     Student currentStudent = database.find1(lastName);
+                    String currentSecondGoal = currentStudent.secondGoal.goal;
                     currentStudent.setSecondGoal(null);
                     currentStudent.goalsCompleted = currentStudent.goalsCompleted + 1;
+                    currentStudent.completedGoals.add(currentSecondGoal);
                     database.modify1(lastName, currentStudent);
                     popup.setAgreeToChanges(false);
                     findStudentGoals.getSelectionModel().clearSelection();
@@ -2352,6 +2369,7 @@ final class TabDemo extends Application {
                 progressLabel.setVisible(false);
                 goalProgress.setVisible(false);
                 printReport.setDisable(true);
+                completedGoalsList.clear();
                 completedSubgoalsList.clear();
                 remainingSubgoalsList.clear();
                 if (findStudentReports.getValue() != null) {
@@ -2362,7 +2380,8 @@ final class TabDemo extends Application {
                     Student currentStudent = database.find1(lastName);
                     if (currentStudent.goal != null) {
                         primaryStudentGoal.setText(currentStudent.goal.goal);
-                        selectGoalReport1.setDisable(false);
+                        if (!currentStudent.goal.goal.equals("No current goal"))
+                            selectGoalReport1.setDisable(false);
                     }
                     if (currentStudent.secondGoal != null) {
                         secondaryStudentGoal.setText(currentStudent.secondGoal.goal);
@@ -2370,6 +2389,11 @@ final class TabDemo extends Application {
                     }
                     goalsCompleted.setText("Goals completed: " + currentStudent.goalsCompleted);
                     goalsCompleted.setVisible(true);
+                    String completedGoals = "";
+                    for (String goal : currentStudent.completedGoals) {
+                        completedGoals += goal + "\n";
+                    }
+                    completedGoalsList.setText(completedGoals);
                 }
             }
         });
@@ -2381,7 +2405,12 @@ final class TabDemo extends Application {
                 Student currentStudent = database.find1(lastName);
                 int numSubgoals = currentStudent.goal.subgoals.size();
                 int numCompleted = currentStudent.goal.numCompletedSubgoals();
-                progressLabel.setText("Progress towards current goal: " + numCompleted * 100.0 / numSubgoals + "%");
+                String progress;
+                if (numSubgoals == 0)
+                    progress = "0.00";
+                else
+                    progress = df.format(numCompleted * 100.0 / numSubgoals);
+                progressLabel.setText("Progress towards current goal: " + progress + "%");
                 goalProgress.setProgress(numCompleted * 1.0 / numSubgoals);
                 progressLabel.setVisible(true);
                 goalProgress.setVisible(true);
@@ -2407,7 +2436,12 @@ final class TabDemo extends Application {
                 Student currentStudent = database.find1(lastName);
                 int numSubgoals = currentStudent.secondGoal.subgoals.size();
                 int numCompleted = currentStudent.secondGoal.numCompletedSubgoals();
-                progressLabel.setText("Progress towards current goal: " + df.format(numCompleted * 100.0 / numSubgoals) + "%");
+                String progress;
+                if (numSubgoals == 0)
+                    progress = "0.00";
+                else
+                    progress = df.format(numCompleted * 100.0 / numSubgoals);                
+                progressLabel.setText("Progress towards current goal: " + progress + "%");
                 goalProgress.setProgress(numCompleted * 1.0 / numSubgoals);
                 progressLabel.setVisible(true);
                 goalProgress.setVisible(true);
@@ -3974,7 +4008,7 @@ public class AIUWithTrees extends Application {
                 }
             }
             if (student.secondGoal != null) {
-                for (int i = 32; i < array.length; i++) {
+                for (int i = 32; i < 52; i++) {
                     if (array[i].equals("1")) {
                         student.secondGoal.subgoals.get(i - 32).setComplete(true);
                     } else if (array[i].equals("0")) {
@@ -3983,6 +4017,10 @@ public class AIUWithTrees extends Application {
                         break;
                     }
                 }
+            }
+            
+            for (int i = 52; i < array.length; i++) {
+                student.completedGoals.add(array[i]);
             }
             database.add(array[0], array[1].replaceAll("\\D+", ""), student);
         }
