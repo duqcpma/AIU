@@ -1465,10 +1465,11 @@ final class TabDemo extends Application {
             public void handle(KeyEvent k) {
                 String rawNotes = adminNotes.getText();
                 if (!rawNotes.isEmpty()) {
-                    while (rawNotes.lastIndexOf("\n") == rawNotes.length() - 1) {
+                    while (rawNotes.lastIndexOf("\n") == rawNotes.length() - 1 && rawNotes.length() != 0) {
                         rawNotes = rawNotes.substring(0, rawNotes.length() - 1);
                     }
-                    rawNotes += "\n";
+                    if (rawNotes.length() != 0)
+                        rawNotes += "\n";
                 }
                 administrativeNotes = rawNotes;
             }
