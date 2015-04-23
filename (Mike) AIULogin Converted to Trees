@@ -1468,8 +1468,9 @@ final class TabDemo extends Application {
                     while (rawNotes.lastIndexOf("\n") == rawNotes.length() - 1 && rawNotes.length() != 0) {
                         rawNotes = rawNotes.substring(0, rawNotes.length() - 1);
                     }
-                    if (rawNotes.length() != 0)
+                    if (rawNotes.length() != 0) {
                         rawNotes += "\n";
+                    }
                 }
                 administrativeNotes = rawNotes;
             }
@@ -2081,7 +2082,7 @@ final class TabDemo extends Application {
                 }
             }
         });
-        
+
         goals2.setOnMouseExited(new EventHandler<MouseEvent>() {
             public void handle(MouseEvent m) {
                 if (goals2.getValue() != null && ((String) goals2.getValue()).equals(theSeparator)) {
@@ -2090,7 +2091,7 @@ final class TabDemo extends Application {
                 }
             }
         });
-       
+
         secondGoals2.setOnMouseExited(new EventHandler<MouseEvent>() {
             public void handle(MouseEvent m) {
                 if (secondGoals2.getValue() != null && ((String) displaySecondGoal.getValue()).equals(theSeparator)) {
@@ -2098,7 +2099,7 @@ final class TabDemo extends Application {
                     secondGoals2.setValue(null);
                 }
             }
-        });        
+        });
 
         addStudent.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
@@ -2685,6 +2686,15 @@ final class TabDemo extends Application {
         final ArrayList<CheckBox> checkBoxes2 = new ArrayList<CheckBox>();
         final ArrayList<TextField> textFields = new ArrayList<TextField>();
 
+        listOfGoals.setOnMouseExited(new EventHandler<MouseEvent>() {
+            public void handle(MouseEvent m) {
+                if (listOfGoals.getValue() != null && ((String) listOfGoals.getValue()).equals(theSeparator)) {
+                    listOfGoals.getSelectionModel().clearSelection();
+                    listOfGoals.setValue(null);
+                }
+            }
+        });
+
         listOfGoals.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
                 saveGoal.setDisable(true);
@@ -2703,11 +2713,7 @@ final class TabDemo extends Application {
                 }
                 checkBoxes2.clear();
                 textFields.clear();
-                if (listOfGoals.getValue() != null && ((String) listOfGoals.getValue()).equals(theSeparator)) {
-                    listOfGoals.getSelectionModel().clearSelection();
-                    listOfGoals.setValue(null);
-                }
-                if (listOfGoals.getValue() != null) {
+                if (listOfGoals.getValue() != null && !((String) listOfGoals.getValue()).equals(theSeparator)) {
                     goalStatement.setText((String) listOfGoals.getValue());
                     editGoal.setDisable(false);
                     Goal currentGoal = goalTree.find((String) listOfGoals.getValue());
