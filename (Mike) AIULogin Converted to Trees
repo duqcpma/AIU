@@ -3373,7 +3373,10 @@ final class TabDemo extends Application {
 
         editTab.setOnSelectionChanged(new EventHandler<Event>() {
             public void handle(Event t) {
-
+                findStudentEdit.getSelectionModel().clearSelection();
+                findStudentEdit.setValue(null);
+                searchName.clear();
+                searchPhone.clear();
             }
         });
 
@@ -3384,7 +3387,10 @@ final class TabDemo extends Application {
 
         goalTab.setOnSelectionChanged(new EventHandler<Event>() {
             public void handle(Event t) {
-
+                searchName2.clear();
+                searchPhone2.clear();
+                findStudentGoals.getSelectionModel().clearSelection();
+                findStudentGoals.setValue(null);
             }
         });
 
@@ -3395,7 +3401,17 @@ final class TabDemo extends Application {
 
         newStudentTab.setOnSelectionChanged(new EventHandler<Event>() {
             public void handle(Event t) {
-
+                firstNameField2.clear();
+                lastNameField2.clear();
+                phoneNumberField2.clear();
+                emailField2.clear();
+                noteArea2.clear();
+                studentAdded.setVisible(false);
+                hasEmail.setSelected(false);
+                goals2.getSelectionModel().clearSelection();
+                goals2.setValue(null);
+                secondGoals2.getSelectionModel().clearSelection();
+                secondGoals2.setValue(null);
             }
         });
 
@@ -3406,7 +3422,12 @@ final class TabDemo extends Application {
 
         flagsTab.setOnSelectionChanged(new EventHandler<Event>() {
             public void handle(Event t) {
-
+                findStudentFlags.getSelectionModel().clearSelection();
+                findStudentFlags.setValue(null);
+                reportTimes.getSelectionModel().clearSelection();
+                reportTimes.setValue(null);
+                searchNameFlags.clear();
+                searchPhoneFlags.clear();
             }
         });
 
@@ -3417,7 +3438,10 @@ final class TabDemo extends Application {
 
         reportsTab.setOnSelectionChanged(new EventHandler<Event>() {
             public void handle(Event t) {
-
+                findStudentReports.getSelectionModel().clearSelection();
+                findStudentReports.setValue(null);
+                searchName3.clear();
+                searchPhone3.clear();
             }
         });
 
@@ -3430,7 +3454,28 @@ final class TabDemo extends Application {
 
         adminTab.setOnSelectionChanged(new EventHandler<Event>() {
             public void handle(Event t) {
-
+                passwordMatch1.setVisible(false);
+                passwordMatch2.setVisible(false);
+                usernameMatch1.setVisible(false);
+                usernameMatch2.setVisible(false);
+                username.clear();
+                password.clear();
+                confirmPassword.clear();
+                userFirstName.clear();
+                userLastName.clear();
+                newUsername.clear();
+                newPassword.clear();
+                confirmNewPassword.clear();
+                userFirstName2.clear();
+                userLastName2.clear();
+                userList.getSelectionModel().clearSelection();
+                userList.setValue(null);
+                isAdministrator.getSelectionModel().clearSelection();
+                isAdministrator.setValue(null);
+                isAdministrator2.getSelectionModel().clearSelection();
+                isAdministrator2.setValue(null);
+                userChangesFailed.setVisible(false);
+                newUserAdded.setVisible(false);
             }
         });
 
@@ -3443,7 +3488,11 @@ final class TabDemo extends Application {
 
         manageTab.setOnSelectionChanged(new EventHandler<Event>() {
             public void handle(Event t) {
-
+                createdGoal.clear();
+                selectGoalType.getSelectionModel().clearSelection();
+                selectGoalType.setValue(null);
+                listOfGoals.getSelectionModel().clearSelection();
+                listOfGoals.setValue(null);
             }
         });
 
