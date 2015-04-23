@@ -230,6 +230,9 @@ final class TabDemo extends Application {
 
     public static String administrativeNotes;
 
+    public String goalBackup;
+    public String secondGoalBackup;
+    
     public void setAdmin(boolean b) {
         this.isAdmin = b;
     }
@@ -646,8 +649,10 @@ final class TabDemo extends Application {
         currentGoals.setAlignment(Pos.CENTER_RIGHT);
         editGrid.add(currentGoals, 2, 5, 2, 1);
 
-        Separator theSeparator = new Separator();
+        //Separator theSeparator = new Separator();
 
+        String theSeparator = "------------------------";
+        
         final ComboBox displayGoal = new ComboBox();
         displayGoal.setDisable(true);
         displayGoal.getItems().addAll(civicsGoals);
@@ -1279,7 +1284,7 @@ final class TabDemo extends Application {
             listOfGoals.getItems().add(theSeparator);
         }
         listOfGoals.getItems().addAll(postsecGoals);
-        if (postsecGoals.size() != 0 && otherGoals.size() != 0) {
+        if (postsecGoals.size() != 0 && otherGoals.size() != 1) {
             listOfGoals.getItems().add(theSeparator);
         }
         listOfGoals.getItems().addAll(otherGoals);
@@ -1458,7 +1463,7 @@ final class TabDemo extends Application {
             }
         });
 
-        // "Edit Profiles" tab Actions
+        // "Edit Profiles" tab Actions        
         findStudentEdit.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
                 firstNameField.clear();
@@ -1494,11 +1499,13 @@ final class TabDemo extends Application {
                     if (currentStudent.goal == null) {
                         displayGoal.setValue(null);
                     } else {
+                        goalBackup = currentStudent.goal.goal;
                         displayGoal.setValue(currentStudent.goal.goal);
                     }
                     if (currentStudent.secondGoal == null) {
                         displaySecondGoal.setValue(null);
                     } else {
+                        secondGoalBackup = currentStudent.secondGoal.goal;
                         displaySecondGoal.setValue(currentStudent.secondGoal.goal);
                     }
                     changeGoal.setDisable(false);
@@ -1591,6 +1598,16 @@ final class TabDemo extends Application {
             }
         });
 
+        displayGoal.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent t) {
+                if (((String) displayGoal.getValue()).equals(theSeparator)) {
+                    //displayGoal.getSelectionModel().clearSelection();
+                    displayGoal.setValue(goalBackup);
+                }
+            }
+        });
+        
+        /*
         displayGoal.setOnMouseReleased(new EventHandler<MouseEvent>() {
             public void handle(MouseEvent m) {
                 if (displayGoal.getValue() == theSeparator) {
@@ -1606,6 +1623,7 @@ final class TabDemo extends Application {
                 }
             }
         });
+        */
 
         displaySecondGoal.setOnMouseReleased(new EventHandler<MouseEvent>() {
             public void handle(MouseEvent m) {
@@ -1659,7 +1677,7 @@ final class TabDemo extends Application {
                         }
                         Goal previousSecondGoal = theStudent.secondGoal;
                         Goal newSecondGoal = null;
-                        if (displaySecondGoal.getValue() != null) {
+                        if (displaySecondGoal.getValue() != null && !((String) displaySecondGoal.getValue()).equals("No current goal")) {
                             newSecondGoal = new Goal(goalTree.find((String) displaySecondGoal.getValue()));
                         }
                         Goal secondGoal;
@@ -1673,6 +1691,10 @@ final class TabDemo extends Application {
                             } else {
                                 secondGoal = newSecondGoal;
                             }
+                        }
+                        if (goal.goal.equals("No current goal") && secondGoal != null) {
+                            goal = new Goal(secondGoal);
+                            secondGoal = null;
                         }
                         Notes previousNotes = theStudent.notes;
                         Notes note;
@@ -2638,7 +2660,11 @@ final class TabDemo extends Application {
                 }
                 checkBoxes2.clear();
                 textFields.clear();
-                if (listOfGoals.getValue() != null) {
+                if (listOfGoals.getValue() != null && ((String) listOfGoals.getValue()).equals(theSeparator)) {
+                    listOfGoals.getSelectionModel().clearSelection();
+                    listOfGoals.setValue(null);
+                }
+                if (listOfGoals.getValue() != null ) {
                     goalStatement.setText((String) listOfGoals.getValue());
                     editGoal.setDisable(false);
                     Goal currentGoal = goalTree.find((String) listOfGoals.getValue());
@@ -2754,7 +2780,7 @@ final class TabDemo extends Application {
                     listOfGoals.getItems().add(theSeparator);
                 }
                 listOfGoals.getItems().addAll(postsecGoals);
-                if (postsecGoals.size() != 0 && otherGoals.size() != 0) {
+                if (postsecGoals.size() != 0 && otherGoals.size() != 1) {
                     listOfGoals.getItems().add(theSeparator);
                 }
                 listOfGoals.getItems().addAll(otherGoals);
@@ -2866,7 +2892,7 @@ final class TabDemo extends Application {
                         listOfGoals.getItems().add(theSeparator);
                     }
                     listOfGoals.getItems().addAll(postsecGoals);
-                    if (postsecGoals.size() != 0 && otherGoals.size() != 0) {
+                    if (postsecGoals.size() != 0 && otherGoals.size() != 1) {
                         listOfGoals.getItems().add(theSeparator);
                     }
                     listOfGoals.getItems().addAll(otherGoals);
@@ -3242,7 +3268,7 @@ final class TabDemo extends Application {
                         listOfGoals.getItems().add(theSeparator);
                     }
                     listOfGoals.getItems().addAll(postsecGoals);
-                    if (postsecGoals.size() != 0 && otherGoals.size() != 0) {
+                    if (postsecGoals.size() != 0 && otherGoals.size() != 1) {
                         listOfGoals.getItems().add(theSeparator);
                     }
                     listOfGoals.getItems().addAll(otherGoals);
