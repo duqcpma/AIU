@@ -230,9 +230,9 @@ final class TabDemo extends Application {
 
     public static String administrativeNotes;
 
-    public String goalBackup;
-    public String secondGoalBackup;
-    
+    public String goalBackupEdit;
+    public String secondGoalBackupEdit;
+
     public void setAdmin(boolean b) {
         this.isAdmin = b;
     }
@@ -311,17 +311,18 @@ final class TabDemo extends Application {
                         sub2[i] = " ";
                     }
                 }
-                
+
                 String completedGoals = ",";
-                
+
                 for (String goal : currNode.data.completedGoals) {
                     completedGoals += goal + ",";
                 }
-                
-                if (completedGoals.length() > 1)
-                    completedGoals = completedGoals.substring(0,completedGoals.length()-1);
-                else
+
+                if (completedGoals.length() > 1) {
+                    completedGoals = completedGoals.substring(0, completedGoals.length() - 1);
+                } else {
                     completedGoals = "";
+                }
 
                 content = content + currNode.data.lastName + "," + currNode.data.phoneNumber.replaceAll("\\D+", "") + "," + currNode.data.lastName + ","
                         + currNode.data.firstName + "," + currNode.data.phoneNumber + "," + currNode.data.emailAddress + "," + currNode.data.lastUpdate.getTime() + "," + goal1.goal + "," + secondGoalString + ","
@@ -661,9 +662,8 @@ final class TabDemo extends Application {
         editGrid.add(currentGoals, 2, 5, 2, 1);
 
         //Separator theSeparator = new Separator();
-
         String theSeparator = "------------------------";
-        
+
         final ComboBox displayGoal = new ComboBox();
         displayGoal.setDisable(true);
         displayGoal.getItems().addAll(civicsGoals);
@@ -1510,13 +1510,13 @@ final class TabDemo extends Application {
                     if (currentStudent.goal == null) {
                         displayGoal.setValue(null);
                     } else {
-                        goalBackup = currentStudent.goal.goal;
+                        goalBackupEdit = currentStudent.goal.goal;
                         displayGoal.setValue(currentStudent.goal.goal);
                     }
                     if (currentStudent.secondGoal == null) {
                         displaySecondGoal.setValue(null);
                     } else {
-                        secondGoalBackup = currentStudent.secondGoal.goal;
+                        secondGoalBackupEdit = currentStudent.secondGoal.goal;
                         displaySecondGoal.setValue(currentStudent.secondGoal.goal);
                     }
                     changeGoal.setDisable(false);
@@ -1609,38 +1609,25 @@ final class TabDemo extends Application {
             }
         });
 
-        displayGoal.setOnAction(new EventHandler<ActionEvent>() {
-            public void handle(ActionEvent t) {
-                if (displayGoal.getValue() != null && ((String) displayGoal.getValue()).equals(theSeparator)) {
-                    //displayGoal.getSelectionModel().clearSelection();
-                    displayGoal.setValue(goalBackup);
-                }
-            }
-        });
-        
-        /*
-        displayGoal.setOnMouseReleased(new EventHandler<MouseEvent>() {
+        displayGoal.setOnMouseExited(new EventHandler<MouseEvent>() {
             public void handle(MouseEvent m) {
-                if (displayGoal.getValue() == theSeparator) {
+                if (displayGoal.getValue() != null && ((String) displayGoal.getValue()).equals(theSeparator)) {
                     displayGoal.getSelectionModel().clearSelection();
-                    displayGoal.setValue(null);
-                    changeSecondGoal.setDisable(true);
-                    displaySecondGoal.getSelectionModel().clearSelection();
-                    displaySecondGoal.setValue(null);
+                    displayGoal.setValue(goalBackupEdit);
                 } else if (displayGoal.getValue() == null) {
                     changeSecondGoal.setDisable(true);
                 } else {
                     changeSecondGoal.setDisable(false);
                 }
             }
-        });
-        */
+        }
+        );
 
-        displaySecondGoal.setOnMouseReleased(new EventHandler<MouseEvent>() {
+        displaySecondGoal.setOnMouseExited(new EventHandler<MouseEvent>() {
             public void handle(MouseEvent m) {
-                if (displaySecondGoal.getValue() == theSeparator) {
+                if (displaySecondGoal.getValue() != null && ((String) displaySecondGoal.getValue()).equals(theSeparator)) {
                     displaySecondGoal.getSelectionModel().clearSelection();
-                    displaySecondGoal.setValue(null);
+                    displaySecondGoal.setValue(secondGoalBackupEdit);
                 }
             }
         });
@@ -2093,6 +2080,24 @@ final class TabDemo extends Application {
                 }
             }
         });
+        
+        goals2.setOnMouseExited(new EventHandler<MouseEvent>() {
+            public void handle(MouseEvent m) {
+                if (goals2.getValue() != null && ((String) goals2.getValue()).equals(theSeparator)) {
+                    goals2.getSelectionModel().clearSelection();
+                    goals2.setValue(null);
+                }
+            }
+        });
+       
+        secondGoals2.setOnMouseExited(new EventHandler<MouseEvent>() {
+            public void handle(MouseEvent m) {
+                if (secondGoals2.getValue() != null && ((String) displaySecondGoal.getValue()).equals(theSeparator)) {
+                    secondGoals2.getSelectionModel().clearSelection();
+                    secondGoals2.setValue(null);
+                }
+            }
+        });        
 
         addStudent.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
@@ -2380,8 +2385,9 @@ final class TabDemo extends Application {
                     Student currentStudent = database.find1(lastName);
                     if (currentStudent.goal != null) {
                         primaryStudentGoal.setText(currentStudent.goal.goal);
-                        if (!currentStudent.goal.goal.equals("No current goal"))
+                        if (!currentStudent.goal.goal.equals("No current goal")) {
                             selectGoalReport1.setDisable(false);
+                        }
                     }
                     if (currentStudent.secondGoal != null) {
                         secondaryStudentGoal.setText(currentStudent.secondGoal.goal);
@@ -2406,10 +2412,11 @@ final class TabDemo extends Application {
                 int numSubgoals = currentStudent.goal.subgoals.size();
                 int numCompleted = currentStudent.goal.numCompletedSubgoals();
                 String progress;
-                if (numSubgoals == 0)
+                if (numSubgoals == 0) {
                     progress = "0.00";
-                else
+                } else {
                     progress = df.format(numCompleted * 100.0 / numSubgoals);
+                }
                 progressLabel.setText("Progress towards current goal: " + progress + "%");
                 goalProgress.setProgress(numCompleted * 1.0 / numSubgoals);
                 progressLabel.setVisible(true);
@@ -2437,10 +2444,11 @@ final class TabDemo extends Application {
                 int numSubgoals = currentStudent.secondGoal.subgoals.size();
                 int numCompleted = currentStudent.secondGoal.numCompletedSubgoals();
                 String progress;
-                if (numSubgoals == 0)
+                if (numSubgoals == 0) {
                     progress = "0.00";
-                else
-                    progress = df.format(numCompleted * 100.0 / numSubgoals);                
+                } else {
+                    progress = df.format(numCompleted * 100.0 / numSubgoals);
+                }
                 progressLabel.setText("Progress towards current goal: " + progress + "%");
                 goalProgress.setProgress(numCompleted * 1.0 / numSubgoals);
                 progressLabel.setVisible(true);
@@ -2698,7 +2706,7 @@ final class TabDemo extends Application {
                     listOfGoals.getSelectionModel().clearSelection();
                     listOfGoals.setValue(null);
                 }
-                if (listOfGoals.getValue() != null ) {
+                if (listOfGoals.getValue() != null) {
                     goalStatement.setText((String) listOfGoals.getValue());
                     editGoal.setDisable(false);
                     Goal currentGoal = goalTree.find((String) listOfGoals.getValue());
@@ -4067,7 +4075,7 @@ public class AIUWithTrees extends Application {
                     }
                 }
             }
-            
+
             for (int i = 52; i < array.length; i++) {
                 student.completedGoals.add(array[i]);
             }
