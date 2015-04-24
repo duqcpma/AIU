@@ -1672,18 +1672,22 @@ final class TabDemo extends Application {
                         query = query.substring(0, 1).toUpperCase() + query.substring(1);
                         ArrayList<Student> querySearch = database.find1(query);
                         if (querySearch != null) {
-                            ArrayList<String> matchNames = new ArrayList<String>();
+                            if (querySearch.size() > 1) {
+                                ArrayList<String> matchNames = new ArrayList<String>();
 
-                            for (Student student : querySearch) {
-                                String name = student.lastName + ", " + student.firstName;
-                                matchNames.add(name);
+                                for (Student student : querySearch) {
+                                    String name = student.lastName + ", " + student.firstName;
+                                    matchNames.add(name);
+                                }
+                                matches.setEdit(true);
+                                studentChoices.getItems().addAll(matchNames);
+                                multipleMatchesStage.setScene(multipleMatchesScene);
+                                multipleMatchesStage.show();
+                            } else {
+                                String studentName = querySearch.get(0).lastName + ", " + querySearch.get(0).firstName;
+                                findStudentEdit.setValue(studentName);
                             }
-                            matches.setEdit(true);
-                            studentChoices.getItems().addAll(matchNames);
-                            multipleMatchesStage.setScene(multipleMatchesScene);
-                            multipleMatchesStage.show();
                         }
-
                     }
                 }
                 searchName.clear();
@@ -1701,15 +1705,20 @@ final class TabDemo extends Application {
                     String query = searchPhone.getText().replaceAll("\\D+", "");
                     ArrayList<Student> potentialMatch = database.find2(query);
                     if (potentialMatch != null) {
-                        ArrayList<String> matchNames = new ArrayList<String>();
-                        for (Student student : potentialMatch) {
-                            String name = student.lastName + ", " + student.firstName;
-                            matchNames.add(name);
+                        if (potentialMatch.size() > 1) {
+                            ArrayList<String> matchNames = new ArrayList<String>();
+                            for (Student student : potentialMatch) {
+                                String name = student.lastName + ", " + student.firstName;
+                                matchNames.add(name);
+                            }
+                            matches.setEdit(true);
+                            studentChoices.getItems().addAll(matchNames);
+                            multipleMatchesStage.setScene(multipleMatchesScene);
+                            multipleMatchesStage.show();
+                        } else {
+                            String studentName = potentialMatch.get(0).lastName + ", " + potentialMatch.get(0).firstName;
+                            findStudentEdit.setValue(studentName);
                         }
-                        matches.setEdit(true);
-                        studentChoices.getItems().addAll(matchNames);
-                        multipleMatchesStage.setScene(multipleMatchesScene);
-                        multipleMatchesStage.show();
                     }
                     searchPhone.clear();
                 }
@@ -1968,15 +1977,20 @@ final class TabDemo extends Application {
                         query = query.substring(0, 1).toUpperCase() + query.substring(1);
                         ArrayList<Student> querySearch = database.find1(query);
                         if (querySearch != null) {
-                            ArrayList<String> matchNames = new ArrayList<String>();
-                            for (Student student : querySearch) {
-                                String name = student.lastName + ", " + student.firstName;
-                                matchNames.add(name);
+                            if (querySearch.size() > 1) {
+                                ArrayList<String> matchNames = new ArrayList<String>();
+                                for (Student student : querySearch) {
+                                    String name = student.lastName + ", " + student.firstName;
+                                    matchNames.add(name);
+                                }
+                                matches.setGoals(true);
+                                studentChoices.getItems().addAll(matchNames);
+                                multipleMatchesStage.setScene(multipleMatchesScene);
+                                multipleMatchesStage.show();
+                            } else {
+                                String studentName = querySearch.get(0).lastName + ", " + querySearch.get(0).firstName;
+                                findStudentGoals.setValue(studentName);
                             }
-                            matches.setGoals(true);
-                            studentChoices.getItems().addAll(matchNames);
-                            multipleMatchesStage.setScene(multipleMatchesScene);
-                            multipleMatchesStage.show();
                         }
                     }
                 }
@@ -1995,15 +2009,20 @@ final class TabDemo extends Application {
                     String query = searchPhone2.getText().replaceAll("\\D+", "");
                     ArrayList<Student> potentialMatch = database.find2(query);
                     if (potentialMatch != null) {
-                        ArrayList<String> matchNames = new ArrayList<String>();
-                        for (Student student : potentialMatch) {
-                            String name = student.lastName + ", " + student.firstName;
-                            matchNames.add(name);
+                        if (potentialMatch.size() > 1) {
+                            ArrayList<String> matchNames = new ArrayList<String>();
+                            for (Student student : potentialMatch) {
+                                String name = student.lastName + ", " + student.firstName;
+                                matchNames.add(name);
+                            }
+                            matches.setGoals(true);
+                            studentChoices.getItems().addAll(matchNames);
+                            multipleMatchesStage.setScene(multipleMatchesScene);
+                            multipleMatchesStage.show();
+                        } else {
+                            String studentName = potentialMatch.get(0).lastName + ", " + potentialMatch.get(0).firstName;
+                            findStudentGoals.setValue(studentName);
                         }
-                        matches.setGoals(true);
-                        studentChoices.getItems().addAll(matchNames);
-                        multipleMatchesStage.setScene(multipleMatchesScene);
-                        multipleMatchesStage.show();
                     }
                     searchPhone2.clear();
                 }
@@ -2396,15 +2415,20 @@ final class TabDemo extends Application {
                         query = query.substring(0, 1).toUpperCase() + query.substring(1);
                         ArrayList<Student> querySearch = database.find1(query);
                         if (querySearch != null) {
-                            ArrayList<String> matchNames = new ArrayList<String>();
-                            for (Student student : querySearch) {
-                                String name = student.lastName + ", " + student.firstName;
-                                matchNames.add(name);
+                            if (querySearch.size() > 1) {
+                                ArrayList<String> matchNames = new ArrayList<String>();
+                                for (Student student : querySearch) {
+                                    String name = student.lastName + ", " + student.firstName;
+                                    matchNames.add(name);
+                                }
+                                matches.setFlags(true);
+                                studentChoices.getItems().addAll(matchNames);
+                                multipleMatchesStage.setScene(multipleMatchesScene);
+                                multipleMatchesStage.show();
+                            } else {
+                                String studentName = querySearch.get(0).lastName + ", " + querySearch.get(0).firstName;
+                                findStudentFlags.setValue(studentName);
                             }
-                            matches.setFlags(true);
-                            studentChoices.getItems().addAll(matchNames);
-                            multipleMatchesStage.setScene(multipleMatchesScene);
-                            multipleMatchesStage.show();
                         }
                     }
                 }
@@ -2423,15 +2447,20 @@ final class TabDemo extends Application {
                     String query = searchPhoneFlags.getText().replaceAll("\\D+", "");
                     ArrayList<Student> potentialMatch = database.find2(query);
                     if (potentialMatch != null) {
-                        ArrayList<String> matchNames = new ArrayList<String>();
-                        for (Student student : potentialMatch) {
-                            String name = student.lastName + ", " + student.firstName;
-                            matchNames.add(name);
+                        if (potentialMatch.size() > 1) {
+                            ArrayList<String> matchNames = new ArrayList<String>();
+                            for (Student student : potentialMatch) {
+                                String name = student.lastName + ", " + student.firstName;
+                                matchNames.add(name);
+                            }
+                            matches.setFlags(true);
+                            studentChoices.getItems().addAll(matchNames);
+                            multipleMatchesStage.setScene(multipleMatchesScene);
+                            multipleMatchesStage.show();
+                        } else {
+                            String studentName = potentialMatch.get(0).lastName + ", " + potentialMatch.get(0).firstName;
+                            findStudentFlags.setValue(studentName);
                         }
-                        matches.setFlags(true);
-                        studentChoices.getItems().addAll(matchNames);
-                        multipleMatchesStage.setScene(multipleMatchesScene);
-                        multipleMatchesStage.show();
                     }
                     searchPhoneFlags.clear();
                 }
@@ -2595,15 +2624,20 @@ final class TabDemo extends Application {
                         query = query.substring(0, 1).toUpperCase() + query.substring(1);
                         ArrayList<Student> querySearch = database.find1(query);
                         if (querySearch != null) {
-                            ArrayList<String> matchNames = new ArrayList<String>();
-                            for (Student student : querySearch) {
-                                String name = student.lastName + ", " + student.firstName;
-                                matchNames.add(name);
+                            if (querySearch.size() > 1) {
+                                ArrayList<String> matchNames = new ArrayList<String>();
+                                for (Student student : querySearch) {
+                                    String name = student.lastName + ", " + student.firstName;
+                                    matchNames.add(name);
+                                }
+                                matches.setReports(true);
+                                studentChoices.getItems().addAll(matchNames);
+                                multipleMatchesStage.setScene(multipleMatchesScene);
+                                multipleMatchesStage.show();
+                            } else {
+                                String studentName = querySearch.get(0).lastName + ", " + querySearch.get(0).firstName;
+                                findStudentReports.setValue(studentName);
                             }
-                            matches.setReports(true);
-                            studentChoices.getItems().addAll(matchNames);
-                            multipleMatchesStage.setScene(multipleMatchesScene);
-                            multipleMatchesStage.show();
                         }
                     }
                 }
@@ -2622,15 +2656,21 @@ final class TabDemo extends Application {
                     String query = searchPhone3.getText().replaceAll("\\D+", "");
                     ArrayList<Student> potentialMatch = database.find2(query);
                     if (potentialMatch != null) {
-                        ArrayList<String> matchNames = new ArrayList<String>();
-                        for (Student student : potentialMatch) {
-                            String name = student.lastName + ", " + student.firstName;
-                            matchNames.add(name);
+                        if (potentialMatch.size() > 1) {
+                            ArrayList<String> matchNames = new ArrayList<String>();
+                            for (Student student : potentialMatch) {
+                                String name = student.lastName + ", " + student.firstName;
+                                matchNames.add(name);
+                            }
+                            matches.setReports(true);
+                            studentChoices.getItems().addAll(matchNames);
+                            multipleMatchesStage.setScene(multipleMatchesScene);
+                            multipleMatchesStage.show();
                         }
-                        matches.setReports(true);
-                        studentChoices.getItems().addAll(matchNames);
-                        multipleMatchesStage.setScene(multipleMatchesScene);
-                        multipleMatchesStage.show();
+                        else {
+                            String studentName = potentialMatch.get(0).lastName + ", " + potentialMatch.get(0).firstName;
+                            findStudentReports.setValue(studentName);
+                        }
                     }
                     searchPhone3.clear();
                 }
