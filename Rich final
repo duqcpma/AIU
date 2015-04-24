@@ -2951,9 +2951,10 @@ final class TabDemo extends Application {
                 String datelabel = "Date:";
                 String secgoal = "Secondary Goal";
                 
+                //need
                 String currentName = (String) findStudentReports.getValue();
                 String lastName = currentName.substring(0, currentName.indexOf(","));
-                Student currentStudent = database.find1(lastName);
+                Student currentStudent = database.find(lastName);
                 
                 
                 Date d = new Date();
