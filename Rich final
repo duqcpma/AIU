@@ -2617,7 +2617,7 @@ final class TabDemo extends Application {
                 Date d = new Date();
                 String date = (d.getMonth()+1) +"/"+ d.getDate() + "/" + (d.getYear()+1900);
 
-                File file1 = new File("C:\\Users\\"+System.getProperty("user.name")+"\\Desktop\\flagsheet.xls");
+                File file1 = new File("C:\\Users\\"+System.getProperty("user.name")+"\\Google Drive\\flagsheet.xls");
                 
                 
       
@@ -2957,7 +2957,7 @@ final class TabDemo extends Application {
                 String date = (d.getMonth()+1) +"/"+ d.getDate() + "/" + (d.getYear()+1900);
       
       
-                File file  = new File("C:\\Users\\"+System.getProperty("user.name")+"\\Desktop\\report.xls");
+                File file  = new File("C:\\Users\\"+System.getProperty("user.name")+"\\Google Drive\\report.xls");
      
       
                 WritableWorkbook wworkbook;
