@@ -14,6 +14,10 @@ String lname = "Last Name";
                 WritableCellFormat ab11format = new WritableCellFormat(arialBold11font);
                 WritableCellFormat a11format = new WritableCellFormat(arial11font);
                 
+                wworkbook = Workbook.createWorkbook(file);
+      
+                WritableSheet wsheet = wworkbook.createSheet("First Sheet", 0);
+                
                 AIUTreeIterator it = new AIUTreeIterator(database);
                 
                 jxl.write.Label l1 = new jxl.write.Label(0,0,lname,ab11format);
@@ -49,3 +53,8 @@ String lname = "Last Name";
                 wsheet.addCell(l2);
                 wsheet.addCell(l3);
                 wsheet.addCell(l4);
+                
+                wworkbook.write();
+                wworkbook.close();
+                
+                Desktop.getDesktop().open(file);
