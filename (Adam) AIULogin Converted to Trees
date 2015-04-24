@@ -55,7 +55,7 @@ import javafx.stage.WindowEvent;
 
 /**
  *
- * @author Adam
+ * @author mguyer92
  */
 final class Notes {
 
@@ -153,7 +153,7 @@ final class Student {
 
     public Goal goal;
     public Goal secondGoal;
-    public ArrayList<Goal> completedGoals;
+    public ArrayList<String> completedGoals = new ArrayList<String>();
 
     public Student(String theLastName, String theFirstName, String thePhoneNumber, String theEmail,
             Goal theGoal, Notes theNotes) {
@@ -216,7 +216,9 @@ final class Student {
 
 final class TabDemo extends Application {
 
-    public static TwoKeyTree<String, String, Student> database;
+    public static AIUTree<String, ArrayList<Student>> database;
+	
+	public static AIUTree<String, ArrayList<Student>> database2;
 
     public static AIUTree<String, Goal> goalTree;
 
@@ -230,14 +232,18 @@ final class TabDemo extends Application {
 
     public static String administrativeNotes;
 
+    public String goalBackupEdit;
+    public String secondGoalBackupEdit;
+
     public void setAdmin(boolean b) {
         this.isAdmin = b;
     }
 
-    public TabDemo(TwoKeyTree<String, String, Student> theDatabase,
+    public TabDemo(AIUTree<String, ArrayList<Student>> theDatabase, AIUTree<String, ArrayList<Student>> theDatabase2,
             AIUTree<String, Goal> theGoalTree, AIUTree<String, UserAndPass> theUserTree,
             UserAndPass theCurrentUser, String theAdminNotes) {
         database = theDatabase;
+		database2 = theDatabase2;
         goalTree = theGoalTree;
         userTree = theUserTree;
         currentUser = theCurrentUser;
@@ -246,80 +252,94 @@ final class TabDemo extends Application {
 
     //public String convertDate() {};
     public static void saveTree() {
-        AIUTreeIterator iterator = new AIUTreeIterator(database.tree1);
+        AIUTreeIterator iterator = new AIUTreeIterator(database);
         try {
 
             String content = "";
 
             while (iterator.hasNext()) {
-                Node<String, Student> currNode = iterator.next();
-                String notes;
-                if (currNode.data.notes.notes.length() == 0) {
-                    notes = " ";
-                } else {
-                    notes = currNode.data.notes.notes.replaceAll("\\n", "\\\\n");
-                }
-                Goal goal1 = currNode.data.goal;
-                Goal goal2 = currNode.data.secondGoal;
-
-                String secondGoalString;
-
-                if (goal2 != null) {
-                    secondGoalString = goal2.goal;
-                } else {
-                    secondGoalString = " ";
-                }
-
-                String[] sub1 = new String[20];
-                String[] sub2 = new String[20];
-
-                int size1 = goal1.subgoals.size();
-
-                if (size1 > 0) {
-                    for (int i = 0; i < size1; i++) {
-                        if (goal1.subgoals.get(i).isComplete) {
-                            sub1[i] = "1";
-                        } else {
-                            sub1[i] = "0";
-                        }
+                Node<String, ArrayList<Student>> currNode = iterator.next();
+                for (Student student : currNode.data) {
+                    String notes;
+                    if (student.notes.notes.length() == 0) {
+                        notes = " ";
+                    } else {
+                        notes = student.notes.notes.replaceAll("\\n", "\\\\n");
                     }
-                }
+                    Goal goal1 = student.goal;
+                    Goal goal2 = student.secondGoal;
 
-                for (int i = size1; i < 20; i++) {
-                    sub1[i] = " ";
-                }
+                    String secondGoalString;
 
-                if (goal2 != null) {
-                    int size2 = goal2.subgoals.size();
-                    if (size2 > 0) {
-                        for (int i = 0; i < size2; i++) {
-                            if (goal2.subgoals.get(i).isComplete) {
-                                sub2[i] = "1";
+                    if (goal2 != null) {
+                        secondGoalString = goal2.goal;
+                    } else {
+                        secondGoalString = " ";
+                    }
+
+                    String[] sub1 = new String[20];
+                    String[] sub2 = new String[20];
+
+                    int size1 = goal1.subgoals.size();
+
+                    if (size1 > 0) {
+                        for (int i = 0; i < size1; i++) {
+                            if (goal1.subgoals.get(i).isComplete) {
+                                sub1[i] = "1";
                             } else {
-                                sub2[i] = "0";
+                                sub1[i] = "0";
                             }
                         }
                     }
-                    for (int i = size2; i < 20; i++) {
-                        sub2[i] = " ";
-                    }
-                } else {
-                    for (int i = 0; i < 20; i++) {
-                        sub2[i] = " ";
-                    }
-                }
 
-                content = content + currNode.data.lastName + "," + currNode.data.phoneNumber.replaceAll("\\D+", "") + "," + currNode.data.lastName + ","
-                        + currNode.data.firstName + "," + currNode.data.phoneNumber + "," + currNode.data.emailAddress + "," + currNode.data.lastUpdate.getTime() + "," + goal1.goal + "," + secondGoalString + ","
-                        + currNode.data.goalsCompleted + "," + notes + "," + currNode.data.notes.date.getTime() + "," + sub1[0] + "," + sub1[1] + "," + sub1[2] + "," + sub1[3] + ","
-                        + sub1[4] + "," + sub1[5] + "," + sub1[6] + "," + sub1[7] + "," + sub1[8] + "," + sub1[9] + "," + sub1[10] + ","
-                        + sub1[11] + "," + sub1[12] + "," + sub1[13] + "," + sub1[14] + "," + sub1[15] + "," + sub1[16] + "," + sub1[17] + "," + sub1[18] + ","
-                        + sub1[19] + "," + sub2[0] + "," + sub2[1] + "," + sub2[2] + "," + sub2[3] + "," + sub2[4] + "," + sub2[5] + "," + sub2[6] + ","
-                        + sub2[7] + "," + sub2[8] + "," + sub2[9] + "," + sub2[10] + "," + sub2[11] + "," + sub2[12] + "," + sub2[13] + "," + sub2[14] + ","
-                        + sub2[15] + "," + sub2[16] + "," + sub2[17] + "," + sub2[18] + "," + sub2[19] + System.getProperty("line.separator");
+                    for (int i = size1; i < 20; i++) {
+                        sub1[i] = " ";
+                    }
+
+                    if (goal2 != null) {
+                        int size2 = goal2.subgoals.size();
+                        if (size2 > 0) {
+                            for (int i = 0; i < size2; i++) {
+                                if (goal2.subgoals.get(i).isComplete) {
+                                    sub2[i] = "1";
+                                } else {
+                                    sub2[i] = "0";
+                                }
+                            }
+                        }
+                        for (int i = size2; i < 20; i++) {
+                            sub2[i] = " ";
+                        }
+                    } else {
+                        for (int i = 0; i < 20; i++) {
+                            sub2[i] = " ";
+                        }
+                    }
+
+                    String completedGoals = ",";
+
+                    for (String goal : student.completedGoals) {
+                        completedGoals += goal + ",";
+                    }
+
+                    if (completedGoals.length() > 1) {
+                        completedGoals = completedGoals.substring(0, completedGoals.length() - 1);
+                    } else {
+                        completedGoals = "";
+                    }
+
+                    content = content + student.lastName + "," + student.phoneNumber.replaceAll("\\D+", "") + "," + student.lastName + ","
+                            + student.firstName + "," + student.phoneNumber + "," + student.emailAddress + "," + student.lastUpdate.getTime() + "," + goal1.goal + "," + secondGoalString + ","
+                            + student.goalsCompleted + "," + notes + "," + student.notes.date.getTime() + "," + sub1[0] + "," + sub1[1] + "," + sub1[2] + "," + sub1[3] + ","
+                            + sub1[4] + "," + sub1[5] + "," + sub1[6] + "," + sub1[7] + "," + sub1[8] + "," + sub1[9] + "," + sub1[10] + ","
+                            + sub1[11] + "," + sub1[12] + "," + sub1[13] + "," + sub1[14] + "," + sub1[15] + "," + sub1[16] + "," + sub1[17] + "," + sub1[18] + ","
+                            + sub1[19] + "," + sub2[0] + "," + sub2[1] + "," + sub2[2] + "," + sub2[3] + "," + sub2[4] + "," + sub2[5] + "," + sub2[6] + ","
+                            + sub2[7] + "," + sub2[8] + "," + sub2[9] + "," + sub2[10] + "," + sub2[11] + "," + sub2[12] + "," + sub2[13] + "," + sub2[14] + ","
+                            + sub2[15] + "," + sub2[16] + "," + sub2[17] + "," + sub2[18] + "," + sub2[19] + completedGoals + System.getProperty("line.separator");
+                }
             }
 
-            File file = new File("C:\\Users\\Adam\\Google Drive\\database.txt");
+            File file = new File("C:\\Users\\" + System.getProperty("user.name") + "\\Google Drive\\database.txt");
 
             // if file doesnt exists, then create it
             if (!file.exists()) {
@@ -373,7 +393,7 @@ final class TabDemo extends Application {
                         + "," + temp[17] + "," + temp[18] + "," + temp[19] + System.getProperty("line.separator");
             }
 
-            File file = new File("C:\\Users\\Adam\\Google Drive\\goals.txt");
+            File file = new File("C:\\Users\\" + System.getProperty("user.name") + "\\Google Drive\\goals.txt");
 
             // if file doesnt exists, then create it
             if (!file.exists()) {
@@ -416,7 +436,7 @@ final class TabDemo extends Application {
                 }
             }
 
-            File file = new File("C:\\Users\\Adam\\Google Drive\\users.txt");
+            File file = new File("C:\\Users\\" + System.getProperty("user.name") + "\\Google Drive\\users.txt");
 
             // if file doesnt exists, then create it
             if (!file.exists()) {
@@ -439,7 +459,7 @@ final class TabDemo extends Application {
         try {
             String content = administrativeNotes;
 
-            File file = new File("C:\\Users\\Adam\\Google Drive\\adminNotes.txt");
+            File file = new File("C:\\Users\\" + System.getProperty("user.name") + "\\Google Drive\\adminNotes.txt");
 
             // if file doesnt exists, then create it
             if (!file.exists()) {
@@ -472,7 +492,7 @@ final class TabDemo extends Application {
             width = 450;
             fillColor = Color.WHITE;
         }
-        Scene scene = new Scene(root, 3*width, 1050, fillColor);
+        Scene scene = new Scene(root, width, 650, fillColor);
 
         TabPane tabPane = new TabPane();
         BorderPane mainPane = new BorderPane();
@@ -486,12 +506,8 @@ final class TabDemo extends Application {
         homeGrid.setVgap(10);
         homeGrid.setPadding(new Insets(25, 25, 25, 25));
         if (!isAdmin) {
-            //homeGrid.getColumnConstraints().add(new ColumnConstraints(120));
-            //homeGrid.getColumnConstraints().add(new ColumnConstraints(180));
-            ColumnConstraints col1 = new ColumnConstraints();
-            ColumnConstraints col2 = new ColumnConstraints();
-            col1.setPercentWidth(40);
-            col2.setPercentWidth(60);
+            homeGrid.getColumnConstraints().add(new ColumnConstraints(120));
+            homeGrid.getColumnConstraints().add(new ColumnConstraints(180));
         }
 
         Text welcome = new Text("Welcome, " + currentUser.firstName + "!");
@@ -535,12 +551,14 @@ final class TabDemo extends Application {
 
         TextArea studentsWithoutGoals = new TextArea();
         studentsWithoutGoals.setEditable(false);
-        AIUTreeIterator<String, Student> studentGoalChecker = new AIUTreeIterator(database.tree1);
+        AIUTreeIterator<String, ArrayList<Student>> studentGoalChecker = new AIUTreeIterator(database);
         String goallessStudents = "";
         while (studentGoalChecker.hasNext()) {
-            Student currentStudent = (Student) studentGoalChecker.next().data;
-            if (currentStudent.goal.goal.equals("No current goal")) {
-                goallessStudents += currentStudent.firstName + " " + currentStudent.lastName + "\n";
+            ArrayList<Student> currentStudents = studentGoalChecker.next().data;
+            for (Student currentStudent : currentStudents) {
+                if (currentStudent.goal.goal.equals("No current goal")) {
+                    goallessStudents += currentStudent.firstName + " " + currentStudent.lastName + "\n";
+                }
             }
         }
         studentsWithoutGoals.setText(goallessStudents);
@@ -552,32 +570,24 @@ final class TabDemo extends Application {
         editGrid.setHgap(10);
         editGrid.setVgap(10);
         editGrid.setPadding(new Insets(25, 25, 25, 25));
+        editGrid.getColumnConstraints().add(new ColumnConstraints(150));
+        editGrid.getColumnConstraints().add(new ColumnConstraints(10));
+        editGrid.getColumnConstraints().add(new ColumnConstraints(80));
+        editGrid.getColumnConstraints().add(new ColumnConstraints(70));
         //editGrid.getColumnConstraints().add(new ColumnConstraints(150));
-        //editGrid.getColumnConstraints().add(new ColumnConstraints(10));
-        //editGrid.getColumnConstraints().add(new ColumnConstraints(80));
-        //editGrid.getColumnConstraints().add(new ColumnConstraints(70));
-        //editGrid.getColumnConstraints().add(new ColumnConstraints(150));
-        ColumnConstraints col3 = new ColumnConstraints();
-        ColumnConstraints col4 = new ColumnConstraints();
-        ColumnConstraints col5 = new ColumnConstraints();
-        ColumnConstraints col6 = new ColumnConstraints();
-        col3.setPercentWidth(48);
-        col4.setPercentWidth(3);
-        col5.setPercentWidth(26);
-        col6.setPercentWidth(23);
-        
-        
 
         Label selectStudent = new Label("Select student:");
         editGrid.add(selectStudent, 0, 3);
 
-        AIUTreeIterator nameExtract = new AIUTreeIterator(database.tree1);
+        AIUTreeIterator<String, ArrayList<Student>> nameExtract = new AIUTreeIterator(database);
 
         final ArrayList<String> names = new ArrayList<String>();
 
         while (nameExtract.hasNext()) {
-            Student currentStudent = (Student) nameExtract.next().data;
-            names.add(currentStudent.lastName + ", " + currentStudent.firstName);
+            ArrayList<Student> currentStudents = nameExtract.next().data;
+            for (Student currentStudent : currentStudents) {
+                names.add(currentStudent.lastName + ", " + currentStudent.firstName);
+            }
         }
 
         AIUTreeIterator goalExtract = new AIUTreeIterator(goalTree);
@@ -660,7 +670,8 @@ final class TabDemo extends Application {
         currentGoals.setAlignment(Pos.CENTER_RIGHT);
         editGrid.add(currentGoals, 2, 5, 2, 1);
 
-        Separator theSeparator = new Separator();
+        //Separator theSeparator = new Separator();
+        String theSeparator = "------------------------";
 
         final ComboBox displayGoal = new ComboBox();
         displayGoal.setDisable(true);
@@ -745,12 +756,8 @@ final class TabDemo extends Application {
         goalsGrid.setHgap(10);
         goalsGrid.setVgap(10);
         goalsGrid.setPadding(new Insets(25, 25, 25, 25));
-        //goalsGrid.getColumnConstraints().add(new ColumnConstraints(120));
-        //goalsGrid.getColumnConstraints().add(new ColumnConstraints(150));
-        ColumnConstraints col7 = new ColumnConstraints();
-        ColumnConstraints col8 = new ColumnConstraints();
-        col7.setPercentWidth(45);
-        col8.setPercentWidth(55);
+        goalsGrid.getColumnConstraints().add(new ColumnConstraints(120));
+        goalsGrid.getColumnConstraints().add(new ColumnConstraints(150));
 
         Label searchForStudent = new Label("Search for a student:");
         goalsGrid.add(searchForStudent, 0, 0);
@@ -835,15 +842,9 @@ final class TabDemo extends Application {
         newStudentGrid.setHgap(10);
         newStudentGrid.setVgap(10);
         newStudentGrid.setPadding(new Insets(25, 25, 25, 25));
-        //newStudentGrid.getColumnConstraints().add(new ColumnConstraints(150));
-        //newStudentGrid.getColumnConstraints().add(new ColumnConstraints(20));
-        //newStudentGrid.getColumnConstraints().add(new ColumnConstraints(150));
-        ColumnConstraints col9 = new ColumnConstraints();
-        ColumnConstraints col10 = new ColumnConstraints();
-        ColumnConstraints col11 = new ColumnConstraints();
-        col9.setPercentWidth(46.875);
-        col10.setPercentWidth(6.25);
-        col11.setPercentWidth(46.875);
+        newStudentGrid.getColumnConstraints().add(new ColumnConstraints(150));
+        newStudentGrid.getColumnConstraints().add(new ColumnConstraints(20));
+        newStudentGrid.getColumnConstraints().add(new ColumnConstraints(150));
 
         final TextField firstNameField2 = new TextField();
         firstNameField2.setPromptText("First Name (Required)");
@@ -924,21 +925,11 @@ final class TabDemo extends Application {
         flagsGrid.setHgap(10);
         flagsGrid.setVgap(10);
         flagsGrid.setPadding(new Insets(25, 25, 25, 25));
-        //flagsGrid.getColumnConstraints().add(new ColumnConstraints(120));
-        //flagsGrid.getColumnConstraints().add(new ColumnConstraints(50));
-        //flagsGrid.getColumnConstraints().add(new ColumnConstraints(70));
-        //flagsGrid.getColumnConstraints().add(new ColumnConstraints(20));
-        //flagsGrid.getColumnConstraints().add(new ColumnConstraints(100));
-        ColumnConstraints col12 = new ColumnConstraints();
-        ColumnConstraints col13 = new ColumnConstraints();
-        ColumnConstraints col14 = new ColumnConstraints();
-        ColumnConstraints col15 = new ColumnConstraints();
-        ColumnConstraints col16 = new ColumnConstraints();
-        col12.setPercentWidth(33);
-        col13.setPercentWidth(14);
-        col14.setPercentWidth(20);
-        col15.setPercentWidth(5);
-        col16.setPercentWidth(28);
+        flagsGrid.getColumnConstraints().add(new ColumnConstraints(120));
+        flagsGrid.getColumnConstraints().add(new ColumnConstraints(50));
+        flagsGrid.getColumnConstraints().add(new ColumnConstraints(70));
+        flagsGrid.getColumnConstraints().add(new ColumnConstraints(20));
+        flagsGrid.getColumnConstraints().add(new ColumnConstraints(100));
 
         Label studentSearchFlags = new Label("Search for a student:");
         flagsGrid.add(studentSearchFlags, 0, 1);
@@ -976,14 +967,6 @@ final class TabDemo extends Application {
         timeSince.setEditable(false);
         flagsGrid.add(timeSince, 2, 6, 3, 1);
 
-        /*
-         final Button saveTime = new Button("Update");
-         HBox hbSaveTime = new HBox(10);
-         hbSaveTime.setAlignment(Pos.BOTTOM_LEFT);
-         hbSaveTime.getChildren().add(saveTime);
-         saveTime.setDisable(true);
-         flagsGrid.add(hbSaveTime, 2, 5);
-         */
         Label unreportedStudents = new Label("Students whose profile has not been updated in:");
         flagsGrid.add(unreportedStudents, 0, 11, 3, 1);
 
@@ -1011,14 +994,9 @@ final class TabDemo extends Application {
         reportsGrid.setVgap(10);
         reportsGrid.setPadding(new Insets(25, 20, 25, 20));
         reportsGrid.getColumnConstraints().add(new ColumnConstraints(150));
+        //reportsGrid.getColumnConstraints().add(new ColumnConstraints(50));
         reportsGrid.getColumnConstraints().add(new ColumnConstraints(45));
         reportsGrid.getColumnConstraints().add(new ColumnConstraints(40));
-        ColumnConstraints col17 = new ColumnConstraints();
-        ColumnConstraints col18 = new ColumnConstraints();
-        ColumnConstraints col19 = new ColumnConstraints();
-        col17.setPercentWidth(65);
-        col18.setPercentWidth(20);
-        col19.setPercentWidth(15);
 
         DecimalFormat df = new DecimalFormat("#.00");
 
@@ -1158,6 +1136,12 @@ final class TabDemo extends Application {
         username.setEditable(false);
         adminGrid.add(username, 0, 2, 2, 1);
 
+        final Text usernameMatch1 = new Text();
+        usernameMatch1.setFill(Color.FIREBRICK);
+        usernameMatch1.setText("Username already exists!");
+        usernameMatch1.setVisible(false);
+        adminGrid.add(usernameMatch1, 2, 2);
+
         final PasswordField password = new PasswordField();
         password.setPromptText("Password");
         password.setEditable(false);
@@ -1193,6 +1177,12 @@ final class TabDemo extends Application {
         isAdministrator.setVisible(false);
         adminGrid.add(isAdministrator, 1, 7);
 
+        final Text userChangesFailed = new Text();
+        userChangesFailed.setFill(Color.FIREBRICK);
+        userChangesFailed.setText("Please fill out all fields!");
+        userChangesFailed.setVisible(false);
+        adminGrid.add(userChangesFailed, 2, 8);
+
         final Button saveUserChanges = new Button("Save Changes");
         final HBox hbSaveUserChanges = new HBox(10);
         hbSaveUserChanges.setAlignment(Pos.BOTTOM_RIGHT);
@@ -1214,6 +1204,12 @@ final class TabDemo extends Application {
         newUsername.setPromptText("Username");
         adminGrid.add(newUsername, 0, 10, 2, 1);
 
+        final Text usernameMatch2 = new Text();
+        usernameMatch2.setFill(Color.FIREBRICK);
+        usernameMatch2.setText("Username already exists!");
+        usernameMatch2.setVisible(false);
+        adminGrid.add(usernameMatch2, 2, 10);
+
         final PasswordField newPassword = new PasswordField();
         newPassword.setPromptText("Password");
         adminGrid.add(newPassword, 0, 11, 2, 1);
@@ -1230,12 +1226,10 @@ final class TabDemo extends Application {
 
         final TextField userFirstName2 = new TextField();
         userFirstName2.setPromptText("First name");
-        userFirstName2.setEditable(false);
         adminGrid.add(userFirstName2, 0, 13, 2, 1);
 
         final TextField userLastName2 = new TextField();
         userLastName2.setPromptText("Last name");
-        userLastName2.setEditable(false);
         adminGrid.add(userLastName2, 0, 14, 2, 1);
 
         Label setAdmin2 = new Label("Set as administrator:");
@@ -1263,18 +1257,10 @@ final class TabDemo extends Application {
         manageGoalsGrid.setHgap(10);
         manageGoalsGrid.setVgap(10);
         manageGoalsGrid.setPadding(new Insets(25, 25, 25, 25));
-        //manageGoalsGrid.getColumnConstraints().add(new ColumnConstraints(120));
-        //manageGoalsGrid.getColumnConstraints().add(new ColumnConstraints(50));
-        //manageGoalsGrid.getColumnConstraints().add(new ColumnConstraints(100));
-        //manageGoalsGrid.getColumnConstraints().add(new ColumnConstraints(40));
-        ColumnConstraints col20 = new ColumnConstraints();
-        ColumnConstraints col21 = new ColumnConstraints();
-        ColumnConstraints col22 = new ColumnConstraints();
-        ColumnConstraints col23 = new ColumnConstraints();
-        col20.setPercentWidth(39);
-        col21.setPercentWidth(16);
-        col22.setPercentWidth(32);
-        col23.setPercentWidth(13);
+        manageGoalsGrid.getColumnConstraints().add(new ColumnConstraints(120));
+        manageGoalsGrid.getColumnConstraints().add(new ColumnConstraints(50));
+        manageGoalsGrid.getColumnConstraints().add(new ColumnConstraints(100));
+        manageGoalsGrid.getColumnConstraints().add(new ColumnConstraints(40));
 
         Label createGoal = new Label("Create a new goal:");
         manageGoalsGrid.add(createGoal, 0, 1);
@@ -1310,7 +1296,7 @@ final class TabDemo extends Application {
             listOfGoals.getItems().add(theSeparator);
         }
         listOfGoals.getItems().addAll(postsecGoals);
-        if (postsecGoals.size() != 0 && otherGoals.size() != 0) {
+        if (postsecGoals.size() != 0 && otherGoals.size() != 1) {
             listOfGoals.getItems().add(theSeparator);
         }
         listOfGoals.getItems().addAll(otherGoals);
@@ -1364,34 +1350,97 @@ final class TabDemo extends Application {
         hbDeleteGoal.setAlignment(Pos.CENTER);
         hbDeleteGoal.getChildren().add(deleteGoal);
 
+        // Multiple Matches Window
+        final MultipleMatches matches = new MultipleMatches();
+        final Stage multipleMatchesStage = new Stage();
+        multipleMatchesStage.setResizable(false);
+
+        GridPane multipleMatchesGrid = new GridPane();
+        multipleMatchesGrid.setAlignment(Pos.TOP_CENTER);
+        multipleMatchesGrid.setHgap(10);
+        multipleMatchesGrid.setVgap(10);
+        multipleMatchesGrid.setPadding(new Insets(25, 25, 25, 25));
+        multipleMatchesGrid.getColumnConstraints().add(new ColumnConstraints(100));
+        multipleMatchesGrid.getColumnConstraints().add(new ColumnConstraints(150));
+
+        final Text multipleMatches = new Text();
+        multipleMatches.setFill(Color.BLACK);
+        multipleMatches.setText("                  Multiple matches have been found.              \n"
+                + "Please select the student you are looking for from the list below");
+        multipleMatchesGrid.add(multipleMatches, 0, 1, 3, 1);
+
+        Label selectFromChoices = new Label("Select a student:");
+        multipleMatchesGrid.add(selectFromChoices, 0, 3);
+
+        final ComboBox studentChoices = new ComboBox();
+        multipleMatchesGrid.add(studentChoices, 1, 3);
+
+        final Button confirmChoice = new Button("Confirm");
+        HBox hbConfirmChoice = new HBox(10);
+        hbConfirmChoice.setAlignment(Pos.BOTTOM_RIGHT);
+        hbConfirmChoice.getChildren().add(confirmChoice);
+        multipleMatchesGrid.add(hbConfirmChoice, 1, 7);
+        confirmChoice.setDisable(true);
+
+        studentChoices.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent t) {
+                if (studentChoices.getValue() != null) {
+                    confirmChoice.setDisable(false);
+                } else {
+                    confirmChoice.setDisable(true);
+                }
+            }
+        });
+
+        confirmChoice.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent t) {
+                String studentName = (String) studentChoices.getValue();
+                if (matches.edit) {
+                    findStudentEdit.setValue(studentName);
+                    matches.setEdit(false);
+                    studentChoices.getItems().clear();
+                    multipleMatchesStage.close();
+                    confirmChoice.setDisable(true);
+                } else if (matches.goals) {
+                    findStudentGoals.setValue(studentName);
+                    matches.setGoals(false);
+                    studentChoices.getItems().clear();
+                    multipleMatchesStage.close();
+                    confirmChoice.setDisable(true);
+                } else if (matches.flags) {
+                    findStudentFlags.setValue(studentName);
+                    matches.setFlags(false);
+                    studentChoices.getItems().clear();
+                    multipleMatchesStage.close();
+                    confirmChoice.setDisable(true);
+                } else {
+                    findStudentReports.setValue(studentName);
+                    matches.setReports(false);
+                    studentChoices.getItems().clear();
+                    multipleMatchesStage.close();
+                    confirmChoice.setDisable(true);
+                }
+            }
+        });
+
+        final Scene multipleMatchesScene = new Scene(multipleMatchesGrid, 450, 200);
+
         // Popup Window
         final PopUpWindow popup = new PopUpWindow();
         final Stage popupStage = new Stage();
+        popupStage.setResizable(false);
 
         GridPane popupGrid = new GridPane();
         popupGrid.setAlignment(Pos.TOP_CENTER);
         popupGrid.setHgap(10);
         popupGrid.setVgap(10);
         popupGrid.setPadding(new Insets(10, 10, 10, 10));
-        //popupGrid.getColumnConstraints().add(new ColumnConstraints(50));
-        //popupGrid.getColumnConstraints().add(new ColumnConstraints(50));
-        //popupGrid.getColumnConstraints().add(new ColumnConstraints(50));
-        //popupGrid.getColumnConstraints().add(new ColumnConstraints(50));
-        //popupGrid.getColumnConstraints().add(new ColumnConstraints(50));
-        //popupGrid.getColumnConstraints().add(new ColumnConstraints(50));
-        ColumnConstraints col24 = new ColumnConstraints();
-        ColumnConstraints col25 = new ColumnConstraints();
-        ColumnConstraints col26 = new ColumnConstraints();
-        ColumnConstraints col27 = new ColumnConstraints();
-        ColumnConstraints col28 = new ColumnConstraints();
-        ColumnConstraints col29 = new ColumnConstraints();
-        col24.setPercentWidth(16.67);
-        col25.setPercentWidth(16.67);
-        col26.setPercentWidth(16.66);
-        col27.setPercentWidth(16.67);
-        col28.setPercentWidth(16.66);
-        col29.setPercentWidth(16.67);
-                
+        popupGrid.getColumnConstraints().add(new ColumnConstraints(50));
+        popupGrid.getColumnConstraints().add(new ColumnConstraints(50));
+        popupGrid.getColumnConstraints().add(new ColumnConstraints(50));
+        popupGrid.getColumnConstraints().add(new ColumnConstraints(50));
+        popupGrid.getColumnConstraints().add(new ColumnConstraints(50));
+        popupGrid.getColumnConstraints().add(new ColumnConstraints(50));
 
         final Text areYouSure1 = new Text();
         areYouSure1.setFill(Color.BLACK);
@@ -1413,7 +1462,6 @@ final class TabDemo extends Application {
 
         final Text areYouSure4 = new Text();
         areYouSure4.setFill(Color.BLACK);
-        areYouSure4.setText("Are you sure you want to delete this goal?");
         popupGrid.add(areYouSure4, 1, 1, 5, 1);
         areYouSure4.setVisible(false);
 
@@ -1465,7 +1513,7 @@ final class TabDemo extends Application {
         });
 
         final Scene popupScene = new Scene(popupGrid, 450, 120);
-        primaryStage.setResizable(false);
+        //primaryStage.setResizable(false);
 
         primaryStage.setTitle("");
 
@@ -1494,16 +1542,18 @@ final class TabDemo extends Application {
             public void handle(KeyEvent k) {
                 String rawNotes = adminNotes.getText();
                 if (!rawNotes.isEmpty()) {
-                    while (rawNotes.lastIndexOf("\n") == rawNotes.length() - 1) {
+                    while (rawNotes.lastIndexOf("\n") == rawNotes.length() - 1 && rawNotes.length() != 0) {
                         rawNotes = rawNotes.substring(0, rawNotes.length() - 1);
                     }
-                    rawNotes += "\n";
+                    if (rawNotes.length() != 0) {
+                        rawNotes += "\n";
+                    }
                 }
                 administrativeNotes = rawNotes;
             }
         });
 
-        // "Edit Profiles" tab Actions
+        // "Edit Profiles" tab Actions        
         findStudentEdit.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
                 firstNameField.clear();
@@ -1531,30 +1581,37 @@ final class TabDemo extends Application {
                     deleteStudent.setDisable(false);
                     final String choice = (String) findStudentEdit.getValue();
                     String lastName = choice.substring(0, choice.indexOf(","));
-                    Student currentStudent = (Student) database.find1(lastName);
-                    firstNameField.setText(currentStudent.firstName);
-                    lastNameField.setText(currentStudent.lastName);
-                    emailField.setText(currentStudent.emailAddress);
-                    phoneNumberField.setText(currentStudent.phoneNumber);
-                    if (currentStudent.goal == null) {
-                        displayGoal.setValue(null);
-                    } else {
-                        displayGoal.setValue(currentStudent.goal.goal);
+                    ArrayList<Student> currentStudents = database.find(lastName);
+                    for (Student currentStudent : currentStudents) {
+                        if (currentStudent.firstName.equals(choice.substring(choice.indexOf(" ") + 1))) {
+                            firstNameField.setText(currentStudent.firstName);
+                            lastNameField.setText(currentStudent.lastName);
+                            emailField.setText(currentStudent.emailAddress);
+                            phoneNumberField.setText(currentStudent.phoneNumber);
+                            if (currentStudent.goal == null) {
+                                displayGoal.setValue(null);
+                            } else {
+                                goalBackupEdit = currentStudent.goal.goal;
+                                displayGoal.setValue(currentStudent.goal.goal);
+                            }
+                            if (currentStudent.secondGoal == null) {
+                                displaySecondGoal.setValue(null);
+                            } else {
+                                secondGoalBackupEdit = currentStudent.secondGoal.goal;
+                                displaySecondGoal.setValue(currentStudent.secondGoal.goal);
+                            }
+                            changeGoal.setDisable(false);
+                            if (currentStudent.goal != null) {
+                                changeSecondGoal.setDisable(false);
+                            }
+                            if (!currentStudent.notes.notes.equals(" ")) {
+                                noteArea.setText(currentStudent.notes.notes);
+                            }
+                            noteTime.setText("Notes last updated on: "
+                                    + currentStudent.notes.date.toString());
+                            break;
+                        }
                     }
-                    if (currentStudent.secondGoal == null) {
-                        displaySecondGoal.setValue(null);
-                    } else {
-                        displaySecondGoal.setValue(currentStudent.secondGoal.goal);
-                    }
-                    changeGoal.setDisable(false);
-                    if (currentStudent.goal != null) {
-                        changeSecondGoal.setDisable(false);
-                    }
-                    if (!currentStudent.notes.notes.equals(" ")) {
-                        noteArea.setText(currentStudent.notes.notes);
-                    }
-                    noteTime.setText("Notes last updated on: "
-                            + currentStudent.notes.date.toString());
                 } else {
                     firstNameField.setEditable(false);
                     lastNameField.setEditable(false);
@@ -1569,6 +1626,11 @@ final class TabDemo extends Application {
 
         searchButton.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
+                matches.setEdit(false);
+                matches.setGoals(false);
+                matches.setFlags(false);
+                matches.setReports(false);
+                studentChoices.getItems().clear();
                 if (searchName.getLength() == 0) {
                     searchMessage.setFill(Color.FIREBRICK);
                     searchMessage.setText("Please enter a name");
@@ -1609,12 +1671,25 @@ final class TabDemo extends Application {
                             }
                         }
                     } else {
+
                         query = query.substring(0, 1).toUpperCase() + query.substring(1);
-                        Student querySearch = database.find1(query);
+                        ArrayList<Student> querySearch = database.find(query);
                         if (querySearch != null) {
-                            String name = querySearch.lastName + ", " + querySearch.firstName;
-                            findStudentEdit.setValue(name);
-                            searchMessage.setVisible(false);
+                            if (querySearch.size() > 1) {
+                                ArrayList<String> matchNames = new ArrayList<String>();
+
+                                for (Student student : querySearch) {
+                                    String name = student.lastName + ", " + student.firstName;
+                                    matchNames.add(name);
+                                }
+                                matches.setEdit(true);
+                                studentChoices.getItems().addAll(matchNames);
+                                multipleMatchesStage.setScene(multipleMatchesScene);
+                                multipleMatchesStage.show();
+                            } else {
+                                String studentName = querySearch.get(0).lastName + ", " + querySearch.get(0).firstName;
+                                findStudentEdit.setValue(studentName);
+                            }
                         }
                     }
                 }
@@ -1624,39 +1699,54 @@ final class TabDemo extends Application {
 
         searchPhoneButton.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
+                matches.setEdit(false);
+                matches.setGoals(false);
+                matches.setFlags(false);
+                matches.setReports(false);
+                studentChoices.getItems().clear();
                 if (searchPhone.getLength() != 0) {
                     String query = searchPhone.getText().replaceAll("\\D+", "");
-                    Student potentialMatch = (Student) database.find2(query);
+                    ArrayList<Student> potentialMatch = database2.find(query);
                     if (potentialMatch != null) {
-                        String name = potentialMatch.lastName + ", " + potentialMatch.firstName;
-                        findStudentEdit.setValue(name);
+                        if (potentialMatch.size() > 1) {
+                            ArrayList<String> matchNames = new ArrayList<String>();
+                            for (Student student : potentialMatch) {
+                                String name = student.lastName + ", " + student.firstName;
+                                matchNames.add(name);
+                            }
+                            matches.setEdit(true);
+                            studentChoices.getItems().addAll(matchNames);
+                            multipleMatchesStage.setScene(multipleMatchesScene);
+                            multipleMatchesStage.show();
+                        } else {
+                            String studentName = potentialMatch.get(0).lastName + ", " + potentialMatch.get(0).firstName;
+                            findStudentEdit.setValue(studentName);
+                        }
                     }
                     searchPhone.clear();
                 }
             }
         });
 
-        displayGoal.setOnMouseReleased(new EventHandler<MouseEvent>() {
+        displayGoal.setOnMouseExited(new EventHandler<MouseEvent>() {
             public void handle(MouseEvent m) {
-                if (displayGoal.getValue() == theSeparator) {
+                if (displayGoal.getValue() != null && ((String) displayGoal.getValue()).equals(theSeparator)) {
                     displayGoal.getSelectionModel().clearSelection();
-                    displayGoal.setValue(null);
-                    changeSecondGoal.setDisable(true);
-                    displaySecondGoal.getSelectionModel().clearSelection();
-                    displaySecondGoal.setValue(null);
+                    displayGoal.setValue(goalBackupEdit);
                 } else if (displayGoal.getValue() == null) {
                     changeSecondGoal.setDisable(true);
                 } else {
                     changeSecondGoal.setDisable(false);
                 }
             }
-        });
+        }
+        );
 
-        displaySecondGoal.setOnMouseReleased(new EventHandler<MouseEvent>() {
+        displaySecondGoal.setOnMouseExited(new EventHandler<MouseEvent>() {
             public void handle(MouseEvent m) {
-                if (displaySecondGoal.getValue() == theSeparator) {
+                if (displaySecondGoal.getValue() != null && ((String) displaySecondGoal.getValue()).equals(theSeparator)) {
                     displaySecondGoal.getSelectionModel().clearSelection();
-                    displaySecondGoal.setValue(null);
+                    displaySecondGoal.setValue(secondGoalBackupEdit);
                 }
             }
         });
@@ -1687,89 +1777,98 @@ final class TabDemo extends Application {
                         names.set(index, "" + lastNameField.getText() + ", " + firstNameField.getText());
                         String name = (String) findStudentEdit.getValue();
                         String lastName = name.substring(0, name.indexOf(","));
-                        Student theStudent = (Student) database.find1(lastName);
-                        Goal previousGoal = theStudent.goal;
-                        Goal newGoal = new Goal(goalTree.find((String) displayGoal.getValue()));
-                        Goal goal;
-                        if (previousGoal != null) {
-                            if (newGoal == null) {
-                                goal = newGoal;
-                            } else if (previousGoal.goal.equals(newGoal.goal)) {
-                                goal = previousGoal;
-                            } else {
-                                goal = newGoal;
+                        String firstName = name.substring(name.indexOf(" ") + 1);
+                        ArrayList<Student> theStudents = database.find(lastName);
+                        for (Student theStudent : theStudents) {
+                            if (theStudent.firstName.equals(firstName)) {
+                                int studentIndex = theStudents.indexOf(theStudent);
+                                Goal previousGoal = theStudent.goal;
+                                Goal newGoal = new Goal(goalTree.find((String) displayGoal.getValue()));
+                                Goal goal;
+                                if (previousGoal != null) {
+                                    if (newGoal == null) {
+                                        goal = newGoal;
+                                    } else if (previousGoal.goal.equals(newGoal.goal)) {
+                                        goal = previousGoal;
+                                    } else {
+                                        goal = newGoal;
+                                    }
+                                } else {
+                                    goal = newGoal;
+                                }
+                                Goal previousSecondGoal = theStudent.secondGoal;
+                                Goal newSecondGoal = null;
+                                if (displaySecondGoal.getValue() != null && !((String) displaySecondGoal.getValue()).equals("No current goal")) {
+                                    newSecondGoal = new Goal(goalTree.find((String) displaySecondGoal.getValue()));
+                                }
+                                Goal secondGoal;
+                                if (previousSecondGoal == null && newSecondGoal == null) {
+                                    secondGoal = previousSecondGoal;
+                                } else if (previousSecondGoal == null || newSecondGoal == null) {
+                                    secondGoal = newSecondGoal;
+                                } else {
+                                    if (previousSecondGoal.goal.equals(newSecondGoal.goal)) {
+                                        secondGoal = previousSecondGoal;
+                                    } else {
+                                        secondGoal = newSecondGoal;
+                                    }
+                                }
+                                if (goal.goal.equals("No current goal") && secondGoal != null) {
+                                    goal = new Goal(secondGoal);
+                                    secondGoal = null;
+                                }
+                                Notes previousNotes = theStudent.notes;
+                                Notes note;
+                                if (previousNotes.notes.equals(noteArea.getText())
+                                        || (previousNotes.notes.equals(" ") && noteArea.getLength() == 0)) {
+                                    note = previousNotes;
+                                } else {
+                                    note = new Notes(noteArea.getText());
+                                }
+                                Student updatedStudent = new Student(lastNameField.getText(), firstNameField.getText(),
+                                        phoneNumberField.getText(), emailField.getText(),
+                                        goal, note);
+                                updatedStudent.setSecondGoal(secondGoal);
+                                updatedStudent.goalsCompleted = theStudent.goalsCompleted;
+                                updatedStudent.completedGoals = theStudent.completedGoals;
+                                String previousPhoneNumber = theStudent.phoneNumber;
+                                theStudents.set(studentIndex, updatedStudent);
+                                if (lastName.equals(lastNameField.getText())
+                                        && previousPhoneNumber.replaceAll("\\D+", "").equals(phoneNumberField.getText().replaceAll("\\D+", ""))) {
+                                    database.modify(lastName, theStudents);
+                                } else if (!lastName.equals(lastNameField.getText())
+                                        && previousPhoneNumber.replaceAll("\\D+", "").equals(phoneNumberField.getText().replaceAll("\\D+", ""))) {
+                                    database.modify(lastNameField.getText(), theStudents);
+                                } else if (lastName.equals(lastNameField.getText())) {
+                                    database2.modify(phoneNumberField.getText().replaceAll("\\D+", ""), theStudents);
+                                } else {
+                                    database.modify(lastNameField.getText(), theStudents);
+                                }
+
+                                findStudentEdit.getSelectionModel().clearSelection();
+                                findStudentEdit.setValue(null);
+                                findStudentGoals.getSelectionModel().clearSelection();
+                                findStudentGoals.setValue(null);
+                                findStudentFlags.getSelectionModel().clearSelection();
+                                findStudentFlags.setValue(null);
+                                findStudentReports.getSelectionModel().clearSelection();
+                                findStudentReports.setValue(null);
+                                reportTimes.getSelectionModel().clearSelection();
+                                reportTimes.setValue(null);
+
+                                incompleteInput.setText("");
+
+                                Object[] newNames = names.toArray();
+                                Arrays.sort(newNames);
+
+                                findStudentEdit.setItems(FXCollections.observableArrayList(newNames));
+                                findStudentGoals.setItems(FXCollections.observableArrayList(newNames));
+                                findStudentFlags.setItems(FXCollections.observableArrayList(newNames));
+                                findStudentReports.setItems(FXCollections.observableArrayList(newNames));
+
+                                popup.setAgreeToChanges(false);
                             }
-                        } else {
-                            goal = newGoal;
                         }
-                        Goal previousSecondGoal = theStudent.secondGoal;
-                        Goal newSecondGoal = null;
-                        if (displaySecondGoal.getValue() != null) {
-                            newSecondGoal = new Goal(goalTree.find((String) displaySecondGoal.getValue()));
-                        }
-                        Goal secondGoal;
-                        if (previousSecondGoal == null && newSecondGoal == null) {
-                            secondGoal = previousSecondGoal;
-                        } else if (previousSecondGoal == null || newSecondGoal == null) {
-                            secondGoal = newSecondGoal;
-                        } else {
-                            if (previousSecondGoal.goal.equals(newSecondGoal.goal)) {
-                                secondGoal = previousSecondGoal;
-                            } else {
-                                secondGoal = newSecondGoal;
-                            }
-                        }
-                        Notes previousNotes = theStudent.notes;
-                        Notes note;
-                        if (previousNotes.notes.equals(noteArea.getText())
-                                || (previousNotes.notes.equals(" ") && noteArea.getLength() == 0)) {
-                            note = previousNotes;
-                        } else {
-                            note = new Notes(noteArea.getText());
-                        }
-                        Student updatedStudent = new Student(lastNameField.getText(), firstNameField.getText(),
-                                phoneNumberField.getText(), emailField.getText(),
-                                goal, note);
-                        updatedStudent.setSecondGoal(secondGoal);
-                        String previousPhoneNumber = database.find1(lastName).phoneNumber;
-                        if (lastName.equals(lastNameField.getText())
-                                && previousPhoneNumber.replaceAll("\\D+", "").equals(phoneNumberField.getText().replaceAll("\\D+", ""))) {
-                            database.modify1(lastName, updatedStudent);
-                        } else if (!lastName.equals(lastNameField.getText())
-                                && previousPhoneNumber.replaceAll("\\D+", "").equals(phoneNumberField.getText().replaceAll("\\D+", ""))) {
-                            database.change2(previousPhoneNumber.replaceAll("\\D+", ""), lastNameField.getText());
-                            database.modify1(lastNameField.getText(), updatedStudent);
-                        } else if (lastName.equals(lastNameField.getText())) {
-                            database.change1(lastName, phoneNumberField.getText().replaceAll("\\D+", ""));
-                            database.modify2(phoneNumberField.getText().replaceAll("\\D+", ""), updatedStudent);
-                        } else {
-                            database.change1(lastName, phoneNumberField.getText().replaceAll("\\D+", ""));
-                            database.change2(phoneNumberField.getText().replaceAll("\\D+", ""), lastNameField.getText());
-                            database.modify1(lastNameField.getText(), updatedStudent);
-                        }
-
-                        findStudentEdit.getSelectionModel().clearSelection();
-                        findStudentEdit.setValue(null);
-                        findStudentGoals.getSelectionModel().clearSelection();
-                        findStudentGoals.setValue(null);
-                        findStudentFlags.getSelectionModel().clearSelection();
-                        findStudentFlags.setValue(null);
-                        findStudentReports.getSelectionModel().clearSelection();
-                        findStudentReports.setValue(null);
-                        reportTimes.getSelectionModel().clearSelection();
-                        reportTimes.setValue(null);
-
-                        incompleteInput.setText("");
-
-                        Object[] newNames = names.toArray();
-                        Arrays.sort(newNames);
-
-                        findStudentEdit.setItems(FXCollections.observableArrayList(newNames));
-                        findStudentGoals.setItems(FXCollections.observableArrayList(newNames));
-                        findStudentFlags.setItems(FXCollections.observableArrayList(newNames));
-                        findStudentReports.setItems(FXCollections.observableArrayList(newNames));
-
-                        popup.setAgreeToChanges(false);
                     } else {
                         areYouSure2.setVisible(false);
                         areYouSure3.setVisible(false);
@@ -1794,8 +1893,21 @@ final class TabDemo extends Application {
             public void handle(ActionEvent t) {
                 if (popup.agreeToChanges) {
                     String currentStudent = (String) findStudentEdit.getValue();
+                    String firstName = currentStudent.substring(currentStudent.indexOf(" ") + 1);
+                    String lastName = currentStudent.substring(0, currentStudent.indexOf(","));
                     names.remove(currentStudent);
-                    database.remove1(currentStudent.substring(0, currentStudent.indexOf(",")));
+                    ArrayList<Student> allMatches = database.find(lastName);
+                    if (allMatches.size() == 1) {
+                        database.remove(lastName);
+                    } else {
+                        for (Student student : allMatches) {
+                            if (student.firstName.equals(firstName)) {
+                                allMatches.remove(student);
+                                break;
+                            }
+                        }
+                        database.modify(lastName, allMatches);
+                    }
                     Object[] updatedNames = names.toArray();
                     Arrays.sort(updatedNames);
                     findStudentEdit.setItems(FXCollections.observableArrayList(updatedNames));
@@ -1825,6 +1937,11 @@ final class TabDemo extends Application {
         // "Student Goals" tab Actions
         searchButton2.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
+                matches.setEdit(false);
+                matches.setGoals(false);
+                matches.setFlags(false);
+                matches.setReports(false);
+                studentChoices.getItems().clear();
                 if (searchName2.getLength() != 0) {
                     String query = searchName2.getText().toLowerCase();
                     int spaceIndex = query.indexOf(" ");
@@ -1857,10 +1974,22 @@ final class TabDemo extends Application {
                         }
                     } else {
                         query = query.substring(0, 1).toUpperCase() + query.substring(1);
-                        Student querySearch = database.find1(query);
+                        ArrayList<Student> querySearch = database.find(query);
                         if (querySearch != null) {
-                            String name = querySearch.lastName + ", " + querySearch.firstName;
-                            findStudentGoals.setValue(name);
+                            if (querySearch.size() > 1) {
+                                ArrayList<String> matchNames = new ArrayList<String>();
+                                for (Student student : querySearch) {
+                                    String name = student.lastName + ", " + student.firstName;
+                                    matchNames.add(name);
+                                }
+                                matches.setGoals(true);
+                                studentChoices.getItems().addAll(matchNames);
+                                multipleMatchesStage.setScene(multipleMatchesScene);
+                                multipleMatchesStage.show();
+                            } else {
+                                String studentName = querySearch.get(0).lastName + ", " + querySearch.get(0).firstName;
+                                findStudentGoals.setValue(studentName);
+                            }
                         }
                     }
                 }
@@ -1870,12 +1999,29 @@ final class TabDemo extends Application {
 
         searchPhoneButton2.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
+                matches.setEdit(false);
+                matches.setGoals(false);
+                matches.setFlags(false);
+                matches.setReports(false);
+                studentChoices.getItems().clear();
                 if (searchPhone2.getLength() != 0) {
                     String query = searchPhone2.getText().replaceAll("\\D+", "");
-                    Student potentialMatch = (Student) database.find2(query);
+                    ArrayList<Student> potentialMatch = database2.find(query);
                     if (potentialMatch != null) {
-                        String name = potentialMatch.lastName + ", " + potentialMatch.firstName;
-                        findStudentGoals.setValue(name);
+                        if (potentialMatch.size() > 1) {
+                            ArrayList<String> matchNames = new ArrayList<String>();
+                            for (Student student : potentialMatch) {
+                                String name = student.lastName + ", " + student.firstName;
+                                matchNames.add(name);
+                            }
+                            matches.setGoals(true);
+                            studentChoices.getItems().addAll(matchNames);
+                            multipleMatchesStage.setScene(multipleMatchesScene);
+                            multipleMatchesStage.show();
+                        } else {
+                            String studentName = potentialMatch.get(0).lastName + ", " + potentialMatch.get(0).firstName;
+                            findStudentGoals.setValue(studentName);
+                        }
                     }
                     searchPhone2.clear();
                 }
@@ -1906,20 +2052,27 @@ final class TabDemo extends Application {
                 if (findStudentGoals.getValue() != null) {
                     String studentName = (String) findStudentGoals.getValue();
                     String lastName = studentName.substring(0, studentName.indexOf(","));
-                    Student currentStudent = (Student) database.find1(lastName);
-                    Goal currentGoal = currentStudent.goal;
-                    if (currentGoal != null) {
-                        currentStudentGoal.setText(currentGoal.goal);
-                        selectGoal1.setDisable(false);
-                        if (!currentGoal.goal.equals("No current goal")) {
-                            markGoal1Complete.setDisable(false);
+                    String firstName = studentName.substring(studentName.indexOf(" ") + 1);
+                    ArrayList<Student> currentStudents = database.find(lastName);
+                    for (Student currentStudent : currentStudents) {
+                        if (currentStudent.firstName.equals(firstName)) {
+
+                            Goal currentGoal = currentStudent.goal;
+                            if (currentGoal != null) {
+                                currentStudentGoal.setText(currentGoal.goal);
+                                selectGoal1.setDisable(false);
+                                if (!currentGoal.goal.equals("No current goal")) {
+                                    markGoal1Complete.setDisable(false);
+                                }
+                            }
+                            Goal secondaryGoal = currentStudent.secondGoal;
+                            if (secondaryGoal != null) {
+                                secondStudentGoal.setText(secondaryGoal.goal);
+                                selectGoal2.setDisable(false);
+                                markGoal2Complete.setDisable(false);
+                            }
+                            break;
                         }
-                    }
-                    Goal secondaryGoal = currentStudent.secondGoal;
-                    if (secondaryGoal != null) {
-                        secondStudentGoal.setText(secondaryGoal.goal);
-                        selectGoal2.setDisable(false);
-                        markGoal2Complete.setDisable(false);
                     }
                 }
             }
@@ -1939,16 +2092,25 @@ final class TabDemo extends Application {
                 checkBoxes.clear();
                 String studentName = (String) findStudentGoals.getValue();
                 String lastName = studentName.substring(0, studentName.indexOf(","));
-                Student currentStudent = (Student) database.find1(lastName);
-                Goal currentGoal = currentStudent.goal;
-                int n = currentGoal.subgoals.size();
-                for (int i = 0; i < n; i++) {
-                    CheckBox currentSubgoal = new CheckBox(currentGoal.subgoals.get(i).subgoal);
-                    currentSubgoal.setSelected(currentGoal.subgoals.get(i).isComplete);
-                    goalsGrid.add(currentSubgoal, 1, 6 + i, 2, 1);
-                    checkBoxes.add(currentSubgoal);
+                String firstName = studentName.substring(studentName.indexOf(" ") + 1);
+                ArrayList<Student> currentStudents = database.find(lastName);
+                for (Student currentStudent : currentStudents) {
+                    if (currentStudent.firstName.equals(firstName)) {
+
+                        Goal currentGoal = currentStudent.goal;
+                        int n = currentGoal.subgoals.size();
+                        for (int i = 0; i < n; i++) {
+                            CheckBox currentSubgoal = new CheckBox(currentGoal.subgoals.get(i).subgoal);
+                            currentSubgoal.setSelected(currentGoal.subgoals.get(i).isComplete);
+                            goalsGrid.add(currentSubgoal, 1, 6 + i, 2, 1);
+                            checkBoxes.add(currentSubgoal);
+                        }
+                        if (n > 0) {
+                            goalsGrid.add(hbSaveGoalChanges1, 1, 7 + n);
+                        }
+                        break;
+                    }
                 }
-                goalsGrid.add(hbSaveGoalChanges1, 1, 7 + n);
             }
         });
 
@@ -1957,18 +2119,28 @@ final class TabDemo extends Application {
                 if (popup.agreeToChanges) {
                     String studentName = (String) findStudentGoals.getValue();
                     String lastName = studentName.substring(0, studentName.indexOf(","));
-                    Student currentStudent = database.find1(lastName);
-                    Student updatedStudent = new Student(currentStudent.lastName, currentStudent.firstName,
-                            currentStudent.phoneNumber, currentStudent.emailAddress,
-                            goalTree.find("No current goal"), currentStudent.notes);
-                    updatedStudent.goalsCompleted = currentStudent.goalsCompleted + 1;
-                    if (currentStudent.secondGoal != null) {
-                        updatedStudent.setSecondGoal(new Goal(currentStudent.secondGoal));
+                    String firstName = studentName.substring(studentName.indexOf(" ") + 1);
+                    ArrayList<Student> currentStudents = database.find(lastName);
+                    for (Student currentStudent : currentStudents) {
+                        if (currentStudent.firstName.equals(firstName)) {
+                            int studentIndex = currentStudents.indexOf(currentStudent);
+                            Student updatedStudent = new Student(currentStudent.lastName, currentStudent.firstName,
+                                    currentStudent.phoneNumber, currentStudent.emailAddress,
+                                    goalTree.find("No current goal"), currentStudent.notes);
+                            updatedStudent.goalsCompleted = currentStudent.goalsCompleted + 1;
+                            updatedStudent.completedGoals = currentStudent.completedGoals;
+                            updatedStudent.completedGoals.add(currentStudent.goal.goal);
+                            if (currentStudent.secondGoal != null) {
+                                updatedStudent.setSecondGoal(new Goal(currentStudent.secondGoal));
+                            }
+                            currentStudents.set(studentIndex, updatedStudent);
+                            database.modify(lastName, currentStudents);
+                            popup.setAgreeToChanges(false);
+                            findStudentGoals.getSelectionModel().clearSelection();
+                            findStudentGoals.setValue(null);
+                            break;
+                        }
                     }
-                    database.modify1(lastName, updatedStudent);
-                    popup.setAgreeToChanges(false);
-                    findStudentGoals.getSelectionModel().clearSelection();
-                    findStudentGoals.setValue(null);
                 } else {
                     areYouSure5.setVisible(true);
                     areYouSure1.setVisible(false);
@@ -2003,16 +2175,24 @@ final class TabDemo extends Application {
                 checkBoxes.clear();
                 String studentName = (String) findStudentGoals.getValue();
                 String lastName = studentName.substring(0, studentName.indexOf(","));
-                Student currentStudent = (Student) database.find1(lastName);
-                Goal currentGoal = currentStudent.secondGoal;
-                int n = currentGoal.subgoals.size();
-                for (int i = 0; i < n; i++) {
-                    CheckBox currentSubgoal = new CheckBox(currentGoal.subgoals.get(i).subgoal);
-                    currentSubgoal.setSelected(currentGoal.subgoals.get(i).isComplete);
-                    goalsGrid.add(currentSubgoal, 1, 6 + i, 2, 1);
-                    checkBoxes.add(currentSubgoal);
+                String firstName = studentName.substring(studentName.indexOf(" ") + 1);
+                ArrayList<Student> currentStudents = database.find(lastName);
+                for (Student currentStudent : currentStudents) {
+                    if (currentStudent.firstName.equals(firstName)) {
+                        Goal currentGoal = currentStudent.secondGoal;
+                        int n = currentGoal.subgoals.size();
+                        for (int i = 0; i < n; i++) {
+                            CheckBox currentSubgoal = new CheckBox(currentGoal.subgoals.get(i).subgoal);
+                            currentSubgoal.setSelected(currentGoal.subgoals.get(i).isComplete);
+                            goalsGrid.add(currentSubgoal, 1, 6 + i, 2, 1);
+                            checkBoxes.add(currentSubgoal);
+                        }
+                        if (n > 0) {
+                            goalsGrid.add(hbSaveGoalChanges2, 1, 7 + n);
+                        }
+                        break;
+                    }
                 }
-                goalsGrid.add(hbSaveGoalChanges2, 1, 7 + n);
             }
         });
 
@@ -2021,13 +2201,23 @@ final class TabDemo extends Application {
                 if (popup.agreeToChanges) {
                     String studentName = (String) findStudentGoals.getValue();
                     String lastName = studentName.substring(0, studentName.indexOf(","));
-                    Student currentStudent = database.find1(lastName);
-                    currentStudent.setSecondGoal(null);
-                    currentStudent.goalsCompleted = currentStudent.goalsCompleted + 1;
-                    database.modify1(lastName, currentStudent);
-                    popup.setAgreeToChanges(false);
-                    findStudentGoals.getSelectionModel().clearSelection();
-                    findStudentGoals.setValue(null);
+                    String firstName = studentName.substring(studentName.indexOf(" ") + 1);
+                    ArrayList<Student> currentStudents = database.find(lastName);
+                    for (Student currentStudent : currentStudents) {
+                        if (currentStudent.firstName.equals(firstName)) {
+                            int studentIndex = currentStudents.indexOf(currentStudent);
+                            String currentSecondGoal = currentStudent.secondGoal.goal;
+                            currentStudent.setSecondGoal(null);
+                            currentStudent.goalsCompleted = currentStudent.goalsCompleted + 1;
+                            currentStudent.completedGoals.add(currentSecondGoal);
+                            currentStudents.set(studentIndex, currentStudent);
+                            database.modify(lastName, currentStudents);
+                            popup.setAgreeToChanges(false);
+                            findStudentGoals.getSelectionModel().clearSelection();
+                            findStudentGoals.setValue(null);
+                            break;
+                        }
+                    }
                 } else {
                     areYouSure5.setVisible(true);
                     areYouSure1.setVisible(false);
@@ -2051,19 +2241,28 @@ final class TabDemo extends Application {
             public void handle(ActionEvent t) {
                 String studentName = (String) findStudentGoals.getValue();
                 String lastName = studentName.substring(0, studentName.indexOf(","));
-                Student currentStudent = (Student) database.find1(lastName);
-                Goal currentGoal = currentStudent.goal;
-                int size = checkBoxes.size();
-                for (int i = 0; i < size; i++) {
-                    currentGoal.subgoals.get(i).setComplete(checkBoxes.get(i).isSelected());
+                String firstName = studentName.substring(studentName.indexOf(" ") + 1);
+                ArrayList<Student> currentStudents = database.find(lastName);
+                for (Student currentStudent : currentStudents) {
+                    if (currentStudent.firstName.equals(firstName)) {
+                        int studentIndex = currentStudents.indexOf(currentStudent);
+                        Goal currentGoal = currentStudent.goal;
+                        int size = checkBoxes.size();
+                        for (int i = 0; i < size; i++) {
+                            currentGoal.subgoals.get(i).setComplete(checkBoxes.get(i).isSelected());
+                        }
+                        Student updatedStudent = new Student(currentStudent.lastName, currentStudent.firstName,
+                                currentStudent.phoneNumber, currentStudent.emailAddress,
+                                new Goal(currentGoal), currentStudent.notes);
+                        currentStudents.set(studentIndex, updatedStudent);
+                        database.modify(lastName, currentStudents);
+                        findStudentGoals.getSelectionModel().clearSelection();
+                        findStudentGoals.setValue(null);
+                        findStudentReports.getSelectionModel().clearSelection();
+                        findStudentReports.setValue(null);
+                        break;
+                    }
                 }
-                database.modify1(lastName, new Student(currentStudent.lastName, currentStudent.firstName,
-                        currentStudent.phoneNumber, currentStudent.emailAddress,
-                        new Goal(currentGoal), currentStudent.notes));
-                findStudentGoals.getSelectionModel().clearSelection();
-                findStudentGoals.setValue(null);
-                findStudentReports.getSelectionModel().clearSelection();
-                findStudentReports.setValue(null);
             }
         });
 
@@ -2071,19 +2270,26 @@ final class TabDemo extends Application {
             public void handle(ActionEvent t) {
                 String studentName = (String) findStudentGoals.getValue();
                 String lastName = studentName.substring(0, studentName.indexOf(","));
-                Student currentStudent = (Student) database.find1(lastName);
-                Goal currentGoal = currentStudent.secondGoal;
-                int size = checkBoxes.size();
-                for (int i = 0; i < size; i++) {
-                    currentGoal.subgoals.get(i).setComplete(checkBoxes.get(i).isSelected());
+                String firstName = studentName.substring(studentName.indexOf(" ") + 1);
+                ArrayList<Student> currentStudents = database.find(lastName);
+                for (Student currentStudent : currentStudents) {
+                    if (currentStudent.firstName.equals(firstName)) {
+                        int studentIndex = currentStudents.indexOf(currentStudent);
+                        Goal currentGoal = currentStudent.secondGoal;
+                        int size = checkBoxes.size();
+                        for (int i = 0; i < size; i++) {
+                            currentGoal.subgoals.get(i).setComplete(checkBoxes.get(i).isSelected());
+                        }
+                        currentStudent.secondGoal = new Goal(currentGoal);
+                        currentStudents.set(studentIndex, currentStudent);
+                        database.modify(lastName, currentStudents);
+                        findStudentGoals.getSelectionModel().clearSelection();
+                        findStudentGoals.setValue(null);
+                        findStudentReports.getSelectionModel().clearSelection();
+                        findStudentReports.setValue(null);
+                        break;
+                    }
                 }
-                database.modify1(lastName, new Student(currentStudent.lastName, currentStudent.firstName,
-                        currentStudent.phoneNumber, currentStudent.emailAddress,
-                        currentGoal, currentStudent.notes));
-                findStudentGoals.getSelectionModel().clearSelection();
-                findStudentGoals.setValue(null);
-                findStudentReports.getSelectionModel().clearSelection();
-                findStudentReports.setValue(null);
             }
         });
 
@@ -2092,6 +2298,24 @@ final class TabDemo extends Application {
             public void handle(ActionEvent t) {
                 if (hasEmail.isSelected()) {
                     goals2.setValue("Create an email address");
+                }
+            }
+        });
+
+        goals2.setOnMouseExited(new EventHandler<MouseEvent>() {
+            public void handle(MouseEvent m) {
+                if (goals2.getValue() != null && ((String) goals2.getValue()).equals(theSeparator)) {
+                    goals2.getSelectionModel().clearSelection();
+                    goals2.setValue(null);
+                }
+            }
+        });
+
+        secondGoals2.setOnMouseExited(new EventHandler<MouseEvent>() {
+            public void handle(MouseEvent m) {
+                if (secondGoals2.getValue() != null && ((String) displaySecondGoal.getValue()).equals(theSeparator)) {
+                    secondGoals2.getSelectionModel().clearSelection();
+                    secondGoals2.setValue(null);
                 }
             }
         });
@@ -2117,7 +2341,30 @@ final class TabDemo extends Application {
                     if (secondGoals2.getValue() != null) {
                         newStudent.setSecondGoal(new Goal(goalTree.find((String) secondGoals2.getValue())));
                     }
-                    database.add(lastNameField2.getText(), phoneNumberField2.getText().replaceAll("\\D+", ""), newStudent);
+                    ArrayList<Student> potentialMatch = database.find(lastNameField2.getText());
+					ArrayList<Student> potentialMatch2 = database2.find(phoneNumberField2.getText().replaceAll("\\D+", ""));
+                    if (potentialMatch == null && potentialMatch2 == null) {
+                        ArrayList<Student> initialStudent = new ArrayList<Student>();
+						ArrayList<Student> initialStudent2 = new ArrayList<Student>();
+                        initialStudent.add(newStudent);
+						initialStudent2.add(newStudent);
+                        database.add(lastNameField2.getText(), initialStudent);
+						database2.add(phoneNumberField2.getText().replaceAll("\\D+", ""), initialStudent2);
+                    } else if(potentialMatch == null){
+						ArrayList<Student> initialStudent = new ArrayList<Student>();
+                        initialStudent.add(newStudent);
+                        database.add(lastNameField2.getText(), initialStudent);
+						potentialMatch2.add(newStudent);
+                    }else if(potentialMatch2 == null){
+						ArrayList<Student> initialStudent = new ArrayList<Student>();
+                        initialStudent.add(newStudent);
+                        database2.add(phoneNumberField2.getText().replaceAll("\\D+", ""), initialStudent);
+						potentialMatch.add(newStudent);
+					}else{
+						potentialMatch.add(newStudent);
+						potentialMatch2.add(newStudent);
+					}
+					
                     firstNameField2.clear();
                     lastNameField2.clear();
                     emailField2.clear();
@@ -2143,6 +2390,11 @@ final class TabDemo extends Application {
         // "Flags" tab Actions
         searchButtonFlags.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
+                matches.setEdit(false);
+                matches.setGoals(false);
+                matches.setFlags(false);
+                matches.setReports(false);
+                studentChoices.getItems().clear();
                 if (searchNameFlags.getLength() != 0) {
                     String query = searchNameFlags.getText().toLowerCase();
                     int spaceIndex = query.indexOf(" ");
@@ -2175,10 +2427,22 @@ final class TabDemo extends Application {
                         }
                     } else {
                         query = query.substring(0, 1).toUpperCase() + query.substring(1);
-                        Student querySearch = database.find1(query);
+                        ArrayList<Student> querySearch = database.find(query);
                         if (querySearch != null) {
-                            String name = querySearch.lastName + ", " + querySearch.firstName;
-                            findStudentFlags.setValue(name);
+                            if (querySearch.size() > 1) {
+                                ArrayList<String> matchNames = new ArrayList<String>();
+                                for (Student student : querySearch) {
+                                    String name = student.lastName + ", " + student.firstName;
+                                    matchNames.add(name);
+                                }
+                                matches.setFlags(true);
+                                studentChoices.getItems().addAll(matchNames);
+                                multipleMatchesStage.setScene(multipleMatchesScene);
+                                multipleMatchesStage.show();
+                            } else {
+                                String studentName = querySearch.get(0).lastName + ", " + querySearch.get(0).firstName;
+                                findStudentFlags.setValue(studentName);
+                            }
                         }
                     }
                 }
@@ -2188,12 +2452,29 @@ final class TabDemo extends Application {
 
         searchPhoneButtonFlags.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
+                matches.setEdit(false);
+                matches.setGoals(false);
+                matches.setFlags(false);
+                matches.setReports(false);
+                studentChoices.getItems().clear();
                 if (searchPhoneFlags.getLength() != 0) {
                     String query = searchPhoneFlags.getText().replaceAll("\\D+", "");
-                    Student potentialMatch = (Student) database.find2(query);
+                    ArrayList<Student> potentialMatch = database2.find(query);
                     if (potentialMatch != null) {
-                        String name = potentialMatch.lastName + ", " + potentialMatch.firstName;
-                        findStudentFlags.setValue(name);
+                        if (potentialMatch.size() > 1) {
+                            ArrayList<String> matchNames = new ArrayList<String>();
+                            for (Student student : potentialMatch) {
+                                String name = student.lastName + ", " + student.firstName;
+                                matchNames.add(name);
+                            }
+                            matches.setFlags(true);
+                            studentChoices.getItems().addAll(matchNames);
+                            multipleMatchesStage.setScene(multipleMatchesScene);
+                            multipleMatchesStage.show();
+                        } else {
+                            String studentName = potentialMatch.get(0).lastName + ", " + potentialMatch.get(0).firstName;
+                            findStudentFlags.setValue(studentName);
+                        }
                     }
                     searchPhoneFlags.clear();
                 }
@@ -2207,18 +2488,25 @@ final class TabDemo extends Application {
                 if (findStudentFlags.getValue() != null) {
                     Date currentTime = new Date();
                     String studentName = (String) findStudentFlags.getValue();
-                    Student currentStudent = database.find1(studentName.substring(0, studentName.indexOf(",")));
-                    double difference = (currentTime.getTime() - currentStudent.lastUpdate.getTime()) / 86400000.0;
-                    int differenceDays = (int) difference;
-                    double fractionalDay = difference - differenceDays;
-                    double fractionalDayInHours = fractionalDay * 24;
-                    int differenceHours = (int) fractionalDayInHours;
-                    double fractionalHours = fractionalDayInHours - differenceHours;
-                    double fractionalHoursInMinutes = fractionalHours * 60;
-                    int differenceMinutes = (int) fractionalHoursInMinutes;
-                    timeSince.setText("" + differenceDays + " days, " + differenceHours + " hours, and "
-                            + differenceMinutes + " minutes");
-                    //saveTime.setDisable(false);
+                    String lastName = studentName.substring(0, studentName.indexOf(","));
+                    String firstName = studentName.substring(studentName.indexOf(" ") + 1);
+                    ArrayList<Student> currentStudents = database.find(lastName);
+                    for (Student currentStudent : currentStudents) {
+                        if (currentStudent.firstName.equals(firstName)) {
+                            double difference = (currentTime.getTime() - currentStudent.lastUpdate.getTime()) / 86400000.0;
+                            int differenceDays = (int) difference;
+                            double fractionalDay = difference - differenceDays;
+                            double fractionalDayInHours = fractionalDay * 24;
+                            int differenceHours = (int) fractionalDayInHours;
+                            double fractionalHours = fractionalDayInHours - differenceHours;
+                            double fractionalHoursInMinutes = fractionalHours * 60;
+                            int differenceMinutes = (int) fractionalHoursInMinutes;
+                            timeSince.setText("" + differenceDays + " days, " + differenceHours + " hours, and "
+                                    + differenceMinutes + " minutes");
+                            //saveTime.setDisable(false);
+                            break;
+                        }
+                    }
                 }
             }
         });
@@ -2231,9 +2519,9 @@ final class TabDemo extends Application {
          } else {
          String student = (String) findStudentFlags.getValue();
          String lastName = student.substring(0, student.indexOf(","));
-         Student currentStudent = database.find1(lastName);
+         Student currentStudent = database.find(lastName);
          currentStudent.hoursSince = Integer.parseInt(timeSince.getText());
-         database.modify1(lastName, currentStudent);
+         database.modify(lastName, currentStudent);
          findStudentFlags.getSelectionModel().clearSelection();
          findStudentFlags.setValue(null);
          reportTimes.getSelectionModel().clearSelection();
@@ -2250,42 +2538,50 @@ final class TabDemo extends Application {
                     printBtn.setDisable(false);
                     Date currentTime = new Date();
                     String listOfStudents = "";
-                    Student currentStudent;
-                    AIUTreeIterator flagIterator = new AIUTreeIterator(database.tree1);
+                    ArrayList<Student> currentStudents;
+                    AIUTreeIterator<String, ArrayList<Student>> flagIterator = new AIUTreeIterator(database);
                     if (reportTimes.getValue().equals("0-2 weeks")) {
                         while (flagIterator.hasNext()) {
-                            currentStudent = (Student) flagIterator.next().data;
-                            double difference = (currentTime.getTime() - currentStudent.lastUpdate.getTime()) / 86400000.0;
-                            int differenceDays = (int) difference;
-                            if (differenceDays <= 13) {
-                                listOfStudents += currentStudent.firstName + " " + currentStudent.lastName + "\n";
+                            currentStudents = flagIterator.next().data;
+                            for (Student currentStudent : currentStudents) {
+                                double difference = (currentTime.getTime() - currentStudent.lastUpdate.getTime()) / 86400000.0;
+                                int differenceDays = (int) difference;
+                                if (differenceDays <= 13) {
+                                    listOfStudents += currentStudent.firstName + " " + currentStudent.lastName + "\n";
+                                }
                             }
                         }
                     } else if (reportTimes.getValue().equals("2-4 weeks")) {
                         while (flagIterator.hasNext()) {
-                            currentStudent = (Student) flagIterator.next().data;
-                            double difference = (currentTime.getTime() - currentStudent.lastUpdate.getTime()) / 86400000.0;
-                            int differenceDays = (int) difference;
-                            if (differenceDays > 13 && differenceDays <= 27) {
-                                listOfStudents += currentStudent.firstName + " " + currentStudent.lastName + "\n";
+                            currentStudents = flagIterator.next().data;
+                            for (Student currentStudent : currentStudents) {
+                                double difference = (currentTime.getTime() - currentStudent.lastUpdate.getTime()) / 86400000.0;
+                                int differenceDays = (int) difference;
+                                if (differenceDays > 13 && differenceDays <= 27) {
+                                    listOfStudents += currentStudent.firstName + " " + currentStudent.lastName + "\n";
+                                }
                             }
                         }
                     } else if (reportTimes.getValue().equals("4-6 weeks")) {
                         while (flagIterator.hasNext()) {
-                            currentStudent = (Student) flagIterator.next().data;
-                            double difference = (currentTime.getTime() - currentStudent.lastUpdate.getTime()) / 86400000.0;
-                            int differenceDays = (int) difference;
-                            if (differenceDays > 27 && differenceDays <= 41) {
-                                listOfStudents += currentStudent.firstName + " " + currentStudent.lastName + "\n";
+                            currentStudents = flagIterator.next().data;
+                            for (Student currentStudent : currentStudents) {
+                                double difference = (currentTime.getTime() - currentStudent.lastUpdate.getTime()) / 86400000.0;
+                                int differenceDays = (int) difference;
+                                if (differenceDays > 27 && differenceDays <= 41) {
+                                    listOfStudents += currentStudent.firstName + " " + currentStudent.lastName + "\n";
+                                }
                             }
                         }
                     } else {
                         while (flagIterator.hasNext()) {
-                            currentStudent = (Student) flagIterator.next().data;
-                            double difference = (currentTime.getTime() - currentStudent.lastUpdate.getTime()) / 86400000.0;
-                            int differenceDays = (int) difference;
-                            if (differenceDays > 41) {
-                                listOfStudents += currentStudent.firstName + " " + currentStudent.lastName + "\n";
+                            currentStudents = flagIterator.next().data;
+                            for (Student currentStudent : currentStudents) {
+                                double difference = (currentTime.getTime() - currentStudent.lastUpdate.getTime()) / 86400000.0;
+                                int differenceDays = (int) difference;
+                                if (differenceDays > 41) {
+                                    listOfStudents += currentStudent.firstName + " " + currentStudent.lastName + "\n";
+                                }
                             }
                         }
                     }
@@ -2296,13 +2592,18 @@ final class TabDemo extends Application {
 
         printBtn.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
-
+		//
             }
         });
 
         // "Reports" tab Actions
         searchButton3.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
+                matches.setEdit(false);
+                matches.setGoals(false);
+                matches.setFlags(false);
+                matches.setReports(false);
+                studentChoices.getItems().clear();
                 if (searchName3.getLength() != 0) {
                     String query = searchName3.getText().toLowerCase();
                     int spaceIndex = query.indexOf(" ");
@@ -2335,10 +2636,22 @@ final class TabDemo extends Application {
                         }
                     } else {
                         query = query.substring(0, 1).toUpperCase() + query.substring(1);
-                        Student querySearch = database.find1(query);
+                        ArrayList<Student> querySearch = database.find(query);
                         if (querySearch != null) {
-                            String name = querySearch.lastName + ", " + querySearch.firstName;
-                            findStudentReports.setValue(name);
+                            if (querySearch.size() > 1) {
+                                ArrayList<String> matchNames = new ArrayList<String>();
+                                for (Student student : querySearch) {
+                                    String name = student.lastName + ", " + student.firstName;
+                                    matchNames.add(name);
+                                }
+                                matches.setReports(true);
+                                studentChoices.getItems().addAll(matchNames);
+                                multipleMatchesStage.setScene(multipleMatchesScene);
+                                multipleMatchesStage.show();
+                            } else {
+                                String studentName = querySearch.get(0).lastName + ", " + querySearch.get(0).firstName;
+                                findStudentReports.setValue(studentName);
+                            }
                         }
                     }
                 }
@@ -2348,12 +2661,30 @@ final class TabDemo extends Application {
 
         searchPhoneButton3.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
+                matches.setEdit(false);
+                matches.setGoals(false);
+                matches.setFlags(false);
+                matches.setReports(false);
+                studentChoices.getItems().clear();
                 if (searchPhone3.getLength() != 0) {
                     String query = searchPhone3.getText().replaceAll("\\D+", "");
-                    Student potentialMatch = (Student) database.find2(query);
+                    ArrayList<Student> potentialMatch = database2.find(query);
                     if (potentialMatch != null) {
-                        String name = potentialMatch.lastName + ", " + potentialMatch.firstName;
-                        findStudentReports.setValue(name);
+                        if (potentialMatch.size() > 1) {
+                            ArrayList<String> matchNames = new ArrayList<String>();
+                            for (Student student : potentialMatch) {
+                                String name = student.lastName + ", " + student.firstName;
+                                matchNames.add(name);
+                            }
+                            matches.setReports(true);
+                            studentChoices.getItems().addAll(matchNames);
+                            multipleMatchesStage.setScene(multipleMatchesScene);
+                            multipleMatchesStage.show();
+                        }
+                        else {
+                            String studentName = potentialMatch.get(0).lastName + ", " + potentialMatch.get(0).firstName;
+                            findStudentReports.setValue(studentName);
+                        }
                     }
                     searchPhone3.clear();
                 }
@@ -2371,6 +2702,7 @@ final class TabDemo extends Application {
                 progressLabel.setVisible(false);
                 goalProgress.setVisible(false);
                 printReport.setDisable(true);
+                completedGoalsList.clear();
                 completedSubgoalsList.clear();
                 remainingSubgoalsList.clear();
                 if (findStudentReports.getValue() != null) {
@@ -2378,17 +2710,29 @@ final class TabDemo extends Application {
                     String firstName = choice2.substring(choice2.indexOf(" ") + 1);
                     String lastName = choice2.substring(0, choice2.indexOf(","));
                     studentName.insertText(0, firstName + " " + lastName);
-                    Student currentStudent = database.find1(lastName);
-                    if (currentStudent.goal != null) {
-                        primaryStudentGoal.setText(currentStudent.goal.goal);
-                        selectGoalReport1.setDisable(false);
+                    ArrayList<Student> currentStudents = database.find(lastName);
+                    for (Student currentStudent : currentStudents) {
+                        if (currentStudent.firstName.equals(firstName)) {
+                            if (currentStudent.goal != null) {
+                                primaryStudentGoal.setText(currentStudent.goal.goal);
+                                if (!currentStudent.goal.goal.equals("No current goal")) {
+                                    selectGoalReport1.setDisable(false);
+                                }
+                            }
+                            if (currentStudent.secondGoal != null) {
+                                secondaryStudentGoal.setText(currentStudent.secondGoal.goal);
+                                selectGoalReport2.setDisable(false);
+                            }
+                            goalsCompleted.setText("Goals completed: " + currentStudent.goalsCompleted);
+                            goalsCompleted.setVisible(true);
+                            String completedGoals = "";
+                            for (String goal : currentStudent.completedGoals) {
+                                completedGoals += goal + "\n";
+                            }
+                            completedGoalsList.setText(completedGoals);
+                            break;
+                        }
                     }
-                    if (currentStudent.secondGoal != null) {
-                        secondaryStudentGoal.setText(currentStudent.secondGoal.goal);
-                        selectGoalReport2.setDisable(false);
-                    }
-                    goalsCompleted.setText("Goals completed: " + currentStudent.goalsCompleted);
-                    goalsCompleted.setVisible(true);
                 }
             }
         });
@@ -2397,25 +2741,38 @@ final class TabDemo extends Application {
             public void handle(ActionEvent t) {
                 String currentName = (String) findStudentReports.getValue();
                 String lastName = currentName.substring(0, currentName.indexOf(","));
-                Student currentStudent = database.find1(lastName);
-                int numSubgoals = currentStudent.goal.subgoals.size();
-                int numCompleted = currentStudent.goal.numCompletedSubgoals();
-                progressLabel.setText("Progress towards current goal: " + numCompleted * 100.0 / numSubgoals + "%");
-                goalProgress.setProgress(numCompleted * 1.0 / numSubgoals);
-                progressLabel.setVisible(true);
-                goalProgress.setVisible(true);
-                printReport.setDisable(false);
-                String completedSubgoals = "";
-                String remainingSubgoals = "";
-                for (Subgoal subgoal : currentStudent.goal.subgoals) {
-                    if (subgoal.isComplete) {
-                        completedSubgoals += subgoal.subgoal + "\n";
-                    } else {
-                        remainingSubgoals += subgoal.subgoal + "\n";
+                String firstName = currentName.substring(currentName.indexOf(" ") + 1);
+                ArrayList<Student> currentStudents = database.find(lastName);
+                for (Student currentStudent : currentStudents) {
+                    if (currentStudent.firstName.equals(firstName)) {
+
+                        int numSubgoals = currentStudent.goal.subgoals.size();
+                        int numCompleted = currentStudent.goal.numCompletedSubgoals();
+                        String progress;
+                        if (numSubgoals == 0) {
+                            progress = "0.00";
+                        } else {
+                            progress = df.format(numCompleted * 100.0 / numSubgoals);
+                        }
+                        progressLabel.setText("Progress towards current goal: " + progress + "%");
+                        goalProgress.setProgress(numCompleted * 1.0 / numSubgoals);
+                        progressLabel.setVisible(true);
+                        goalProgress.setVisible(true);
+                        printReport.setDisable(false);
+                        String completedSubgoals = "";
+                        String remainingSubgoals = "";
+                        for (Subgoal subgoal : currentStudent.goal.subgoals) {
+                            if (subgoal.isComplete) {
+                                completedSubgoals += subgoal.subgoal + "\n";
+                            } else {
+                                remainingSubgoals += subgoal.subgoal + "\n";
+                            }
+                        }
+                        completedSubgoalsList.setText(completedSubgoals);
+                        remainingSubgoalsList.setText(remainingSubgoals);
+                        break;
                     }
                 }
-                completedSubgoalsList.setText(completedSubgoals);
-                remainingSubgoalsList.setText(remainingSubgoals);
             }
         });
 
@@ -2423,25 +2780,38 @@ final class TabDemo extends Application {
             public void handle(ActionEvent t) {
                 String currentName = (String) findStudentReports.getValue();
                 String lastName = currentName.substring(0, currentName.indexOf(","));
-                Student currentStudent = database.find1(lastName);
-                int numSubgoals = currentStudent.secondGoal.subgoals.size();
-                int numCompleted = currentStudent.secondGoal.numCompletedSubgoals();
-                progressLabel.setText("Progress towards current goal: " + df.format(numCompleted * 100.0 / numSubgoals) + "%");
-                goalProgress.setProgress(numCompleted * 1.0 / numSubgoals);
-                progressLabel.setVisible(true);
-                goalProgress.setVisible(true);
-                printReport.setDisable(false);
-                String completedSubgoals = "";
-                String remainingSubgoals = "";
-                for (Subgoal subgoal : currentStudent.secondGoal.subgoals) {
-                    if (subgoal.isComplete) {
-                        completedSubgoals += subgoal.subgoal + "\n";
-                    } else {
-                        remainingSubgoals += subgoal.subgoal + "\n";
+                String firstName = currentName.substring(currentName.indexOf(" ") + 1);
+                ArrayList<Student> currentStudents = database.find(lastName);
+                for (Student currentStudent : currentStudents) {
+                    if (currentStudent.firstName.equals(firstName)) {
+
+                        int numSubgoals = currentStudent.secondGoal.subgoals.size();
+                        int numCompleted = currentStudent.secondGoal.numCompletedSubgoals();
+                        String progress;
+                        if (numSubgoals == 0) {
+                            progress = "0.00";
+                        } else {
+                            progress = df.format(numCompleted * 100.0 / numSubgoals);
+                        }
+                        progressLabel.setText("Progress towards current goal: " + progress + "%");
+                        goalProgress.setProgress(numCompleted * 1.0 / numSubgoals);
+                        progressLabel.setVisible(true);
+                        goalProgress.setVisible(true);
+                        printReport.setDisable(false);
+                        String completedSubgoals = "";
+                        String remainingSubgoals = "";
+                        for (Subgoal subgoal : currentStudent.secondGoal.subgoals) {
+                            if (subgoal.isComplete) {
+                                completedSubgoals += subgoal.subgoal + "\n";
+                            } else {
+                                remainingSubgoals += subgoal.subgoal + "\n";
+                            }
+                        }
+                        completedSubgoalsList.setText(completedSubgoals);
+                        remainingSubgoalsList.setText(remainingSubgoals);
+                        break;
                     }
                 }
-                completedSubgoalsList.setText(completedSubgoals);
-                remainingSubgoalsList.setText(remainingSubgoals);
             }
         });
 
@@ -2508,46 +2878,60 @@ final class TabDemo extends Application {
 
         saveUserChanges.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
-                if (password.getText().equals(confirmPassword.getText())) {
-                    if (popup.agreeToChanges) {
-                        int userIndex = usernames.indexOf((String) userList.getValue());
-                        usernames.set(userIndex, username.getText());
-                        UserAndPass updatedUser = new UserAndPass(username.getText(),
-                                password.getText(), userFirstName.getText(), userLastName.getText());
-                        if (((String) isAdministrator.getValue()).equals("Yes")) {
-                            updatedUser.setAdmin(true);
-                        } else {
-                            updatedUser.setAdmin(false);
-                        }
-                        userTree.modify((String) userList.getValue(), updatedUser);
-
-                        userList.getSelectionModel().clearSelection();
-                        userList.setValue(null);
-
-                        userList.setItems(FXCollections.observableArrayList(usernames));
-
-                        popup.setAgreeToChanges(false);
-                        hbSaveUserChanges.setVisible(false);
-                        hbDeleteUser.setVisible(false);
-                    } else {
-                        passwordMatch1.setVisible(false);
-                        areYouSure1.setVisible(true);
-                        areYouSure2.setVisible(false);
-                        areYouSure3.setVisible(false);
-                        areYouSure4.setVisible(false);
-                        areYouSure5.setVisible(false);
-                        popup.setUpdatingUser(true);
-                        popup.setDeletingUser(false);
-                        popup.setUpdatingStudent(false);
-                        popup.setDeletingStudent(false);
-                        popup.setMarkingGoal1Complete(false);
-                        popup.setMarkingGoal2Complete(false);
-                        popup.setDeletingGoal(false);
-                        popupStage.setScene(popupScene);
-                        popupStage.show();
-                    }
+                if (username.getLength() == 0 || password.getLength() == 0
+                        || confirmPassword.getLength() == 0
+                        || userFirstName.getLength() == 0
+                        || userLastName.getLength() == 0) {
+                    userChangesFailed.setVisible(true);
                 } else {
-                    passwordMatch1.setVisible(true);
+                    userChangesFailed.setVisible(false);
+                    if (username.getText() != (String) userList.getValue()
+                            && usernames.contains(username.getText())) {
+                        usernameMatch1.setVisible(true);
+                    } else {
+                        usernameMatch1.setVisible(false);
+                        if (password.getText().equals(confirmPassword.getText())) {
+                            if (popup.agreeToChanges) {
+                                int userIndex = usernames.indexOf((String) userList.getValue());
+                                usernames.set(userIndex, username.getText());
+                                UserAndPass updatedUser = new UserAndPass(username.getText(),
+                                        password.getText(), userFirstName.getText(), userLastName.getText());
+                                if (((String) isAdministrator.getValue()).equals("Yes")) {
+                                    updatedUser.setAdmin(true);
+                                } else {
+                                    updatedUser.setAdmin(false);
+                                }
+                                userTree.modify((String) userList.getValue(), updatedUser);
+
+                                userList.getSelectionModel().clearSelection();
+                                userList.setValue(null);
+
+                                userList.setItems(FXCollections.observableArrayList(usernames));
+
+                                popup.setAgreeToChanges(false);
+                                hbSaveUserChanges.setVisible(false);
+                                hbDeleteUser.setVisible(false);
+                            } else {
+                                passwordMatch1.setVisible(false);
+                                areYouSure1.setVisible(true);
+                                areYouSure2.setVisible(false);
+                                areYouSure3.setVisible(false);
+                                areYouSure4.setVisible(false);
+                                areYouSure5.setVisible(false);
+                                popup.setUpdatingUser(true);
+                                popup.setDeletingUser(false);
+                                popup.setUpdatingStudent(false);
+                                popup.setDeletingStudent(false);
+                                popup.setMarkingGoal1Complete(false);
+                                popup.setMarkingGoal2Complete(false);
+                                popup.setDeletingGoal(false);
+                                popupStage.setScene(popupScene);
+                                popupStage.show();
+                            }
+                        } else {
+                            passwordMatch1.setVisible(true);
+                        }
+                    }
                 }
             }
         });
@@ -2592,26 +2976,30 @@ final class TabDemo extends Application {
                     newUserAdded.setVisible(true);
                 } else {
                     newUserAdded.setVisible(false);
-                    if (newPassword.getText().equals(confirmNewPassword.getText())) {
-                        UserAndPass newUser = new UserAndPass(newUsername.getText(),
-                                newPassword.getText(), userFirstName2.getText(), userLastName2.getText());
-                        if (((String) isAdministrator2.getValue()).equals("Yes")) {
-                            newUser.setAdmin(true);
-                        } else {
-                            newUser.setAdmin(false);
-                        }
-                        usernames.add(newUsername.getText());
-                        userTree.add(newUsername.getText(), newUser);
-                        userList.setItems(FXCollections.observableArrayList(usernames));
-                        newUsername.clear();
-                        newPassword.clear();
-                        confirmNewPassword.clear();
-                        userFirstName2.clear();
-                        userLastName2.clear();
-                        isAdministrator2.getSelectionModel().clearSelection();
-                        isAdministrator2.setValue(null);
+                    if (usernames.contains(newUsername.getText())) {
+                        usernameMatch2.setVisible(true);
                     } else {
-                        passwordMatch2.setVisible(true);
+                        if (newPassword.getText().equals(confirmNewPassword.getText())) {
+                            UserAndPass newUser = new UserAndPass(newUsername.getText(),
+                                    newPassword.getText(), userFirstName2.getText(), userLastName2.getText());
+                            if (((String) isAdministrator2.getValue()).equals("Yes")) {
+                                newUser.setAdmin(true);
+                            } else {
+                                newUser.setAdmin(false);
+                            }
+                            usernames.add(newUsername.getText());
+                            userTree.add(newUsername.getText(), newUser);
+                            userList.setItems(FXCollections.observableArrayList(usernames));
+                            newUsername.clear();
+                            newPassword.clear();
+                            confirmNewPassword.clear();
+                            userFirstName2.clear();
+                            userLastName2.clear();
+                            isAdministrator2.getSelectionModel().clearSelection();
+                            isAdministrator2.setValue(null);
+                        } else {
+                            passwordMatch2.setVisible(true);
+                        }
                     }
                 }
             }
@@ -2643,6 +3031,15 @@ final class TabDemo extends Application {
         final ArrayList<CheckBox> checkBoxes2 = new ArrayList<CheckBox>();
         final ArrayList<TextField> textFields = new ArrayList<TextField>();
 
+        listOfGoals.setOnMouseExited(new EventHandler<MouseEvent>() {
+            public void handle(MouseEvent m) {
+                if (listOfGoals.getValue() != null && ((String) listOfGoals.getValue()).equals(theSeparator)) {
+                    listOfGoals.getSelectionModel().clearSelection();
+                    listOfGoals.setValue(null);
+                }
+            }
+        });
+
         listOfGoals.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
                 saveGoal.setDisable(true);
@@ -2661,7 +3058,7 @@ final class TabDemo extends Application {
                 }
                 checkBoxes2.clear();
                 textFields.clear();
-                if (listOfGoals.getValue() != null) {
+                if (listOfGoals.getValue() != null && !((String) listOfGoals.getValue()).equals(theSeparator)) {
                     goalStatement.setText((String) listOfGoals.getValue());
                     editGoal.setDisable(false);
                     Goal currentGoal = goalTree.find((String) listOfGoals.getValue());
@@ -2777,7 +3174,7 @@ final class TabDemo extends Application {
                     listOfGoals.getItems().add(theSeparator);
                 }
                 listOfGoals.getItems().addAll(postsecGoals);
-                if (postsecGoals.size() != 0 && otherGoals.size() != 0) {
+                if (postsecGoals.size() != 0 && otherGoals.size() != 1) {
                     listOfGoals.getItems().add(theSeparator);
                 }
                 listOfGoals.getItems().addAll(otherGoals);
@@ -2889,22 +3286,26 @@ final class TabDemo extends Application {
                         listOfGoals.getItems().add(theSeparator);
                     }
                     listOfGoals.getItems().addAll(postsecGoals);
-                    if (postsecGoals.size() != 0 && otherGoals.size() != 0) {
+                    if (postsecGoals.size() != 0 && otherGoals.size() != 1) {
                         listOfGoals.getItems().add(theSeparator);
                     }
                     listOfGoals.getItems().addAll(otherGoals);
                     listOfGoals.getItems().remove("No current goal");
 
-                    AIUTreeIterator<String, Student> updateStudents = new AIUTreeIterator(database.tree1);
+                    AIUTreeIterator<String, ArrayList<Student>> updateStudents = new AIUTreeIterator(database);
                     while (updateStudents.hasNext()) {
-                        Student currentStudent = (Student) updateStudents.next().data;
-                        if (currentStudent.goal.goal.equals(oldGoalStatement)) {
-                            Goal newGoal = currentStudent.goal;
-                            newGoal.goal = newGoalStatement;
-                            Student updatedStudent = new Student(currentStudent.lastName, currentStudent.firstName,
-                                    currentStudent.phoneNumber, currentStudent.emailAddress,
-                                    new Goal(newGoal), currentStudent.notes);
-                            database.modify1(currentStudent.lastName, updatedStudent);
+                        ArrayList<Student> currentStudents = updateStudents.next().data;
+                        for (Student currentStudent : currentStudents) {
+                            if (currentStudent.goal.goal.equals(oldGoalStatement)) {
+                                int studentIndex = currentStudents.indexOf(currentStudent);
+                                Goal newGoal = currentStudent.goal;
+                                newGoal.goal = newGoalStatement;
+                                Student updatedStudent = new Student(currentStudent.lastName, currentStudent.firstName,
+                                        currentStudent.phoneNumber, currentStudent.emailAddress,
+                                        new Goal(newGoal), currentStudent.notes);
+                                currentStudents.set(studentIndex, updatedStudent);
+                                database.modify(currentStudent.lastName, currentStudents);
+                            }
                         }
                     }
                     // Need to update the goals of students with that goal
@@ -2947,34 +3348,38 @@ final class TabDemo extends Application {
                         }
                     }
                     goalTree.modify((String) listOfGoals.getValue(), new Goal(currentGoal));
-                    AIUTreeIterator<String, Student> updateStudents = new AIUTreeIterator(database.tree1);
+                    AIUTreeIterator<String, ArrayList<Student>> updateStudents = new AIUTreeIterator(database);
                     ArrayList<Subgoal> newSubgoals = new ArrayList<Subgoal>();
                     for (int i = 0; i < size; i++) {
                         newSubgoals.add(new Subgoal(""));
                     }
                     while (updateStudents.hasNext()) {
-                        Student currentStudent = (Student) updateStudents.next().data;
-                        Goal studentGoal = currentStudent.goal;
-                        ArrayList<Subgoal> exactSubgoalCopies = new ArrayList<Subgoal>();
-                        for (Subgoal subgoal : studentGoal.subgoals) {
-                            exactSubgoalCopies.add(subgoal);
-                        }
-                        if (studentGoal.goal.equals((String) listOfGoals.getValue())) {
-                            for (int i = 0; i < size; i++) {
-                                int updatedValue2 = Integer.parseInt(textFields.get(i).getText());
-                                if (i != (updatedValue2 - 1)) {
-                                    //Subgoal tempSubgoal = studentGoal.subgoals.get(i);
-                                    newSubgoals.set(updatedValue2 - 1, exactSubgoalCopies.get(i));
-                                    //newSubgoals.get(updatedValue2 - 1).setComplete(tempSubgoal.isComplete);
-                                } else {
-                                    newSubgoals.set(i, studentGoal.subgoals.get(i));
-                                }
+                        ArrayList<Student> currentStudents = updateStudents.next().data;
+                        for (Student currentStudent : currentStudents) {
+                            Goal studentGoal = currentStudent.goal;
+                            ArrayList<Subgoal> exactSubgoalCopies = new ArrayList<Subgoal>();
+                            for (Subgoal subgoal : studentGoal.subgoals) {
+                                exactSubgoalCopies.add(subgoal);
                             }
-                            studentGoal.subgoals = newSubgoals;
-                            Student updatedStudent = new Student(currentStudent.lastName, currentStudent.firstName,
-                                    currentStudent.phoneNumber, currentStudent.emailAddress,
-                                    new Goal(studentGoal), currentStudent.notes);
-                            database.modify1(currentStudent.lastName, updatedStudent);
+                            if (studentGoal.goal.equals((String) listOfGoals.getValue())) {
+                                int studentIndex = currentStudents.indexOf(currentStudent);
+                                for (int i = 0; i < size; i++) {
+                                    int updatedValue2 = Integer.parseInt(textFields.get(i).getText());
+                                    if (i != (updatedValue2 - 1)) {
+                                        //Subgoal tempSubgoal = studentGoal.subgoals.get(i);
+                                        newSubgoals.set(updatedValue2 - 1, exactSubgoalCopies.get(i));
+                                        //newSubgoals.get(updatedValue2 - 1).setComplete(tempSubgoal.isComplete);
+                                    } else {
+                                        newSubgoals.set(i, studentGoal.subgoals.get(i));
+                                    }
+                                }
+                                studentGoal.subgoals = newSubgoals;
+                                Student updatedStudent = new Student(currentStudent.lastName, currentStudent.firstName,
+                                        currentStudent.phoneNumber, currentStudent.emailAddress,
+                                        new Goal(studentGoal), currentStudent.notes);
+                                currentStudents.set(studentIndex, updatedStudent);
+                                database.modify(currentStudent.lastName, currentStudents);
+                            }
                         }
                     }
                 }
@@ -3032,23 +3437,27 @@ final class TabDemo extends Application {
                     }
                 }
                 goalTree.modify((String) listOfGoals.getValue(), new Goal(currentGoal));
-                AIUTreeIterator<String, Student> updateStudents = new AIUTreeIterator(database.tree1);
+                AIUTreeIterator<String, ArrayList<Student>> updateStudents = new AIUTreeIterator(database);
                 while (updateStudents.hasNext()) {
-                    Student currentStudent = (Student) updateStudents.next().data;
-                    Goal studentGoal = currentStudent.goal;
-                    if (studentGoal.goal.equals((String) listOfGoals.getValue())) {
-                        int deleteCount2 = 0;
-                        for (int i = 0; i < n; i++) {
-                            if (checkBoxes2.get(i).isSelected()) {
-                                studentGoal.subgoals.remove(i - deleteCount2);
-                                deleteCount2++;
+                    ArrayList<Student> currentStudents = updateStudents.next().data;
+                    for (Student currentStudent : currentStudents) {
+                        Goal studentGoal = currentStudent.goal;
+                        if (studentGoal.goal.equals((String) listOfGoals.getValue())) {
+                            int studentIndex = currentStudents.indexOf(currentStudent);
+                            int deleteCount2 = 0;
+                            for (int i = 0; i < n; i++) {
+                                if (checkBoxes2.get(i).isSelected()) {
+                                    studentGoal.subgoals.remove(i - deleteCount2);
+                                    deleteCount2++;
+                                }
                             }
+                            studentGoal = new Goal(studentGoal);
+                            Student updatedStudent = new Student(currentStudent.lastName, currentStudent.firstName,
+                                    currentStudent.phoneNumber, currentStudent.emailAddress,
+                                    studentGoal, currentStudent.notes);
+                            currentStudents.set(studentIndex, updatedStudent);
+                            database.modify(currentStudent.lastName, currentStudents);
                         }
-                        studentGoal = new Goal(studentGoal);
-                        Student updatedStudent = new Student(currentStudent.lastName, currentStudent.firstName,
-                                currentStudent.phoneNumber, currentStudent.emailAddress,
-                                studentGoal, currentStudent.notes);
-                        database.modify1(currentStudent.lastName, updatedStudent);
                     }
                 }
                 manageGoalsGrid.getChildren().remove(hbDeleteSubgoals);
@@ -3114,17 +3523,21 @@ final class TabDemo extends Application {
                 Goal currentGoal = goalTree.find((String) listOfGoals.getValue());
                 currentGoal.subgoals.add(new Subgoal(newSubgoal.getText()));
                 goalTree.modify((String) listOfGoals.getValue(), new Goal(currentGoal));
-                AIUTreeIterator<String, Student> updateStudents = new AIUTreeIterator(database.tree1);
+                AIUTreeIterator<String, ArrayList<Student>> updateStudents = new AIUTreeIterator(database);
                 while (updateStudents.hasNext()) {
-                    Student currentStudent = (Student) updateStudents.next().data;
-                    Goal studentGoal = currentStudent.goal;
-                    if (studentGoal.goal.equals((String) listOfGoals.getValue())) {
-                        studentGoal.subgoals.add(new Subgoal(newSubgoal.getText()));
-                        studentGoal = new Goal(studentGoal);
-                        Student updatedStudent = new Student(currentStudent.lastName, currentStudent.firstName,
-                                currentStudent.phoneNumber, currentStudent.emailAddress,
-                                studentGoal, currentStudent.notes);
-                        database.modify1(currentStudent.lastName, updatedStudent);
+                    ArrayList<Student> currentStudents = updateStudents.next().data;
+                    for (Student currentStudent : currentStudents) {
+                        Goal studentGoal = currentStudent.goal;
+                        if (studentGoal.goal.equals((String) listOfGoals.getValue())) {
+                            int studentIndex = currentStudents.indexOf(currentStudent);
+                            studentGoal.subgoals.add(new Subgoal(newSubgoal.getText()));
+                            studentGoal = new Goal(studentGoal);
+                            Student updatedStudent = new Student(currentStudent.lastName, currentStudent.firstName,
+                                    currentStudent.phoneNumber, currentStudent.emailAddress,
+                                    studentGoal, currentStudent.notes);
+                            currentStudents.set(studentIndex, updatedStudent);
+                            database.modify(currentStudent.lastName, currentStudents);
+                        }
                     }
                 }
                 manageGoalsGrid.getChildren().remove(hbDeleteSubgoals);
@@ -3169,23 +3582,27 @@ final class TabDemo extends Application {
                     String goalString = (String) listOfGoals.getValue();
                     GoalType goalType = goalTree.find(goalString).goalType;
                     goalTree.remove(goalString);
-                    AIUTreeIterator<String, Student> updateStudents = new AIUTreeIterator(database.tree1);
+                    AIUTreeIterator<String, ArrayList<Student>> updateStudents = new AIUTreeIterator(database);
                     while (updateStudents.hasNext()) {
-                        Student currentStudent = (Student) updateStudents.next().data;
-                        if (currentStudent.goal.goal.equals(goalString)) {
+                        ArrayList<Student> currentStudents = updateStudents.next().data;
+                        for (Student currentStudent : currentStudents) {
+                            int studentIndex = currentStudents.indexOf(currentStudent);
+                            if (currentStudent.goal.goal.equals(goalString)) {
+                                if (currentStudent.secondGoal != null) {
+                                    currentStudent.goal = currentStudent.secondGoal;
+                                    currentStudent.secondGoal = null;
+                                } else {
+                                    currentStudent.goal = goalTree.find("No current goal");
+                                }
+                            }
                             if (currentStudent.secondGoal != null) {
-                                currentStudent.goal = currentStudent.secondGoal;
-                                currentStudent.secondGoal = null;
-                            } else {
-                                currentStudent.goal = goalTree.find("No current goal");
+                                if (currentStudent.secondGoal.goal.equals(goalString)) {
+                                    currentStudent.secondGoal = null;
+                                }
                             }
+                            currentStudents.set(studentIndex, currentStudent);
+                            database.modify(currentStudent.lastName, currentStudents);
                         }
-                        if (currentStudent.secondGoal != null) {
-                            if (currentStudent.secondGoal.goal.equals(goalString)) {
-                                currentStudent.secondGoal = null;
-                            }
-                        }
-                        database.modify1(currentStudent.lastName, currentStudent);
                     }
                     listOfGoals.getSelectionModel().clearSelection();
                     listOfGoals.setValue(null);
@@ -3265,7 +3682,7 @@ final class TabDemo extends Application {
                         listOfGoals.getItems().add(theSeparator);
                     }
                     listOfGoals.getItems().addAll(postsecGoals);
-                    if (postsecGoals.size() != 0 && otherGoals.size() != 0) {
+                    if (postsecGoals.size() != 0 && otherGoals.size() != 1) {
                         listOfGoals.getItems().add(theSeparator);
                     }
                     listOfGoals.getItems().addAll(otherGoals);
@@ -3278,6 +3695,20 @@ final class TabDemo extends Application {
                     findStudentReports.setValue(null);
                     popup.setAgreeToChanges(false);
                 } else {
+                    String goalString = (String) listOfGoals.getValue();
+                    AIUTreeIterator<String, ArrayList<Student>> goalCounter = new AIUTreeIterator(database);
+                    int goalCount = 0;
+                    while (goalCounter.hasNext()) {
+                        ArrayList<Student> currentStudents = goalCounter.next().data;
+                        for (Student currentStudent : currentStudents) {
+                            if ((currentStudent.goal != null && currentStudent.goal.goal.equals(goalString))
+                                    || (currentStudent.secondGoal != null && currentStudent.secondGoal.goal.equals(goalString))) {
+                                goalCount++;
+                            }
+                        }
+                    }
+                    areYouSure4.setText("Are you sure you want to delete this goal? \n There are "
+                            + "currently " + goalCount + " students with this goal");
                     areYouSure4.setVisible(true);
                     areYouSure1.setVisible(false);
                     areYouSure2.setVisible(false);
@@ -3305,12 +3736,14 @@ final class TabDemo extends Application {
         homeTab.setOnSelectionChanged(new EventHandler<Event>() {
             public void handle(Event t) {
                 studentsWithoutGoals.clear();
-                AIUTreeIterator<String, Student> studentGoalChecker = new AIUTreeIterator(database.tree1);
+                AIUTreeIterator<String, ArrayList<Student>> studentGoalChecker = new AIUTreeIterator(database);
                 String goallessStudents = "";
                 while (studentGoalChecker.hasNext()) {
-                    Student currentStudent = (Student) studentGoalChecker.next().data;
-                    if (currentStudent.goal.goal.equals("No current goal")) {
-                        goallessStudents += currentStudent.firstName + " " + currentStudent.lastName + "\n";
+                    ArrayList<Student> currentStudents = studentGoalChecker.next().data;
+                    for (Student currentStudent : currentStudents) {
+                        if (currentStudent.goal.goal.equals("No current goal")) {
+                            goallessStudents += currentStudent.firstName + " " + currentStudent.lastName + "\n";
+                        }
                     }
                 }
                 studentsWithoutGoals.setText(goallessStudents);
@@ -3322,25 +3755,79 @@ final class TabDemo extends Application {
         editTab.setContent(editGrid);
         tabPane.getTabs().add(editTab);
 
+        editTab.setOnSelectionChanged(new EventHandler<Event>() {
+            public void handle(Event t) {
+                findStudentEdit.getSelectionModel().clearSelection();
+                findStudentEdit.setValue(null);
+                searchName.clear();
+                searchPhone.clear();
+            }
+        });
+
         Tab goalTab = new Tab();
         goalTab.setText("Student Goals");
         goalTab.setContent(goalsGrid);
         tabPane.getTabs().add(goalTab);
+
+        goalTab.setOnSelectionChanged(new EventHandler<Event>() {
+            public void handle(Event t) {
+                searchName2.clear();
+                searchPhone2.clear();
+                findStudentGoals.getSelectionModel().clearSelection();
+                findStudentGoals.setValue(null);
+            }
+        });
 
         Tab newStudentTab = new Tab();
         newStudentTab.setText("New Student");
         newStudentTab.setContent(newStudentGrid);
         tabPane.getTabs().add(newStudentTab);
 
+        newStudentTab.setOnSelectionChanged(new EventHandler<Event>() {
+            public void handle(Event t) {
+                firstNameField2.clear();
+                lastNameField2.clear();
+                phoneNumberField2.clear();
+                emailField2.clear();
+                noteArea2.clear();
+                studentAdded.setVisible(false);
+                hasEmail.setSelected(false);
+                goals2.getSelectionModel().clearSelection();
+                goals2.setValue(null);
+                secondGoals2.getSelectionModel().clearSelection();
+                secondGoals2.setValue(null);
+            }
+        });
+
         Tab flagsTab = new Tab();
         flagsTab.setText("Flags");
         flagsTab.setContent(flagsGrid);
         tabPane.getTabs().add(flagsTab);
 
+        flagsTab.setOnSelectionChanged(new EventHandler<Event>() {
+            public void handle(Event t) {
+                findStudentFlags.getSelectionModel().clearSelection();
+                findStudentFlags.setValue(null);
+                reportTimes.getSelectionModel().clearSelection();
+                reportTimes.setValue(null);
+                searchNameFlags.clear();
+                searchPhoneFlags.clear();
+            }
+        });
+
         Tab reportsTab = new Tab();
         reportsTab.setText("Reports");
         reportsTab.setContent(reportsGrid);
         tabPane.getTabs().add(reportsTab);
+
+        reportsTab.setOnSelectionChanged(new EventHandler<Event>() {
+            public void handle(Event t) {
+                findStudentReports.getSelectionModel().clearSelection();
+                findStudentReports.setValue(null);
+                searchName3.clear();
+                searchPhone3.clear();
+            }
+        });
 
         Tab adminTab = new Tab();
         adminTab.setText("Administration");
@@ -3349,12 +3836,49 @@ final class TabDemo extends Application {
             tabPane.getTabs().add(adminTab);
         }
 
+        adminTab.setOnSelectionChanged(new EventHandler<Event>() {
+            public void handle(Event t) {
+                passwordMatch1.setVisible(false);
+                passwordMatch2.setVisible(false);
+                usernameMatch1.setVisible(false);
+                usernameMatch2.setVisible(false);
+                username.clear();
+                password.clear();
+                confirmPassword.clear();
+                userFirstName.clear();
+                userLastName.clear();
+                newUsername.clear();
+                newPassword.clear();
+                confirmNewPassword.clear();
+                userFirstName2.clear();
+                userLastName2.clear();
+                userList.getSelectionModel().clearSelection();
+                userList.setValue(null);
+                isAdministrator.getSelectionModel().clearSelection();
+                isAdministrator.setValue(null);
+                isAdministrator2.getSelectionModel().clearSelection();
+                isAdministrator2.setValue(null);
+                userChangesFailed.setVisible(false);
+                newUserAdded.setVisible(false);
+            }
+        });
+
         Tab manageTab = new Tab();
         manageTab.setText("Manage Goals");
         manageTab.setContent(manageGoalsGrid);
         if (isAdmin) {
             tabPane.getTabs().add(manageTab);
         }
+
+        manageTab.setOnSelectionChanged(new EventHandler<Event>() {
+            public void handle(Event t) {
+                createdGoal.clear();
+                selectGoalType.getSelectionModel().clearSelection();
+                selectGoalType.setValue(null);
+                listOfGoals.getSelectionModel().clearSelection();
+                listOfGoals.setValue(null);
+            }
+        });
 
         Text scenetitle2 = new Text();
         if (isAdmin) {
@@ -3438,6 +3962,30 @@ final class UserAndPass {
         this.isAdmin = b;
     }
 
+}
+
+final class MultipleMatches {
+
+    public boolean edit = false;
+    public boolean goals = false;
+    public boolean flags = false;
+    public boolean reports = false;
+
+    public void setEdit(boolean b) {
+        edit = b;
+    }
+
+    public void setGoals(boolean b) {
+        goals = b;
+    }
+
+    public void setFlags(boolean b) {
+        flags = b;
+    }
+
+    public void setReports(boolean b) {
+        reports = b;
+    }
 }
 
 final class PopUpWindow {
@@ -3796,16 +4344,7 @@ public class AIUWithTrees extends Application {
         grid.setPadding(new Insets(25, 25, 25, 25));
         grid.getColumnConstraints().add(new ColumnConstraints(75));
 
-        /*
-         final ArrayList<UserAndPass> users = new ArrayList<UserAndPass>();
-         UserAndPass user1 = new UserAndPass("admin", "password");
-         UserAndPass user2 = new UserAndPass("mguyer", "test1234");
-         user1.setAdmin(true);
-         users.add(user1);
-         users.add(user2);
-         */
         Text scenetitle = new Text("Welcome");
-        //scenetitle.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
         scenetitle.setId("welcome-text");
         grid.add(scenetitle, 0, 0, 2, 1);
 
@@ -3851,13 +4390,12 @@ public class AIUWithTrees extends Application {
                         if (userTextField.getText().equals(user.username)
                                 && pwBox.getText().equals(user.password)) {
                             userFound = true;
-                            TabDemo tabDisplay = new TabDemo(database, goalTree,
+                            TabDemo tabDisplay = new TabDemo(database, database2, goalTree,
                                     userTree, user, adminNotes);
                             Stage tabStage = new Stage();
                             if (user.isAdmin) {
                                 tabDisplay.setAdmin(true);
                             }
-                            //tabDisplay.users = users;
                             tabDisplay.start(tabStage);
                             primaryStage.close();
                             loginIssue.setText("");
@@ -3879,7 +4417,9 @@ public class AIUWithTrees extends Application {
         primaryStage.show();
     }
 
-    public static TwoKeyTree<String, String, Student> database = new TwoKeyTree<String, String, Student>();
+    public static AIUTree<String, ArrayList<Student>> database = new AIUTree<String, ArrayList<Student>>();
+	
+	public static AIUTree<String, ArrayList<Student>> database2 = new AIUTree<String, ArrayList<Student>>();
 
     public static AIUTree<String, Goal> goalTree = new AIUTree<String, Goal>();
 
@@ -3890,7 +4430,7 @@ public class AIUWithTrees extends Application {
     public static void plantTree() {
         Scanner fileIn = null;
         try {
-            fileIn = new Scanner(new FileInputStream("C:\\Users\\Adam\\Google Drive\\database.txt"));
+            fileIn = new Scanner(new FileInputStream("C:\\Users\\" + System.getProperty("user.name") + "\\Google Drive\\database.txt"));
         } catch (FileNotFoundException e) {
             System.out.println("A fatal error has occurred.");
             System.exit(0);
@@ -3917,7 +4457,7 @@ public class AIUWithTrees extends Application {
                 }
             }
             if (student.secondGoal != null) {
-                for (int i = 32; i < array.length; i++) {
+                for (int i = 32; i < 52; i++) {
                     if (array[i].equals("1")) {
                         student.secondGoal.subgoals.get(i - 32).setComplete(true);
                     } else if (array[i].equals("0")) {
@@ -3927,14 +4467,48 @@ public class AIUWithTrees extends Application {
                     }
                 }
             }
-            database.add(array[0], array[1].replaceAll("\\D+", ""), student);
+
+            for (int i = 52; i < array.length; i++) {
+                student.completedGoals.add(array[i]);
+            }
+            ArrayList<Student> potentialMatch = database.find(array[0]);
+            if (potentialMatch == null) {
+                ArrayList<Student> initialStudent = new ArrayList<Student>();
+                initialStudent.add(student);
+                database.add(array[0], initialStudent);
+            } else {
+                potentialMatch.add(student);
+                database.modify(array[0], potentialMatch);
+            }
         }
     }
+	
+	public static void plantPhoneTree(){
+		ArrayList<Student> studentList = new ArrayList<Student>();
+		AIUTreeIterator iterator = new AIUTreeIterator(database);
+		while(iterator.hasNext()){
+			Node<String,ArrayList<Student>> currNode = iterator.next();
+			for(int i = 0; i < currNode.data.size(); i++){
+				studentList.add(currNode.data.get(i));
+				}
+		}
+        for(Student student : studentList){
+			ArrayList<Student> potentialMatch = database2.find(student.phoneNumber.replaceAll("\\D+", ""));
+			if (potentialMatch == null) {
+				ArrayList<Student> initialStudent = new ArrayList<Student>();
+				initialStudent.add(student);
+				database2.add(student.phoneNumber.replaceAll("\\D+", ""), initialStudent);
+			} else {
+				potentialMatch.add(student);
+				database2.modify(student.phoneNumber.replaceAll("\\D+", ""), potentialMatch);
+            }
+        }
+		}
 
     public static void plantGoalTree() {
         Scanner fileIn2 = null;
         try {
-            fileIn2 = new Scanner(new FileInputStream("C:\\Users\\Adam\\Google Drive\\goals.txt"));
+            fileIn2 = new Scanner(new FileInputStream("C:\\Users\\" + System.getProperty("user.name") + "\\Google Drive\\goals.txt"));
         } catch (FileNotFoundException e) {
             System.out.println("A fatal error has occurred.");
             System.exit(0);
@@ -3966,7 +4540,7 @@ public class AIUWithTrees extends Application {
     public static void plantUserTree() {
         Scanner fileIn3 = null;
         try {
-            fileIn3 = new Scanner(new FileInputStream("C:\\Users\\Adam\\Google Drive\\users.txt"));
+            fileIn3 = new Scanner(new FileInputStream("C:\\Users\\" + System.getProperty("user.name") + "\\Google Drive\\users.txt"));
         } catch (FileNotFoundException e) {
             System.out.println("A fatal error has occurred.");
             System.exit(0);
@@ -3990,7 +4564,7 @@ public class AIUWithTrees extends Application {
     public static void plantAdminNotes() {
         Scanner fileIn4 = null;
         try {
-            fileIn4 = new Scanner(new FileInputStream("C:\\Users\\Adam\\Google Drive\\adminNotes.txt"));
+            fileIn4 = new Scanner(new FileInputStream("C:\\Users\\" + System.getProperty("user.name") + "\\Google Drive\\adminNotes.txt"));
         } catch (FileNotFoundException e) {
             System.out.println("A fatal error has occurred.");
             System.exit(0);
@@ -4009,6 +4583,7 @@ public class AIUWithTrees extends Application {
     public static void main(String[] args) {
         plantGoalTree();
         plantTree();
+		plantPhoneTree();
         plantUserTree();
         plantAdminNotes();
         launch(args);
