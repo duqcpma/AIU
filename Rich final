@@ -2545,9 +2545,7 @@ final class TabDemo extends Application {
          }
          });
          */
-         
-         ArrayList<String> flaggedStudents =  new ArrayList();
-         
+        ArrayList<String> flaggedStudents =  new ArrayList();
         reportTimes.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
                 printBtn.setDisable(true);
@@ -2606,7 +2604,7 @@ final class TabDemo extends Application {
 
         printBtn.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
-	          try{ 
+		try{ 
                 //the labels that will be the heading of the spreadsheet
                 String header = "Students who have not reported within:";
                 String dateLabel = "As of:";
@@ -2617,7 +2615,7 @@ final class TabDemo extends Application {
                 Date d = new Date();
                 String date = (d.getMonth()+1) +"/"+ d.getDate() + "/" + (d.getYear()+1900);
 
-                File file1 = new File("C:\\Users\\"+System.getProperty("user.name")+"\\Google Drive\\flagsheet.xls");
+                File file1 = new File("C:\\Users\\"+System.getProperty("user.name")+"\\Desktop\\flagsheet.xls");
                 
                 
       
@@ -2714,6 +2712,11 @@ final class TabDemo extends Application {
                 catch(WriteException w){
                     System.err.println("no bueno");   
                 }//end catch 2
+                
+                
+                
+                
+                flaggedStudents.clear();
             }
         });
 
@@ -2938,7 +2941,7 @@ final class TabDemo extends Application {
 
         printReport.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
-              try{
+		try{
                 //the labels that will be the heading of the spreadsheet
                 String sname = "Student name:";
                 String cugoal = "Primary Goal:";
@@ -3043,9 +3046,6 @@ final class TabDemo extends Application {
 
                 }//end while
                 
-                
-
-                
                 //sets the column width
                 wsheet.setColumnView(0,22);
                 wsheet.setColumnView(1,22);
@@ -3065,7 +3065,6 @@ final class TabDemo extends Application {
                 wsheet.addCell(l13);
                 wsheet.addCell(l14);
                 
-
                 wworkbook.write();
                 wworkbook.close();
                 
@@ -4842,7 +4841,7 @@ public class AIUWithTrees extends Application {
     public static void main(String[] args) {
         plantGoalTree();
         plantTree();
-		    plantPhoneTree();
+		plantPhoneTree();
         plantUserTree();
         plantAdminNotes();
         launch(args);
