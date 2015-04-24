@@ -1627,6 +1627,7 @@ final class TabDemo extends Application {
                 matches.setGoals(false);
                 matches.setFlags(false);
                 matches.setReports(false);
+                studentChoices.getItems().clear();
                 if (searchName.getLength() == 0) {
                     searchMessage.setFill(Color.FIREBRICK);
                     searchMessage.setText("Please enter a name");
@@ -1695,6 +1696,7 @@ final class TabDemo extends Application {
                 matches.setGoals(false);
                 matches.setFlags(false);
                 matches.setReports(false);
+                studentChoices.getItems().clear();
                 if (searchPhone.getLength() != 0) {
                     String query = searchPhone.getText().replaceAll("\\D+", "");
                     ArrayList<Student> potentialMatch = database.find2(query);
@@ -1931,6 +1933,7 @@ final class TabDemo extends Application {
                 matches.setGoals(false);
                 matches.setFlags(false);
                 matches.setReports(false);
+                studentChoices.getItems().clear();
                 if (searchName2.getLength() != 0) {
                     String query = searchName2.getText().toLowerCase();
                     int spaceIndex = query.indexOf(" ");
@@ -1987,6 +1990,7 @@ final class TabDemo extends Application {
                 matches.setGoals(false);
                 matches.setFlags(false);
                 matches.setReports(false);
+                studentChoices.getItems().clear();
                 if (searchPhone2.getLength() != 0) {
                     String query = searchPhone2.getText().replaceAll("\\D+", "");
                     ArrayList<Student> potentialMatch = database.find2(query);
@@ -2357,6 +2361,7 @@ final class TabDemo extends Application {
                 matches.setGoals(false);
                 matches.setFlags(false);
                 matches.setReports(false);
+                studentChoices.getItems().clear();
                 if (searchNameFlags.getLength() != 0) {
                     String query = searchNameFlags.getText().toLowerCase();
                     int spaceIndex = query.indexOf(" ");
@@ -2413,6 +2418,7 @@ final class TabDemo extends Application {
                 matches.setGoals(false);
                 matches.setFlags(false);
                 matches.setReports(false);
+                studentChoices.getItems().clear();
                 if (searchPhoneFlags.getLength() != 0) {
                     String query = searchPhoneFlags.getText().replaceAll("\\D+", "");
                     ArrayList<Student> potentialMatch = database.find2(query);
@@ -2554,6 +2560,7 @@ final class TabDemo extends Application {
                 matches.setGoals(false);
                 matches.setFlags(false);
                 matches.setReports(false);
+                studentChoices.getItems().clear();
                 if (searchName3.getLength() != 0) {
                     String query = searchName3.getText().toLowerCase();
                     int spaceIndex = query.indexOf(" ");
@@ -2610,6 +2617,7 @@ final class TabDemo extends Application {
                 matches.setGoals(false);
                 matches.setFlags(false);
                 matches.setReports(false);
+                studentChoices.getItems().clear();
                 if (searchPhone3.getLength() != 0) {
                     String query = searchPhone3.getText().replaceAll("\\D+", "");
                     ArrayList<Student> potentialMatch = database.find2(query);
