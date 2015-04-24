@@ -1,4 +1,5 @@
-String lname = "Last Name";
+                try{
+                String lname = "Last Name";
                 String fname = "First Name";
                 String phNo = "Phone Number";
                 String email = "Email Address";
@@ -58,3 +59,9 @@ String lname = "Last Name";
                 wworkbook.close();
                 
                 Desktop.getDesktop().open(file);
+                catch(IOException e){
+                    System.err.println("no bueno");    
+                }//end catch 1
+                catch(WriteException w){
+                    System.err.println("no bueno");   
+                }//end catch 2
