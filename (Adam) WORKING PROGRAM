@@ -53,6 +53,21 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
+//all imports for printing
+import java.awt.Desktop;
+
+import jxl.Cell;
+import jxl.Sheet;
+import jxl.Workbook;
+
+import jxl.format.UnderlineStyle;
+import jxl.format.Colour;
+
+import jxl.write.WritableFont;
+import jxl.write.WritableCellFormat;
+import jxl.write.WritableSheet;
+import jxl.write.WritableWorkbook;
+import jxl.write.WriteException;
 /**
  *
  * @author mguyer92
@@ -216,7 +231,9 @@ final class Student {
 
 final class TabDemo extends Application {
 
-    public static AIUTree<String, ArrayList<Student>> database;
+    public static Student defaultStudent;
+	
+	public static AIUTree<String, ArrayList<Student>> database;
 	
 	public static AIUTree<String, ArrayList<Student>> database2;
 
@@ -2530,58 +2547,58 @@ final class TabDemo extends Application {
          }
          });
          */
+        ArrayList<String> flaggedStudents =  new ArrayList();
         reportTimes.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
                 printBtn.setDisable(true);
-                studentList.clear();
+                studentList.clear(); 
+                
                 if (reportTimes.getValue() != null) {
                     printBtn.setDisable(false);
-                    Date currentTime = new Date();
                     String listOfStudents = "";
-                    ArrayList<Student> currentStudents;
-                    AIUTreeIterator<String, ArrayList<Student>> flagIterator = new AIUTreeIterator(database);
-                    if (reportTimes.getValue().equals("0-2 weeks")) {
+                    Student currentStudent = (Student) findStudentReports.getValue();
+                    Date currentTime = new Date();
+                    double diff = (currentTime.getTime() - currentStudent.lastUpdate.getTime())/86400000.0;
+                    int difference = (int)diff;
+                    AIUTreeIterator flagIterator = new AIUTreeIterator(database);
+                    if (reportTimes.getValue().equals("0-2 Weeks")) {
                         while (flagIterator.hasNext()) {
-                            currentStudents = flagIterator.next().data;
-                            for (Student currentStudent : currentStudents) {
-                                double difference = (currentTime.getTime() - currentStudent.lastUpdate.getTime()) / 86400000.0;
-                                int differenceDays = (int) difference;
-                                if (differenceDays <= 13) {
-                                    listOfStudents += currentStudent.firstName + " " + currentStudent.lastName + "\n";
-                                }
+                            currentStudent = (Student) flagIterator.next().data;
+                            if (diff <= 13) {
+                                listOfStudents += currentStudent.firstName + " " + currentStudent.lastName + "\n";
+                                //adding the sudents to an arrayList for print
+                                flaggedStudents.add(currentStudent.firstName);
+                                flaggedStudents.add(currentStudent.lastName);
                             }
                         }
-                    } else if (reportTimes.getValue().equals("2-4 weeks")) {
+                    } else if (reportTimes.getValue().equals("2-4 Weeks")) {
                         while (flagIterator.hasNext()) {
-                            currentStudents = flagIterator.next().data;
-                            for (Student currentStudent : currentStudents) {
-                                double difference = (currentTime.getTime() - currentStudent.lastUpdate.getTime()) / 86400000.0;
-                                int differenceDays = (int) difference;
-                                if (differenceDays > 13 && differenceDays <= 27) {
-                                    listOfStudents += currentStudent.firstName + " " + currentStudent.lastName + "\n";
-                                }
+                            currentStudent = (Student) flagIterator.next().data;
+                            if (difference > 13 && difference <= 27) {
+                                listOfStudents += currentStudent.firstName + " " + currentStudent.lastName + "\n";
+                                //adding the sudents to an arrayList for print
+                                flaggedStudents.add(currentStudent.firstName);
+                                flaggedStudents.add(currentStudent.lastName);
                             }
                         }
-                    } else if (reportTimes.getValue().equals("4-6 weeks")) {
+                    } else if (reportTimes.getValue().equals("4-6 Weeks")) {
                         while (flagIterator.hasNext()) {
-                            currentStudents = flagIterator.next().data;
-                            for (Student currentStudent : currentStudents) {
-                                double difference = (currentTime.getTime() - currentStudent.lastUpdate.getTime()) / 86400000.0;
-                                int differenceDays = (int) difference;
-                                if (differenceDays > 27 && differenceDays <= 41) {
-                                    listOfStudents += currentStudent.firstName + " " + currentStudent.lastName + "\n";
-                                }
+                            currentStudent = (Student) flagIterator.next().data;
+                            if (difference > 27 && difference <= 41) {
+                                listOfStudents += currentStudent.firstName + " " + currentStudent.lastName + "\n";
+                                //adding the sudents to an arrayList for print
+                                flaggedStudents.add(currentStudent.firstName);
+                                flaggedStudents.add(currentStudent.lastName);
                             }
                         }
                     } else {
                         while (flagIterator.hasNext()) {
-                            currentStudents = flagIterator.next().data;
-                            for (Student currentStudent : currentStudents) {
-                                double difference = (currentTime.getTime() - currentStudent.lastUpdate.getTime()) / 86400000.0;
-                                int differenceDays = (int) difference;
-                                if (differenceDays > 41) {
-                                    listOfStudents += currentStudent.firstName + " " + currentStudent.lastName + "\n";
-                                }
+                            currentStudent = (Student) flagIterator.next().data;
+                            if (difference > 41) {
+                                listOfStudents += currentStudent.firstName + " " + currentStudent.lastName + "\n";
+                                //adding the sudents to an arrayList for print
+                                flaggedStudents.add(currentStudent.firstName);
+                                flaggedStudents.add(currentStudent.lastName);
                             }
                         }
                     }
@@ -2592,7 +2609,119 @@ final class TabDemo extends Application {
 
         printBtn.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
-		//
+		try{ 
+                //the labels that will be the heading of the spreadsheet
+                String header = "Students who have not reported within:";
+                String dateLabel = "As of:";
+                String firstNameLabel = "First Name";
+                String lastNameLabel = "Last Name";
+                String reportTime = reportTimes.getValue().toString();
+
+                Date d = new Date();
+                String date = (d.getMonth()+1) +"/"+ d.getDate() + "/" + (d.getYear()+1900);
+
+                File file1 = new File("C:\\Users\\"+System.getProperty("user.name")+"\\Desktop\\flagsheet.xls");
+                
+                
+      
+                WritableWorkbook wworkbook;
+      
+                //setting the font,size,style,color for the cells
+                WritableFont arialBold11fontRed = new WritableFont(WritableFont.ARIAL, 13, WritableFont.BOLD,false,UnderlineStyle.SINGLE,Colour.RED);
+                WritableFont arialBold11font = new WritableFont(WritableFont.ARIAL, 11, WritableFont.BOLD);
+                WritableFont arial10font = new WritableFont(WritableFont.ARIAL);
+      
+                WritableCellFormat ab11formatRed = new WritableCellFormat(arialBold11fontRed);
+                WritableCellFormat ab11format = new WritableCellFormat(arialBold11font);
+                WritableCellFormat ab10format = new WritableCellFormat(arial10font);
+                WritableCellFormat ab10formatRoseBack = new WritableCellFormat(ab10format);
+                WritableCellFormat ab11formatBc = new WritableCellFormat(ab11format);
+
+                //set Alignment
+                ab11formatRed.setAlignment(jxl.format.Alignment.RIGHT);
+                ab11formatBc.setAlignment(jxl.format.Alignment.CENTRE);
+      
+                //set Indent
+                ab11formatRed.setIndentation(2);
+      
+                //set Background color
+                ab11formatRed.setBackground(Colour.LIGHT_TURQUOISE);
+                ab10formatRoseBack.setBackground(Colour.ROSE);
+                ab11formatBc.setBackground(Colour.TAN);
+      
+                wworkbook = Workbook.createWorkbook(file1);
+      
+                WritableSheet wsheet = wworkbook.createSheet("First Sheet", 0);
+      
+                //how to merge cells
+                wsheet.mergeCells(0,0,4,0);
+                wsheet.mergeCells(0,1,4,1);
+                wsheet.mergeCells(0,2,2,2);
+                wsheet.mergeCells(3,2,5,2);
+      
+                //adding the main headings to the cells
+                jxl.write.Label l1 = new jxl.write.Label(0,0,header,ab11formatRed);
+                jxl.write.Label l2 = new jxl.write.Label(0,1,dateLabel,ab11formatRed);
+                jxl.write.Label l3 = new jxl.write.Label(0,2,firstNameLabel,ab11format);
+                jxl.write.Label l4 = new jxl.write.Label(3,2,lastNameLabel,ab11format);
+                jxl.write.Label l5 = new jxl.write.Label(5,1,date,ab11formatBc);
+                jxl.write.Label l6 = new jxl.write.Label(5,0,reportTime,ab11formatBc);
+      
+                int row = 3;
+                int i = 0;
+                jxl.write.Label l7;
+                jxl.write.Label l8;
+                while(i<flaggedStudents.size()){
+                    wsheet.mergeCells(0,row,2,row);
+                    wsheet.mergeCells(3,row,5,row);
+                    if((row%2)!=0){
+                        l7 = new jxl.write.Label(0,row,flaggedStudents.get(i),ab10formatRoseBack);
+                        l8 = new jxl.write.Label(3,row,flaggedStudents.get(i+1),ab10formatRoseBack);
+                    }//end if
+                    else{
+                        l7 = new jxl.write.Label(0,row,flaggedStudents.get(i),ab10format);
+                        l8 = new jxl.write.Label(3,row,flaggedStudents.get(i+1),ab10format);
+                    }//end else
+            
+                    row++;
+                    wsheet.addCell(l7);
+                    wsheet.addCell(l8);
+                    
+                    i=i+2;
+                }//end while
+      
+                //sets the column width
+                wsheet.setColumnView(0,12);
+                wsheet.setColumnView(1,14);
+                wsheet.setColumnView(2,14);
+                wsheet.setColumnView(4,11);
+                wsheet.setColumnView(5,21);
+      
+                //adds the labels of the headings
+                wsheet.addCell(l1);
+                wsheet.addCell(l2);
+                wsheet.addCell(l3);
+                wsheet.addCell(l4);
+                wsheet.addCell(l5);
+                wsheet.addCell(l6);
+
+                wworkbook.write();
+                wworkbook.close();
+                //opens up the file
+                Desktop.getDesktop().open(file1);
+                }//end try
+                
+                catch(IOException e){
+                    System.err.println("no bueno");    
+                }//end catch 1
+                catch(WriteException w){
+                    System.err.println("no bueno");   
+                }//end catch 2
+                
+                
+                
+                
+                flaggedStudents.clear();
             }
         });
 
@@ -2713,6 +2842,7 @@ final class TabDemo extends Application {
                     ArrayList<Student> currentStudents = database.find(lastName);
                     for (Student currentStudent : currentStudents) {
                         if (currentStudent.firstName.equals(firstName)) {
+							defaultStudent = currentStudent;
                             if (currentStudent.goal != null) {
                                 primaryStudentGoal.setText(currentStudent.goal.goal);
                                 if (!currentStudent.goal.goal.equals("No current goal")) {
@@ -2817,7 +2947,142 @@ final class TabDemo extends Application {
 
         printReport.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent t) {
+		try{
+                //the labels that will be the heading of the spreadsheet
+                String sname = "Student name:";
+                String cugoal = "Primary Goal:";
+                String cogoal = "Completed Goal(s)";
+                String cosgoal = "Completed Subgoals";
+                String rsgoal = "Remaining Subgoals";
+                String datelabel = "Date:";
+                String secgoal = "Secondary Goal";
+                
+                String currentName = (String) findStudentReports.getValue();
+                String lastName = currentName.substring(0, currentName.indexOf(","));
+                Student currentStudent = defaultStudent;
+                
+                
+                Date d = new Date();
+                String date = (d.getMonth()+1) +"/"+ d.getDate() + "/" + (d.getYear()+1900);
+      
+      
+                File file  = new File("C:\\Users\\"+System.getProperty("user.name")+"\\Google Drive\\report.xls");
+     
+      
+                WritableWorkbook wworkbook;
+      
+                //setting the font,size,style,color for the cells
+                WritableFont arialBold11font = new WritableFont(WritableFont.ARIAL, 11, WritableFont.BOLD);
+                WritableFont arial11font = new WritableFont(WritableFont.ARIAL,11);
+      
+                WritableCellFormat ab11format = new WritableCellFormat(arialBold11font);
+                WritableCellFormat a11format = new WritableCellFormat(arial11font);     
+                WritableCellFormat ab11formatB = new WritableCellFormat(ab11format);   
+                WritableCellFormat a11formatLightB = new WritableCellFormat(a11format);    
+                WritableCellFormat ab11formatG = new WritableCellFormat(ab11format);     
+                WritableCellFormat a11formatLightG = new WritableCellFormat(a11format);      
+                WritableCellFormat ab11formatLav = new WritableCellFormat(arialBold11font);
+                
+                //set wrap text
+                a11formatLightB.setWrap(true);
+      
+                //set Background color
+                ab11formatB.setBackground(Colour.SKY_BLUE);
+                ab11formatG.setBackground(Colour.LIME);
+                ab11formatLav.setBackground(Colour.LAVENDER);
+      
+                //set Alignment
+                a11formatLightB.setAlignment(jxl.format.Alignment.CENTRE);
+                a11formatLightG.setAlignment(jxl.format.Alignment.CENTRE);
+                a11format.setAlignment(jxl.format.Alignment.RIGHT);
 
+                wworkbook = Workbook.createWorkbook(file);
+      
+                WritableSheet wsheet = wworkbook.createSheet("First Sheet", 0);
+      
+                //how to merge cells
+                wsheet.mergeCells(1,1,3,1);
+                wsheet.mergeCells(1,3,3,3);
+                wsheet.mergeCells(0,5,1,5);
+				wsheet.mergeCells(1,4,3,4);
+
+                //adding the main headings to the cells
+                jxl.write.Label l1 = new jxl.write.Label(0,1,sname,ab11formatB);
+                jxl.write.Label l2 = new jxl.write.Label(0,3,cugoal,ab11formatG);
+                jxl.write.Label l13 = new jxl.write.Label(0,4,secgoal,ab11formatG);
+                jxl.write.Label l3 = new jxl.write.Label(0,5,cogoal,ab11formatLav);
+                jxl.write.Label l4 = new jxl.write.Label(2,5,cosgoal,ab11formatLav);
+                jxl.write.Label l5 = new jxl.write.Label(3,5,rsgoal,ab11formatLav);
+                jxl.write.Label l6 = new jxl.write.Label(2,0,datelabel,a11format);
+                jxl.write.Label l7 = new jxl.write.Label(3,0,date,a11format);
+                
+                String fullName = currentStudent.firstName + " " + currentStudent.lastName;
+                Goal currentGoal = currentStudent.goal;
+                Goal secondaryGoal = currentStudent.secondGoal;
+                jxl.write.Label l8 = new jxl.write.Label(1,1,fullName,a11formatLightB);
+                jxl.write.Label l9 = new jxl.write.Label(1,3,currentGoal.goal,a11formatLightG);
+                jxl.write.Label l14;
+                if(secondaryGoal==null)
+                    l14 = new jxl.write.Label(1,4," ",a11formatLightG);
+                else
+                    l14 = new jxl.write.Label(1,4,secondaryGoal.goal,a11formatLightG);
+                
+                int i = 6;
+                int j = 6;
+                for (Subgoal subgoal : currentStudent.goal.subgoals) {
+                    if (subgoal.isComplete) {
+                        jxl.write.Label l10 = new jxl.write.Label(2,i,subgoal.subgoal,a11formatLightB);
+                        i++;
+                        wsheet.addCell(l10);
+                    } 
+                    else {
+                        jxl.write.Label  l10 = new jxl.write.Label(3,j,subgoal.subgoal,a11formatLightB);
+                        j++;
+                        wsheet.addCell(l10);
+                    }
+                    
+                    
+                }//end for
+                i=0;
+                j=6;
+                while(i < currentStudent.completedGoals.size()){
+                    jxl.write.Label l12 = new jxl.write.Label(0,j,currentStudent.completedGoals.get(i),a11formatLightB);
+                    i++;
+                    j++;
+                    wsheet.addCell(l12);
+
+                }//end while
+                
+                //sets the column width
+                wsheet.setColumnView(0,22);
+                wsheet.setColumnView(1,22);
+                wsheet.setColumnView(2,22);
+                wsheet.setColumnView(3,22);
+      
+                //adds the labels of the headings
+                wsheet.addCell(l1);
+                wsheet.addCell(l2);
+                wsheet.addCell(l3);
+                wsheet.addCell(l4);
+                wsheet.addCell(l5);
+                wsheet.addCell(l6);
+                wsheet.addCell(l7);
+                wsheet.addCell(l8);
+                wsheet.addCell(l9);
+                wsheet.addCell(l13);
+                wsheet.addCell(l14);
+                
+                wworkbook.write();
+                wworkbook.close();
+                
+                Desktop.getDesktop().open(file);
+                }//end try
+                catch(IOException e){
+                    System.err.println("no bueno");    
+                }//end catch 1
+                catch(WriteException w){
+                    System.err.println("no bueno");   
+                }//end catch 2
             }
         });
 
