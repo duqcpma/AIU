@@ -1,0 +1,116 @@
+/*
+flagged student report print button handle method
+*/
+try{ 
+                //the labels that will be the heading of the spreadsheet
+                String header = "Students who have not reported within:";
+                String dateLabel = "As of:";
+                String firstNameLabel = "First Name";
+                String lastNameLabel = "Last Name";
+                String reportTime = reportTimes.getValue().toString();
+
+                Date d = new Date();
+                String date = (d.getMonth()+1) +"/"+ d.getDate() + "/" + (d.getYear()+1900);
+
+                File file1 = new File("C:\\Users\\"+System.getProperty("user.name")+"\\Desktop\\flagsheet.xls");
+                
+                
+      
+                WritableWorkbook wworkbook;
+      
+                //setting the font,size,style,color for the cells
+                WritableFont arialBold11fontRed = new WritableFont(WritableFont.ARIAL, 13, WritableFont.BOLD,false,UnderlineStyle.SINGLE,Colour.RED);
+                WritableFont arialBold11font = new WritableFont(WritableFont.ARIAL, 11, WritableFont.BOLD);
+                WritableFont arial10font = new WritableFont(WritableFont.ARIAL);
+      
+                WritableCellFormat ab11formatRed = new WritableCellFormat(arialBold11fontRed);
+                WritableCellFormat ab11format = new WritableCellFormat(arialBold11font);
+                WritableCellFormat ab10format = new WritableCellFormat(arial10font);
+                WritableCellFormat ab10formatRoseBack = new WritableCellFormat(ab10format);
+                WritableCellFormat ab11formatBc = new WritableCellFormat(ab11format);
+
+                //set Alignment
+                ab11formatRed.setAlignment(jxl.format.Alignment.RIGHT);
+                ab11formatBc.setAlignment(jxl.format.Alignment.CENTRE);
+      
+                //set Indent
+                ab11formatRed.setIndentation(2);
+      
+                //set Background color
+                ab11formatRed.setBackground(Colour.LIGHT_TURQUOISE);
+                ab10formatRoseBack.setBackground(Colour.ROSE);
+                ab11formatBc.setBackground(Colour.TAN);
+      
+                wworkbook = Workbook.createWorkbook(file1);
+      
+                WritableSheet wsheet = wworkbook.createSheet("First Sheet", 0);
+      
+                //how to merge cells
+                wsheet.mergeCells(0,0,4,0);
+                wsheet.mergeCells(0,1,4,1);
+                wsheet.mergeCells(0,2,2,2);
+                wsheet.mergeCells(3,2,5,2);
+      
+                //adding the main headings to the cells
+                jxl.write.Label l1 = new jxl.write.Label(0,0,header,ab11formatRed);
+                jxl.write.Label l2 = new jxl.write.Label(0,1,dateLabel,ab11formatRed);
+                jxl.write.Label l3 = new jxl.write.Label(0,2,firstNameLabel,ab11format);
+                jxl.write.Label l4 = new jxl.write.Label(3,2,lastNameLabel,ab11format);
+                jxl.write.Label l5 = new jxl.write.Label(5,1,date,ab11formatBc);
+                jxl.write.Label l6 = new jxl.write.Label(5,0,reportTime,ab11formatBc);
+      
+                int row = 3;
+                int i = 0;
+                jxl.write.Label l7;
+                jxl.write.Label l8;
+                while(i<flaggedStudents.size()){
+                    wsheet.mergeCells(0,row,2,row);
+                    wsheet.mergeCells(3,row,5,row);
+                    if((row%2)!=0){
+                        l7 = new jxl.write.Label(0,row,flaggedStudents.get(i),ab10formatRoseBack);
+                        l8 = new jxl.write.Label(3,row,flaggedStudents.get(i+1),ab10formatRoseBack);
+                    }//end if
+                    else{
+                        l7 = new jxl.write.Label(0,row,flaggedStudents.get(i),ab10format);
+                        l8 = new jxl.write.Label(3,row,flaggedStudents.get(i+1),ab10format);
+                    }//end else
+            
+                    row++;
+                    wsheet.addCell(l7);
+                    wsheet.addCell(l8);
+                    
+                    i=i+2;
+                }//end while
+      
+                //sets the column width
+                wsheet.setColumnView(0,12);
+                wsheet.setColumnView(1,14);
+                wsheet.setColumnView(2,14);
+                wsheet.setColumnView(4,11);
+                wsheet.setColumnView(5,21);
+      
+                //adds the labels of the headings
+                wsheet.addCell(l1);
+                wsheet.addCell(l2);
+                wsheet.addCell(l3);
+                wsheet.addCell(l4);
+                wsheet.addCell(l5);
+                wsheet.addCell(l6);
+
+                wworkbook.write();
+                wworkbook.close();
+                //opens up the file
+                Desktop.getDesktop().open(file1);
+                }//end try
+                
+                catch(IOException e){
+                    System.err.println("no bueno");    
+                }//end catch 1
+                catch(WriteException w){
+                    System.err.println("no bueno");   
+                }//end catch 2
+                
+                
+                
+                
+                flaggedStudents.clear();
