@@ -1,0 +1,56 @@
+/*new report times handle method where the flagged student are stored in an array list
+
+This array list should be placed outside of the report times handle method
+ArrayList<String> flaggedStudents =  new ArrayList();
+*/
+printBtn.setDisable(true);
+                studentList.clear(); 
+                
+                if (reportTimes.getValue() != null) {
+                    printBtn.setDisable(false);
+                    String listOfStudents = "";
+                    Student currentStudent;
+                    AIUTreeIterator flagIterator = new AIUTreeIterator(database.tree1);
+                    if (reportTimes.getValue().equals("0-12 Hours")) {
+                        while (flagIterator.hasNext()) {
+                            currentStudent = (Student) flagIterator.next().data;
+                            if (currentStudent.hoursSince <= 12) {
+                                listOfStudents += currentStudent.firstName + " " + currentStudent.lastName + "\n";
+                                //adding the sudents to an arrayList for print
+                                flaggedStudents.add(currentStudent.firstName);
+                                flaggedStudents.add(currentStudent.lastName);
+                            }
+                        }
+                    } else if (reportTimes.getValue().equals("13-30 Hours")) {
+                        while (flagIterator.hasNext()) {
+                            currentStudent = (Student) flagIterator.next().data;
+                            if (currentStudent.hoursSince > 12 && currentStudent.hoursSince <= 30) {
+                                listOfStudents += currentStudent.firstName + " " + currentStudent.lastName + "\n";
+                                //adding the sudents to an arrayList for print
+                                flaggedStudents.add(currentStudent.firstName);
+                                flaggedStudents.add(currentStudent.lastName);
+                            }
+                        }
+                    } else if (reportTimes.getValue().equals("31-60 Hours")) {
+                        while (flagIterator.hasNext()) {
+                            currentStudent = (Student) flagIterator.next().data;
+                            if (currentStudent.hoursSince > 30 && currentStudent.hoursSince <= 60) {
+                                listOfStudents += currentStudent.firstName + " " + currentStudent.lastName + "\n";
+                                //adding the sudents to an arrayList for print
+                                flaggedStudents.add(currentStudent.firstName);
+                                flaggedStudents.add(currentStudent.lastName);
+                            }
+                        }
+                    } else {
+                        while (flagIterator.hasNext()) {
+                            currentStudent = (Student) flagIterator.next().data;
+                            if (currentStudent.hoursSince > 60) {
+                                listOfStudents += currentStudent.firstName + " " + currentStudent.lastName + "\n";
+                                //adding the sudents to an arrayList for print
+                                flaggedStudents.add(currentStudent.firstName);
+                                flaggedStudents.add(currentStudent.lastName);
+                            }
+                        }
+                    }
+                    studentList.setText(listOfStudents);
+                }
