@@ -1,0 +1,51 @@
+String lname = "Last Name";
+                String fname = "First Name";
+                String phNo = "Phone Number";
+                String email = "Email Address";
+                
+                File file = new File("C:\\Users\\"+System.getProperty("users")+"\\Google Drive\\database.xls");
+                
+                WritableWorkbook wworkbook;
+      
+                //setting the font,size,style,color for the cells
+                WritableFont arialBold11font = new WritableFont(WritableFont.ARIAL, 12, WritableFont.BOLD,false,UnderlineStyle.SINGLE);
+                WritableFont arial11font = new WritableFont(WritableFont.ARIAL,10);
+                
+                WritableCellFormat ab11format = new WritableCellFormat(arialBold11font);
+                WritableCellFormat a11format = new WritableCellFormat(arial11font);
+                
+                AIUTreeIterator it = new AIUTreeIterator(database);
+                
+                jxl.write.Label l1 = new jxl.write.Label(0,0,lname,ab11format);
+                jxl.write.Label l2 = new jxl.write.Label(1,0,fname,ab11format);
+                jxl.write.Label l3 = new jxl.write.Label(2,0,phNo,ab11format);
+                jxl.write.Label l4 = new jxl.write.Label(3,0,email,ab11format);
+                
+                int i=1;
+                
+                while(it.hasNext()){
+                    ArrayList<Student> list = it.next().data;
+                    for(int j=0;j<list.size();j++){
+                        jxl.write.Label l5 = new jxl.write.Label(0,i,list.get(j).lastName,ab11format);
+                        jxl.write.Label l6 = new jxl.write.Label(1,i,list.get(j).firstName,ab11format);
+                        jxl.write.Label l7 = new jxl.write.Label(2,i,list.get(j).phoneNumber,ab11format);
+                        jxl.write.Label l8 = new jxl.write.Label(3,i,list.get(j).emailAddress,ab11format);
+                        i++;
+                        wsheet.addCell(l5);
+                        wsheet.addCell(l6);
+                        wsheet.addCell(l7);
+                        wsheet.addCell(l8);
+                    }//end for
+                }//end while
+                
+                //sets the column width
+                wsheet.setColumnView(0,25);
+                wsheet.setColumnView(1,25);
+                wsheet.setColumnView(2,25);
+                wsheet.setColumnView(3,25);
+      
+                //adds the labels of the headings
+                wsheet.addCell(l1);
+                wsheet.addCell(l2);
+                wsheet.addCell(l3);
+                wsheet.addCell(l4);
