@@ -58,8 +58,7 @@ try{
                             l12 = new jxl.write.Label(5,i," ",a10format);
                         else
                             l12 = new jxl.write.Label(5,i,secGoal.goal,a10format);
-
-                        
+                            
                         wsheet.addCell(l7);
                         wsheet.addCell(l8);
                         wsheet.addCell(l9);
@@ -67,6 +66,7 @@ try{
                         wsheet.addCell(l11);
                         wsheet.addCell(l12);
                         }//end if
+                        
                         else {
                         jxl.write.Label l7 = new jxl.write.Label(0,i,student.lastName,a10formatGray);
                         jxl.write.Label l8 = new jxl.write.Label(1,i,student.firstName,a10formatGray);
