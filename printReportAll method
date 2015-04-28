@@ -3,20 +3,28 @@ try{
                 String fname = "First Name";
                 String phNo = "Phone Number";
                 String email = "Email Address";
+                String primaryGoal = "Primary Goal";
+                String secondGoal = "Secondary Goal";
                 
                 File file = new File("C:\\Users\\"+System.getProperty("user.name")+"\\Google Drive\\studentlist.xls");
                 
                 WritableWorkbook wworkbook;
       
                 //setting the font,size,style,color for the cells
-                WritableFont arialBold11font = new WritableFont(WritableFont.ARIAL, 12, WritableFont.BOLD,false,UnderlineStyle.SINGLE);
-                WritableFont arial10font = new WritableFont(WritableFont.ARIAL,10);
+                WritableFont arialBold11font = new WritableFont(WritableFont.ARIAL, 10, WritableFont.BOLD,false,UnderlineStyle.SINGLE);
+                WritableFont arial10font = new WritableFont(WritableFont.ARIAL,9);
                 
                 WritableCellFormat ab11format = new WritableCellFormat(arialBold11font);
                 WritableCellFormat a10format = new WritableCellFormat(arial10font);
                 WritableCellFormat a10formatGray = new WritableCellFormat(arial10font);
                 
+                
                 a10formatGray.setBackground(Colour.GRAY_25);
+                a10formatGray.setWrap(true);
+                a10format.setWrap(true);
+                
+                a10formatGray.setVerticalAlignment(jxl.format.VerticalAlignment.CENTRE);
+                a10format.setVerticalAlignment(jxl.format.VerticalAlignment.CENTRE);
                 
                 wworkbook = Workbook.createWorkbook(file);
       
@@ -28,6 +36,8 @@ try{
                 jxl.write.Label l2 = new jxl.write.Label(1,0,fname,ab11format);
                 jxl.write.Label l3 = new jxl.write.Label(2,0,phNo,ab11format);
                 jxl.write.Label l4 = new jxl.write.Label(3,0,email,ab11format);
+                jxl.write.Label l5 = new jxl.write.Label(4,0,primaryGoal,ab11format);
+                jxl.write.Label l6 = new jxl.write.Label(5,0,secondGoal,ab11format);
                 
                 int i=1;
 
@@ -35,25 +45,45 @@ try{
                 while(it.hasNext()){
                     ArrayList<Student> currentstudent = it.next().data;
                     for(Student student : currentstudent) {
+                        Goal firstGoal = student.goal;
+                        Goal secGoal = student.secondGoal;
                         if(i%2 != 1){
-                        jxl.write.Label l5 = new jxl.write.Label(0,i,student.lastName,a10format);
-                        jxl.write.Label l6 = new jxl.write.Label(1,i,student.firstName,a10format);
-                        jxl.write.Label l7 = new jxl.write.Label(2,i,student.phoneNumber,a10format);
-                        jxl.write.Label l8 = new jxl.write.Label(3,i,student.emailAddress,a10format);
-                        wsheet.addCell(l5);
-                        wsheet.addCell(l6);
+                        jxl.write.Label l7 = new jxl.write.Label(0,i,student.lastName,a10format);
+                        jxl.write.Label l8 = new jxl.write.Label(1,i,student.firstName,a10format);
+                        jxl.write.Label l9 = new jxl.write.Label(2,i,student.phoneNumber,a10format);
+                        jxl.write.Label l10 = new jxl.write.Label(3,i,student.emailAddress,a10format);
+                        jxl.write.Label l11 = new jxl.write.Label(4,i,firstGoal.goal,a10format);
+                        jxl.write.Label l12;
+                        if(secGoal==null)
+                            l12 = new jxl.write.Label(5,i," ",a10format);
+                        else
+                            l12 = new jxl.write.Label(5,i,secGoal.goal,a10format);
+
+                        
                         wsheet.addCell(l7);
                         wsheet.addCell(l8);
+                        wsheet.addCell(l9);
+                        wsheet.addCell(l10);
+                        wsheet.addCell(l11);
+                        wsheet.addCell(l12);
                         }//end if
                         else {
-                        jxl.write.Label l5 = new jxl.write.Label(0,i,student.lastName,a10formatGray);
-                        jxl.write.Label l6 = new jxl.write.Label(1,i,student.firstName,a10formatGray);
-                        jxl.write.Label l7 = new jxl.write.Label(2,i,student.phoneNumber,a10formatGray);
-                        jxl.write.Label l8 = new jxl.write.Label(3,i,student.emailAddress,a10formatGray);    
-                        wsheet.addCell(l5);
-                        wsheet.addCell(l6);
+                        jxl.write.Label l7 = new jxl.write.Label(0,i,student.lastName,a10formatGray);
+                        jxl.write.Label l8 = new jxl.write.Label(1,i,student.firstName,a10formatGray);
+                        jxl.write.Label l9 = new jxl.write.Label(2,i,student.phoneNumber,a10formatGray);
+                        jxl.write.Label l10 = new jxl.write.Label(3,i,student.emailAddress,a10formatGray);
+                        jxl.write.Label l11 = new jxl.write.Label(4,i,firstGoal.goal,a10formatGray);
+                        jxl.write.Label l12;
+                        if(secGoal==null)
+                            l12 = new jxl.write.Label(5,i," ",a10formatGray);
+                        else
+                            l12 = new jxl.write.Label(5,i,secGoal.goal,a10formatGray);
                         wsheet.addCell(l7);
                         wsheet.addCell(l8);
+                        wsheet.addCell(l9);
+                        wsheet.addCell(l10);
+                        wsheet.addCell(l11);
+                        wsheet.addCell(l12);
                         }
                         i++;
                           
@@ -61,16 +91,20 @@ try{
                 }//end while
                 
                 //sets the column width
-                wsheet.setColumnView(0,16);
-                wsheet.setColumnView(1,16);
-                wsheet.setColumnView(2,18);
-                wsheet.setColumnView(3,36);
+                wsheet.setColumnView(0,11);
+                wsheet.setColumnView(1,11);
+                wsheet.setColumnView(2,15);
+                wsheet.setColumnView(3,21);
+                wsheet.setColumnView(4,14);
+                wsheet.setColumnView(5,15);
       
                 //adds the labels of the headings
                 wsheet.addCell(l1);
                 wsheet.addCell(l2);
                 wsheet.addCell(l3);
                 wsheet.addCell(l4);
+                wsheet.addCell(l5);
+                wsheet.addCell(l6);
                 
                 wworkbook.write();
                 wworkbook.close();
