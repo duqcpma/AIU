@@ -254,7 +254,7 @@ final class TabDemo extends Application {
     public String goalBackupEdit;
     public String secondGoalBackupEdit;
     
-    private static final PATH2 = "C:\\Users\\"+System.getProperty("user.name")+"\\Documents\\";
+    private static final String PATH2 = "C:\\Users\\" + System.getProperty("user.name") + "\\Documents\\";
 
     public void setAdmin(boolean b) {
         this.isAdmin = b;
@@ -361,7 +361,7 @@ final class TabDemo extends Application {
             }
 
             File file = new File("C:\\Users\\" + System.getProperty("user.name") + "\\Google Drive\\database.txt");
-            File backup = new File(PATH2+"database.txt");
+            File backup = new File(PATH2 + "database.txt");
 
             // if file doesnt exists, then create it
             if (!file.exists()) {
@@ -420,7 +420,7 @@ final class TabDemo extends Application {
             }
 
             File file = new File("C:\\Users\\" + System.getProperty("user.name") + "\\Google Drive\\goals.txt");
-            File backup = new File(PATH2+"goals.txt");
+            File backup = new File(PATH2 + "goals.txt");
 
             // if file doesnt exists, then create it
             if (!file.exists()) {
@@ -468,7 +468,7 @@ final class TabDemo extends Application {
             }
 
             File file = new File("C:\\Users\\" + System.getProperty("user.name") + "\\Google Drive\\users.txt");
-            File backup = new File(PATH2+"users.txt");
+            File backup = new File(PATH2 + "users.txt");
 
             // if file doesnt exists, then create it
             if (!file.exists()) {
@@ -496,7 +496,7 @@ final class TabDemo extends Application {
             String content = administrativeNotes;
 
             File file = new File("C:\\Users\\" + System.getProperty("user.name") + "\\Google Drive\\adminNotes.txt");
-            File backup = new File(PATH2+"adminNotes.txt");
+            File backup = new File(PATH2 + "adminNotes.txt");
 
             // if file doesnt exists, then create it
             if (!file.exists()) {
